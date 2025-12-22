@@ -5,6 +5,7 @@
 
 import type { ColorFormat } from '@/types/theme'
 import { parseColor, formatColorAs } from '@/lib/colorConversion'
+import { Tooltip } from './Tooltip'
 
 // ============================================================================
 // Types
@@ -163,42 +164,43 @@ export function ColorSwatchRow({
   displayFormat = 'hex',
 }: ColorSwatchRowProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={description}
-      className={`
-        flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
-        ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
-        ${!defined ? 'opacity-50' : ''}
-      `}
-    >
-      <div className={`relative ${!defined ? 'rounded border border-dashed border-neutral-400 dark:border-neutral-600' : ''}`}>
-        <ColorSwatch
-          color={color}
-          originalColor={originalColor}
-          size="sm"
-          isSelected={isSelected}
-          className={!defined ? 'opacity-70' : ''}
-        />
-      </div>
-      <span
-        className={`flex-1 truncate text-sm ${
-          defined
-            ? 'text-neutral-700 dark:text-neutral-300'
-            : 'italic text-neutral-500 dark:text-neutral-500'
-        }`}
+    <Tooltip content={description} position="right">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`
+          flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
+          ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
+          ${!defined ? 'opacity-50' : ''}
+        `}
       >
-        {label}
-      </span>
-      {defined ? (
-        <span className="font-mono text-xs text-neutral-500">
-          {formatColorValue(color, displayFormat)}
+        <div className={`relative ${!defined ? 'rounded border border-dashed border-neutral-400 dark:border-neutral-600' : ''}`}>
+          <ColorSwatch
+            color={color}
+            originalColor={originalColor}
+            size="sm"
+            isSelected={isSelected}
+            className={!defined ? 'opacity-70' : ''}
+          />
+        </div>
+        <span
+          className={`flex-1 truncate text-sm ${
+            defined
+              ? 'text-neutral-700 dark:text-neutral-300'
+              : 'italic text-neutral-500 dark:text-neutral-500'
+          }`}
+        >
+          {label}
         </span>
-      ) : (
-        <span className="text-xs text-neutral-400 dark:text-neutral-600">+</span>
-      )}
-    </button>
+        {defined ? (
+          <span className="font-mono text-xs text-neutral-500">
+            {formatColorValue(color, displayFormat)}
+          </span>
+        ) : (
+          <span className="text-xs text-neutral-400 dark:text-neutral-600">+</span>
+        )}
+      </button>
+    </Tooltip>
   )
 }
 
