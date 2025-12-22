@@ -286,6 +286,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         error: null,
       }
 
+    /* v8 ignore next 2 -- TypeScript ensures exhaustive case handling */
     default:
       return state
   }

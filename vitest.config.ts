@@ -10,8 +10,14 @@ export default defineConfig({
     setupFiles: ['./src/setupTests.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/setupTests.ts'],
+      exclude: [
+        'node_modules/',
+        'src/setupTests.ts',
+        'themes/**', // JSON data files, not code
+        '**/*.d.ts',
+      ],
     },
   },
   resolve: {

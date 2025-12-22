@@ -17,6 +17,7 @@ export function useLocalStorage<T>(
 ): [T, (value: T | ((prev: T) => T)) => void, () => void] {
   // Get initial value from localStorage or use default
   const readValue = useCallback((): T => {
+    /* v8 ignore next 3 -- SSR check: window always exists in jsdom */
     if (typeof window === 'undefined') {
       return initialValue
     }
@@ -49,6 +50,7 @@ export function useLocalStorage<T>(
           return valueToStore
         })
       } catch (error) {
+        /* v8 ignore next -- rare: quota exceeded or security errors */
         console.warn(`Error setting localStorage key "${key}":`, error)
       }
     },
@@ -64,6 +66,7 @@ export function useLocalStorage<T>(
       }
       setStoredValue(initialValue)
     } catch (error) {
+      /* v8 ignore next -- rare: security errors in private browsing */
       console.warn(`Error removing localStorage key "${key}":`, error)
     }
   }, [key, initialValue])

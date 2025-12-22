@@ -304,6 +304,7 @@ export function parseColor(hexString: string): ParsedColor | null {
   }
 
   const color = parseHex(hexString)
+  /* v8 ignore next 3 -- defensive: isValidHex ensures parseHex succeeds */
   if (!color) {
     return null
   }

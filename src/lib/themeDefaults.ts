@@ -46,6 +46,7 @@ const typedTheme = oneTheme as OneTheme
 const oneDark = typedTheme.themes.find((t) => t.name === 'One Dark')
 const oneLight = typedTheme.themes.find((t) => t.name === 'One Light')
 
+/* v8 ignore next 2 -- defensive: One theme always contains these themes */
 export const DARK_DEFAULTS = flattenStyleColors(oneDark?.style || {})
 export const LIGHT_DEFAULTS = flattenStyleColors(oneLight?.style || {})
 
