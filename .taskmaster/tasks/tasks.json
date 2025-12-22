@@ -4,450 +4,90 @@
       {
         "id": "1",
         "title": "Project Setup and Foundation",
-        "description": "Initialize the project with Vite, React 19, TypeScript, TailwindCSS 4, and all required dependencies",
-        "details": "Create new Vite project with React 19 and TypeScript template. Install dependencies: culori for color conversion, codemirror 6 for code editing, json5 for JSON5 parsing, vitest and react testing library for testing. Configure TailwindCSS 4, setup basic folder structure as specified in PRD. Create tsconfig.json, vite.config.ts, tailwind.config.ts, and vitest.config.ts files. Setup basic App.tsx with routing structure.",
-        "testStrategy": "Verify all dependencies install correctly, build process works, and basic React app renders without errors. Test hot reload functionality.",
-        "priority": "high",
-        "dependencies": [],
+        "description": "Vite + React 19 + TypeScript + TailwindCSS 4 + Vitest + dependencies (culori, codemirror 6, json5)",
         "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Initialize Vite Project with React 19 and TypeScript",
-            "description": "Create new Vite project using React 19 and TypeScript template, configure basic project structure",
-            "dependencies": [],
-            "details": "Run 'npm create vite@latest zed-theme-editor -- --template react-ts' to scaffold project. Update to React 19 by installing react@19 and react-dom@19. Configure package.json scripts for dev, build, and preview. Verify project builds and runs successfully with hot reload.",
-            "status": "pending",
-            "testStrategy": "Verify project scaffolds correctly, React 19 is installed, TypeScript compilation works, and dev server starts without errors",
-            "parentId": "undefined"
-          },
-          {
-            "id": 2,
-            "title": "Configure TailwindCSS 4 and Styling Setup",
-            "description": "Install and configure TailwindCSS 4 with proper configuration files and CSS imports",
-            "dependencies": [
-              1
-            ],
-            "details": "Install TailwindCSS 4 using 'npm install tailwindcss@next @tailwindcss/vite@next'. Create tailwind.config.ts with content paths for src/**/*.{js,ts,jsx,tsx}. Configure vite.config.ts to include TailwindCSS plugin. Create src/index.css with @tailwind directives. Test basic utility classes work correctly.",
-            "status": "pending",
-            "testStrategy": "Verify TailwindCSS classes render correctly, build process includes CSS, and hot reload works for style changes",
-            "parentId": "undefined"
-          },
-          {
-            "id": 3,
-            "title": "Setup Vitest and React Testing Library Configuration",
-            "description": "Install and configure Vitest with React Testing Library for unit and integration testing",
-            "dependencies": [
-              1
-            ],
-            "details": "Install vitest, @testing-library/react, @testing-library/jest-dom, @testing-library/user-event, and jsdom. Create vitest.config.ts with React testing environment setup. Configure test scripts in package.json. Create src/setupTests.ts for jest-dom imports. Add basic test for App component to verify setup works.",
-            "status": "pending",
-            "testStrategy": "Run test suite to verify Vitest configuration, React Testing Library integration, and DOM testing environment work correctly",
-            "parentId": "undefined"
-          },
-          {
-            "id": 4,
-            "title": "Install Core Dependencies for Color and Code Editing",
-            "description": "Install and verify core dependencies: culori, codemirror 6, and json5 libraries",
-            "dependencies": [
-              1
-            ],
-            "details": "Install culori for color conversion, @codemirror/state @codemirror/view @codemirror/lang-json @codemirror/theme-one-dark for code editing, and json5 for JSON5 parsing. Install TypeScript types where available. Create basic import tests to verify all packages are accessible and properly typed.",
-            "status": "pending",
-            "testStrategy": "Verify all dependencies install without conflicts, TypeScript recognizes imports, and basic functionality can be imported and used",
-            "parentId": "undefined"
-          },
-          {
-            "id": 5,
-            "title": "Create Project Folder Structure and Basic App Shell",
-            "description": "Establish folder structure per PRD and create basic App.tsx with placeholder components",
-            "dependencies": [
-              2,
-              3,
-              4
-            ],
-            "details": "Create folder structure: src/components/, src/hooks/, src/lib/, src/types/, src/utils/. Create placeholder components: ThemeEditor.tsx, ColorPicker.tsx, ThemePreview.tsx, Toolbar.tsx. Setup basic App.tsx with routing structure and component imports. Create basic layout with TailwindCSS classes and ensure all placeholder components render.",
-            "status": "pending",
-            "testStrategy": "Verify folder structure is created, all placeholder components render without errors, and basic navigation/layout works as expected",
-            "parentId": "undefined"
-          }
-        ],
-        "updatedAt": "2025-12-22T02:34:33.729Z"
+        "priority": "high",
+        "dependencies": []
       },
       {
         "id": "2",
-        "title": "Core Types and Color Conversion Utilities",
-        "description": "Implement TypeScript types for Zed themes and color conversion utilities using Culori",
-        "details": "Create types/theme.ts with Zed theme schema types. Implement lib/colorConversion.ts with functions for converting between hex, RGB, HSL, and OKLCH using Culori library. Include gamut detection and clamping functions. Create utility functions for parsing hex colors (#RGB, #RGBA, #RRGGBB, #RRGGBBAA) and validating color formats. Implement precision handling for different color formats (3 decimals for OKLCH L/C, 1 for H, 2 for alpha).",
-        "testStrategy": "Unit tests for all color conversion functions, edge cases like invalid hex codes, gamut boundary conditions, and precision rounding. Test bidirectional conversion accuracy.",
-        "priority": "high",
-        "dependencies": [
-          "1"
-        ],
+        "title": "Core Types and Color Conversion",
+        "description": "TypeScript types for Zed themes, color conversion utilities (hex/RGB/HSL/OKLCH) using Culori, gamut detection, precision handling",
         "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create Zed Theme TypeScript Types",
-            "description": "Implement TypeScript types for Zed theme schema based on the official schema specification",
-            "dependencies": [],
-            "details": "Create types/theme.ts file with comprehensive TypeScript interfaces for Zed theme schema. Define types for theme structure, appearance modes, color properties, syntax highlighting, UI elements, and editor components. Reference the Zed schema at https://zed.dev/schema/themes/v0.2.0.json to ensure complete coverage of all theme properties including nested objects and arrays.",
-            "status": "pending",
-            "testStrategy": "Create type validation tests to ensure schema compliance and proper TypeScript inference",
-            "parentId": "undefined"
-          },
-          {
-            "id": 2,
-            "title": "Implement Culori Color Conversion Wrapper Functions",
-            "description": "Create wrapper functions for color conversions between hex, RGB, HSL, and OKLCH using Culori library",
-            "dependencies": [
-              1
-            ],
-            "details": "Implement lib/colorConversion.ts with bidirectional conversion functions: hex↔RGB, hex↔HSL, hex↔OKLCH, RGB↔HSL, RGB↔OKLCH, HSL↔OKLCH. Use Culori library for accurate color space conversions. Ensure proper handling of alpha channels and maintain color accuracy across all conversion paths. Include error handling for invalid color inputs.",
-            "status": "pending",
-            "testStrategy": "Unit tests for bidirectional conversion accuracy, alpha channel preservation, and invalid input handling",
-            "parentId": "undefined"
-          },
-          {
-            "id": 3,
-            "title": "Create Hex Color Parsing Utilities",
-            "description": "Implement comprehensive hex color parsing for all standard hex formats",
-            "dependencies": [
-              2
-            ],
-            "details": "Create utility functions to parse and validate hex colors in all formats: #RGB (3-digit), #RGBA (4-digit), #RRGGBB (6-digit), and #RRGGBBAA (8-digit). Handle case-insensitive input, validate hex characters, and convert short formats to full formats. Include functions to detect hex format type and extract alpha values when present.",
-            "status": "pending",
-            "testStrategy": "Test all hex formats, case variations, invalid hex codes, and edge cases like missing # prefix",
-            "parentId": "undefined"
-          },
-          {
-            "id": 4,
-            "title": "Implement Gamut Detection and Clamping Functions",
-            "description": "Create functions for detecting color gamut boundaries and clamping out-of-gamut colors",
-            "dependencies": [
-              2
-            ],
-            "details": "Implement gamut detection functions to identify when colors fall outside displayable ranges (sRGB, P3, etc.). Create clamping functions that bring out-of-gamut colors back into valid ranges while preserving visual appearance as much as possible. Use Culori's gamut mapping capabilities and implement custom clamping strategies for different color spaces.",
-            "status": "pending",
-            "testStrategy": "Test gamut boundary detection, clamping accuracy, and visual preservation with extreme color values",
-            "parentId": "undefined"
-          },
-          {
-            "id": 5,
-            "title": "Create Precision Handling Utilities",
-            "description": "Implement precision control utilities for different color formats and numeric rounding",
-            "dependencies": [
-              2,
-              3,
-              4
-            ],
-            "details": "Create utility functions for handling precision in different color formats: 3 decimals for OKLCH lightness and chroma, 1 decimal for hue values, 2 decimals for alpha channels. Implement smart rounding functions that maintain color accuracy while providing clean numeric output. Include functions for formatting color values for display and parsing with appropriate precision.",
-            "status": "pending",
-            "testStrategy": "Test precision rounding accuracy, format-specific decimal handling, and numeric stability across conversions",
-            "parentId": "undefined"
-          }
-        ],
-        "updatedAt": "2025-12-22T02:39:09.814Z"
+        "priority": "high",
+        "dependencies": ["1"]
       },
       {
         "id": "3",
         "title": "File Handling and JSON5 Parsing",
-        "description": "Implement file opening, JSON5 parsing, and File System Access API integration",
-        "details": "Create hooks/useFileAccess.ts for File System Access API with fallback for unsupported browsers. Implement lib/jsonParsing.ts using json5 package to parse theme files and normalize colors to hex format. Create DropZone.tsx component with drag-and-drop and file picker functionality. Handle .json and .json5 files, store file handle for saving, and convert all colors to hex on load while preserving non-color properties.",
-        "testStrategy": "Test file opening with various JSON5 files, drag-and-drop functionality, error handling for invalid files, and color normalization. Mock File System Access API for testing.",
-        "priority": "high",
-        "dependencies": [
-          "2"
-        ],
+        "description": "useFileAccess hook with File System Access API + fallback, JSON5 parsing with color normalization, DropZone component",
         "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create useFileAccess hook with File System Access API",
-            "description": "Implement hooks/useFileAccess.ts with File System Access API integration for modern browsers",
-            "dependencies": [],
-            "details": "Create a custom hook that provides file opening and saving functionality using the File System Access API. Include methods for opening files with proper file type filters (.json, .json5), saving files to previously opened handles, and checking API support. Handle permissions and user gesture requirements.",
-            "status": "pending",
-            "testStrategy": "Mock File System Access API methods and test file opening/saving flows, permission handling, and error cases",
-            "parentId": "undefined"
-          },
-          {
-            "id": 2,
-            "title": "Implement fallback for unsupported browsers",
-            "description": "Add fallback functionality for browsers that don't support File System Access API",
-            "dependencies": [
-              1
-            ],
-            "details": "Extend useFileAccess hook with fallback methods using traditional file input elements and download links. For opening files, use hidden file input with change event. For saving, trigger download with blob URLs. Detect API support and automatically use appropriate method.",
-            "status": "pending",
-            "testStrategy": "Test fallback behavior by mocking unsupported browser environment, verify file input functionality and download triggers",
-            "parentId": "undefined"
-          },
-          {
-            "id": 3,
-            "title": "Create JSON5 parsing with color normalization",
-            "description": "Implement lib/jsonParsing.ts using json5 package to parse theme files and normalize colors",
-            "dependencies": [],
-            "details": "Create parsing functions that use json5 library to parse .json5 and .json files. Implement color detection and normalization to convert all color values (hex, rgb, hsl, oklch) to hex format while preserving non-color properties. Handle parsing errors gracefully and provide meaningful error messages.",
-            "status": "pending",
-            "testStrategy": "Test parsing of various JSON5 files with different color formats, error handling for invalid files, and verify color normalization accuracy",
-            "parentId": "undefined"
-          },
-          {
-            "id": 4,
-            "title": "Build DropZone component with drag-and-drop functionality",
-            "description": "Create DropZone.tsx component supporting drag-and-drop and file picker functionality",
-            "dependencies": [
-              2,
-              3
-            ],
-            "details": "Implement a React component with drag-and-drop zone for theme files. Include visual feedback for drag states (hover, active). Add file picker button as alternative to drag-and-drop. Filter for .json and .json5 files, handle multiple file selection, and integrate with useFileAccess hook for file processing.",
-            "status": "pending",
-            "testStrategy": "Test drag-and-drop interactions, file type filtering, visual feedback states, and integration with file access functionality",
-            "parentId": "undefined"
-          },
-          {
-            "id": 5,
-            "title": "Implement file handle storage and state management",
-            "description": "Add file handle storage for saving and integrate with global state management",
-            "dependencies": [
-              4
-            ],
-            "details": "Store file handles in global state for later saving operations. Implement state updates when files are loaded, including setting originalThemeText, editorText, and fileHandle. Handle file loading workflow from DropZone through parsing to state updates. Ensure proper cleanup of file handles and state when loading new files.",
-            "status": "pending",
-            "testStrategy": "Test file handle persistence, state updates during file loading, proper cleanup when switching files, and integration with save functionality",
-            "parentId": "undefined"
-          }
-        ],
-        "updatedAt": "2025-12-22T02:52:32.472Z"
+        "priority": "high",
+        "dependencies": ["2"]
       },
       {
         "id": "4",
-        "title": "State Management and Context Setup",
-        "description": "Implement React Context and useReducer for global state management",
-        "details": "Create hooks/useThemeEditor.ts with React Context and useReducer for managing EditorState (originalThemeText, editorText, activeThemeIndex, selectedColorPath, colorDisplayFormat, isDarkMode, fileHandle, hasUnsavedChanges). Implement hooks/useLocalStorage.ts for persisting user preferences (colorDisplayFormat, isDarkMode, background colors). Create state actions for file operations, color selection, theme switching, and preference updates.",
-        "testStrategy": "Test state transitions, localStorage persistence, context provider functionality, and state synchronization across components. Verify state immutability and proper re-renders.",
-        "priority": "high",
-        "dependencies": [
-          "3"
-        ],
+        "title": "State Management",
+        "description": "useThemeEditor hook with React Context + useReducer, useLocalStorage for preferences",
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-12-22T02:57:07.631Z"
+        "priority": "high",
+        "dependencies": ["3"]
       },
       {
         "id": "5",
-        "title": "NumberField Component with Modifier Support",
-        "description": "Create custom NumberField component with arrow key modifiers and domain-specific validation",
-        "details": "Implement components/NumberField.tsx with support for integers and decimals based on field type. Handle arrow key modifiers: ArrowUp/Down (±1), Alt+Arrow (±0.1), Shift+Arrow (±10), Alt+Shift+Arrow (±0.01). Implement domain clamping with wrapping for hue values (0-360). Support partial input during editing (-, .) and preserve decimal precision (3-4 decimals max). Add visual focus states and accessibility features.",
-        "testStrategy": "Test all modifier combinations, domain clamping, precision handling, partial input states, keyboard navigation, and accessibility with screen readers.",
-        "priority": "medium",
-        "dependencies": [
-          "2"
-        ],
+        "title": "NumberField Component",
+        "description": "Custom numeric input with arrow key modifiers (±1/±0.1/±10/±0.01), domain clamping, hue wrapping, precision handling",
         "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create Base NumberField Input Component",
-            "description": "Implement the foundational NumberField component with raw text state management for partial input handling",
-            "dependencies": [],
-            "details": "Create components/NumberField.tsx with React component that maintains both display value and raw input state. Handle partial input states like '-', '.', '-.', allowing users to type incomplete numbers during editing. Implement controlled input with value/onChange props, support for integer/decimal modes, and basic styling with Tailwind classes. Include proper TypeScript interfaces for props.",
-            "status": "pending",
-            "testStrategy": "Test partial input states, controlled component behavior, prop validation, and basic rendering with different value types",
-            "parentId": "undefined"
-          },
-          {
-            "id": 2,
-            "title": "Implement Arrow Key Modifier System",
-            "description": "Add comprehensive keyboard event handling for all arrow key modifier combinations",
-            "dependencies": [
-              1
-            ],
-            "details": "Implement onKeyDown handler supporting: ArrowUp/Down (±1), Alt+Arrow (±0.1), Shift+Arrow (±10), Alt+Shift+Arrow (±0.01). Create modifier detection logic and increment/decrement functions. Handle both integer and decimal modes appropriately. Prevent default browser behavior for handled keys and ensure smooth value updates with proper state management.",
-            "status": "pending",
-            "testStrategy": "Test all 8 modifier combinations (up/down × 4 modifier states), verify correct increment values, and test with both integer and decimal modes",
-            "parentId": "undefined"
-          },
-          {
-            "id": 3,
-            "title": "Add Domain Clamping and Hue Wrapping Logic",
-            "description": "Implement value clamping with special hue wrapping behavior for 0-360 degree values",
-            "dependencies": [
-              2
-            ],
-            "details": "Create clamping functions that handle min/max bounds with special case for hue values (0-360) that wrap around (359→0, 0→359). Implement domain detection based on field type or props. Handle edge cases like negative hue values and values exceeding 360. Ensure wrapping works correctly with all modifier increments and maintains smooth user experience.",
-            "status": "pending",
-            "testStrategy": "Test hue wrapping at boundaries (359+1=0, 0-1=359), regular clamping for other domains, and edge cases with large increments crossing boundaries multiple times",
-            "parentId": "undefined"
-          },
-          {
-            "id": 4,
-            "title": "Implement Precision Preservation System",
-            "description": "Add decimal precision handling to avoid floating-point errors and maintain clean display values",
-            "dependencies": [
-              3
-            ],
-            "details": "Implement precision rounding logic that rounds to 3-4 decimal places maximum while avoiding JavaScript floating-point garbage (e.g., 0.1 + 0.2 = 0.30000000000000004). Create utility functions for clean number formatting, handle scientific notation edge cases, and preserve appropriate precision based on field type. Ensure consistent display formatting across all operations.",
-            "status": "pending",
-            "testStrategy": "Test floating-point arithmetic edge cases, precision rounding with various decimal values, scientific notation handling, and consistency across increment operations",
-            "parentId": "undefined"
-          },
-          {
-            "id": 5,
-            "title": "Add Focus States and Accessibility Features",
-            "description": "Implement visual focus indicators, validation states, and comprehensive accessibility support",
-            "dependencies": [
-              4
-            ],
-            "details": "Add focus/blur event handlers with visual focus states using Tailwind focus classes. Implement validation with error states and appropriate ARIA attributes. Add screen reader support with proper labels and value announcements. Include keyboard navigation hints and ensure component works with assistive technologies. Handle validation messages and error display.",
-            "status": "pending",
-            "testStrategy": "Test focus/blur behavior, screen reader compatibility, keyboard navigation, ARIA attribute correctness, and validation state visual feedback",
-            "parentId": "undefined"
-          }
-        ],
-        "updatedAt": "2025-12-22T03:01:42.649Z"
+        "priority": "medium",
+        "dependencies": ["2"]
       },
       {
         "id": "6",
-        "title": "Color Editor Panel and Visual Color Picker",
-        "description": "Build the color editor panel with visual picker and multi-format numeric inputs",
-        "details": "Create components/ColorEditorPanel.tsx and ColorPicker.tsx with gradient square for saturation/lightness, hue slider, and alpha slider. Implement real-time updates between visual picker and numeric inputs. Create input sections for Hex (#RRGGBB/#RRGGBBAA), RGB (0-255), HSL (H: 0-360, S/L: 0-100%), and OKLCH (L: 0-1, C: 0-0.4+, H: 0-360) using NumberField components. Add gamut warning indicators for out-of-gamut OKLCH colors.",
-        "testStrategy": "Test color picker interactions, real-time synchronization between all input formats, gamut detection, and smooth 60fps performance during dragging.",
-        "priority": "medium",
-        "dependencies": [
-          "5"
-        ],
+        "title": "Color Editor Panel",
+        "description": "Visual color picker (gradient square, hue/alpha sliders), multi-format inputs (Hex/RGB/HSL/OKLCH), gamut warnings",
         "status": "done",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Create ColorPicker component with gradient square",
-            "description": "Build the main visual color picker with saturation × lightness gradient square",
-            "dependencies": [],
-            "details": "Create components/ColorPicker.tsx with a 2D gradient square showing saturation (x-axis) and lightness (y-axis) for the current hue. Implement mouse/touch drag handling with smooth cursor positioning. Add visual cursor indicator and ensure 60fps performance during dragging. Handle edge cases for cursor positioning at boundaries.",
-            "status": "pending",
-            "testStrategy": "Test drag interactions, cursor positioning accuracy, performance during continuous dragging, and touch device compatibility",
-            "parentId": "undefined"
-          },
-          {
-            "id": 2,
-            "title": "Implement hue and alpha sliders",
-            "description": "Create interactive hue slider (0-360°) and alpha slider (0-1) components",
-            "dependencies": [
-              1
-            ],
-            "details": "Add horizontal hue slider with rainbow gradient background and draggable thumb. Implement alpha slider with checkerboard background and current color gradient overlay. Handle mouse/touch interactions with smooth thumb positioning. Ensure sliders update the gradient square in real-time and maintain 60fps performance.",
-            "status": "pending",
-            "testStrategy": "Test slider drag interactions, real-time gradient square updates, alpha transparency rendering, and smooth performance",
-            "parentId": "undefined"
-          },
-          {
-            "id": 3,
-            "title": "Build hex input field with validation",
-            "description": "Create hex color input field supporting #RGB, #RGBA, #RRGGBB, #RRGGBBAA formats",
-            "dependencies": [],
-            "details": "Implement hex input field with real-time validation for supported formats. Handle partial input states during typing (allow incomplete hex codes). Add visual validation feedback and error states. Support both 3/4 digit shorthand and 6/8 digit full hex codes. Implement two-way binding with visual picker.",
-            "status": "pending",
-            "testStrategy": "Test all hex format variations, partial input handling, validation feedback, and synchronization with visual picker",
-            "parentId": "undefined"
-          },
-          {
-            "id": 4,
-            "title": "Create RGB, HSL, and OKLCH input groups",
-            "description": "Build numeric input groups for RGB (0-255), HSL (H:0-360, S/L:0-100%), and OKLCH (L:0-1, C:0-0.4+, H:0-360) formats",
-            "dependencies": [
-              3
-            ],
-            "details": "Create input groups using NumberField components with domain-specific validation and clamping. RGB: R/G/B integers 0-255. HSL: H integer 0-360 with wrapping, S/L percentages 0-100%. OKLCH: L float 0-1, C float 0-0.4+, H integer 0-360 with wrapping. Implement proper decimal precision handling and real-time updates.",
-            "status": "pending",
-            "testStrategy": "Test domain clamping, precision handling, wrapping behavior for hue values, and real-time synchronization between all formats",
-            "parentId": "undefined"
-          },
-          {
-            "id": 5,
-            "title": "Implement ColorEditorPanel with two-way binding and gamut warnings",
-            "description": "Create main ColorEditorPanel component integrating all inputs with gamut detection and performance optimization",
-            "dependencies": [
-              1,
-              2,
-              3,
-              4
-            ],
-            "details": "Create components/ColorEditorPanel.tsx that combines ColorPicker and all input fields. Implement two-way binding between visual picker and all numeric inputs. Add gamut warning indicators for out-of-gamut OKLCH colors. Optimize for 60fps performance during dragging with debounced updates and efficient re-rendering. Handle color space conversions and maintain precision.",
-            "status": "pending",
-            "testStrategy": "Test complete two-way synchronization between all inputs, gamut warning accuracy, 60fps performance during interactions, and color precision maintenance across conversions",
-            "parentId": "undefined"
-          }
-        ],
-        "updatedAt": "2025-12-22T03:16:32.328Z"
+        "priority": "medium",
+        "dependencies": ["5"]
       },
       {
         "id": "7",
-        "title": "CodeMirror Integration and JSON Editor",
-        "description": "Integrate CodeMirror 6 with syntax highlighting and inline color swatch widgets",
-        "details": "Create components/JsonEditorPanel.tsx with CodeMirror 6 integration. Setup JSON syntax highlighting, line numbers, and code folding. Implement custom inline widgets for color swatches showing original → new color pairs. Make swatches clickable to select colors for editing. Create components/ColorSwatch.tsx for displaying colors in user-selected format (hex/RGB/HSL/OKLCH). Integrate with theme context for real-time updates.",
-        "testStrategy": "Test syntax highlighting, inline widget rendering, swatch click handling, real-time updates when colors change, and CodeMirror performance with large files.",
-        "priority": "medium",
-        "dependencies": [
-          "4"
-        ],
+        "title": "CodeMirror JSON Editor",
+        "description": "CodeMirror 6 integration with JSON syntax highlighting, inline color swatch widgets, click-to-select colors",
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-12-22T03:31:31.442Z"
+        "priority": "medium",
+        "dependencies": ["4"]
       },
       {
         "id": "8",
-        "title": "Theme Tabs and Multi-Theme Support",
-        "description": "Implement theme tabs for switching between multiple themes in a single file",
-        "details": "Create components/ThemeTabs.tsx to display tabs for each theme in the themes array. Show theme name and appearance indicator (dark/light icon). Implement tab switching functionality that updates activeThemeIndex in state. Handle theme-specific color selection and editing. Ensure selected colors persist when switching between themes. Add visual highlighting for active theme tab.",
-        "testStrategy": "Test theme switching, state persistence across theme changes, color selection isolation between themes, and UI responsiveness with multiple themes.",
-        "priority": "medium",
-        "dependencies": [
-          "7"
-        ],
+        "title": "Theme Tabs",
+        "description": "Multi-theme support with tab switching, appearance indicators, state persistence across themes",
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-12-22T03:31:31.476Z"
+        "priority": "medium",
+        "dependencies": ["7"]
       },
       {
         "id": "9",
-        "title": "File Saving and Undo/Redo System",
-        "description": "Implement file saving with File System Access API and undo/redo using CodeMirror history",
-        "details": "Implement save functionality using stored file handle, converting all colors to hex format before saving. Add Ctrl+S/Cmd+S keyboard shortcut and save button in toolbar. Create hooks/useEditorHistory.ts for CodeMirror undo/redo integration with Ctrl+Z/Cmd+Z and Ctrl+Shift+Z/Cmd+Shift+Z shortcuts. Implement unsaved changes tracking and confirmation dialogs. Add save confirmation toast notifications. Batch rapid changes with ~300ms debouncing to avoid flooding history.",
-        "testStrategy": "Test save functionality, keyboard shortcuts, undo/redo operations, unsaved changes detection, and file handle persistence across browser sessions.",
-        "priority": "high",
-        "dependencies": [
-          "7"
-        ],
+        "title": "File Saving and Undo/Redo",
+        "description": "Save with File System Access API, Cmd+S shortcut, undo/redo with debounced history, unsaved changes tracking",
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-12-22T03:31:31.515Z"
+        "priority": "high",
+        "dependencies": ["7"]
       },
       {
         "id": "10",
         "title": "Theme Preview and UI Polish",
-        "description": "Create theme preview panel and implement dark/light mode toggle with final UI polish",
-        "details": "Create components/ThemePreview.tsx with editor mockup (background, line numbers, gutter, syntax highlighting, selection) and terminal preview (background, ANSI colors, foreground). Implement components/Toolbar.tsx with dark/light mode toggle, save button, and settings. Add localStorage persistence for UI preferences. Create main layout with proper responsive design using TailwindCSS. Implement accessibility features (ARIA labels, focus indicators, keyboard navigation). Add error boundaries and loading states.",
-        "testStrategy": "Test theme preview accuracy, dark/light mode switching, responsive design, accessibility compliance with screen readers, keyboard navigation, and error handling scenarios.",
-        "priority": "medium",
-        "dependencies": [
-          "8",
-          "9"
-        ],
+        "description": "Editor/terminal preview mockups, Toolbar with dark/light toggle, responsive layout, accessibility features",
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-12-22T03:31:31.553Z"
+        "priority": "medium",
+        "dependencies": ["8", "9"]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-22T03:31:31.553Z",
+      "projectCompleted": "2025-12-22",
       "taskCount": 10,
       "completedCount": 10,
-      "tags": [
-        "master"
-      ]
+      "note": "Initial development complete. Tasks condensed for historical record."
     }
   }
 }
