@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { extractColors, extractColorsAsMap, transformColorsInJson } from '@/lib/jsonParsing'
+import { getAllThemeColors, extractColorsAsMap, transformColorsInJson, type AllColorsEntry } from '@/lib/jsonParsing'
 import type { ColorFormat } from '@/types/theme'
 import { formatShortcut } from '@/lib/keyboard'
 import type { EditorThemeName } from '@/lib/editorThemes'
@@ -27,6 +27,7 @@ export function ThemeEditor() {
     setActiveTheme,
     selectColor,
     updateColorLive,
+    addColor,
     commitPendingHistory,
     setDarkMode,
     markSaved,
@@ -112,10 +113,10 @@ export function ThemeEditor() {
     [sidebarWidth, setSidebarWidth]
   )
 
-  // Extract colors from current theme
-  const colors = useMemo(() => {
+  // Extract ALL colors from current theme (defined + undefined from schema)
+  const colors = useMemo((): AllColorsEntry[] => {
     if (!currentTheme) return []
-    return extractColors(currentTheme.style)
+    return getAllThemeColors(currentTheme.style)
   }, [currentTheme])
 
   // Filter colors based on search term
@@ -126,7 +127,8 @@ export function ThemeEditor() {
       (color) =>
         color.path.toLowerCase().includes(term) ||
         color.key.toLowerCase().includes(term) ||
-        color.value.toLowerCase().includes(term)
+        color.value.toLowerCase().includes(term) ||
+        color.description?.toLowerCase().includes(term)
     )
   }, [colors, colorFilter])
 
@@ -227,14 +229,21 @@ export function ThemeEditor() {
   )
 
   // Handle color click in sidebar - scroll JSON editor to show the color
+  // If color is not defined, add it to the theme first
   const handleSidebarColorClick = useCallback(
-    (path: string) => {
-      handleSelectColor(path)
+    (path: string, defined: boolean, defaultValue: string) => {
+      if (!defined) {
+        // Add the color to the theme with default value
+        addColor(path, defaultValue)
+        // Scroll is handled after the update
+      } else {
+        handleSelectColor(path)
+      }
 
       // Scroll JSON editor to show this color
       jsonEditorRef.current?.scrollToColorPath(path)
     },
-    [handleSelectColor]
+    [handleSelectColor, addColor]
   )
 
   // Handle color update from panel (uses debounced history)
@@ -371,7 +380,7 @@ export function ThemeEditor() {
             <p className="text-xs text-neutral-500">
               {colorFilter
                 ? `${filteredColors.length} of ${colors.length} properties`
-                : `${colors.length} properties`}
+                : `${colors.filter((c) => c.defined).length} defined / ${colors.length} available`}
             </p>
           </div>
           <div className="border-b border-neutral-300 px-2 py-2 dark:border-neutral-700">
@@ -395,7 +404,8 @@ export function ThemeEditor() {
                     color={color.value}
                     originalColor={originalColors.get(color.path)}
                     isSelected={color.path === state.selectedColorPath}
-                    onClick={() => handleSidebarColorClick(color.path)}
+                    defined={color.defined}
+                    onClick={() => handleSidebarColorClick(color.path, color.defined, color.value)}
                     displayFormat={state.colorDisplayFormat}
                   />
                 </div>

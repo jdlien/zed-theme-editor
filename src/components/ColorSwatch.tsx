@@ -142,6 +142,8 @@ export interface ColorSwatchRowProps {
   originalColor?: string
   /** Whether this row is selected */
   isSelected?: boolean
+  /** Whether this color is defined in the theme (false = placeholder) */
+  defined?: boolean
   /** Click handler */
   onClick?: () => void
   /** Color format to display */
@@ -153,6 +155,7 @@ export function ColorSwatchRow({
   color,
   originalColor,
   isSelected = false,
+  defined = true,
   onClick,
   displayFormat = 'hex',
 }: ColorSwatchRowProps) {
@@ -163,18 +166,34 @@ export function ColorSwatchRow({
       className={`
         flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
         ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
+        ${!defined ? 'opacity-50' : ''}
       `}
     >
-      <ColorSwatch
-        color={color}
-        originalColor={originalColor}
-        size="sm"
-        isSelected={isSelected}
-      />
-      <span className="flex-1 truncate text-sm text-neutral-700 dark:text-neutral-300">{label}</span>
-      <span className="font-mono text-xs text-neutral-500">
-        {formatColorValue(color, displayFormat)}
+      <div className={`relative ${!defined ? 'rounded border border-dashed border-neutral-400 dark:border-neutral-600' : ''}`}>
+        <ColorSwatch
+          color={color}
+          originalColor={originalColor}
+          size="sm"
+          isSelected={isSelected}
+          className={!defined ? 'opacity-70' : ''}
+        />
+      </div>
+      <span
+        className={`flex-1 truncate text-sm ${
+          defined
+            ? 'text-neutral-700 dark:text-neutral-300'
+            : 'italic text-neutral-500 dark:text-neutral-500'
+        }`}
+      >
+        {label}
       </span>
+      {defined ? (
+        <span className="font-mono text-xs text-neutral-500">
+          {formatColorValue(color, displayFormat)}
+        </span>
+      ) : (
+        <span className="text-xs text-neutral-400 dark:text-neutral-600">+</span>
+      )}
     </button>
   )
 }

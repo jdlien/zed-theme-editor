@@ -10,7 +10,9 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "vite",
+    "generate-schema": "tsx scripts/generate-schema.ts",
+    "dev": "pnpm generate-schema && vite",
+    "prebuild": "pnpm generate-schema",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",
@@ -55,6 +57,7 @@
     "jsdom": "^27.3.0",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vitest": "^4.0.16"

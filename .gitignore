@@ -28,5 +28,8 @@ node_modules/
 dist/
 tsconfig.tsbuildinfo
 
+# Generated files
+src/lib/themeSchema.generated.ts
+
 # Test coverage
 coverage/

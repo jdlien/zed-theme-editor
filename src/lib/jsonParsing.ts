@@ -6,6 +6,7 @@
 import JSON5 from 'json5'
 import type { ThemeFamily, ThemeStyle, HighlightStyle, ColorFormat } from '@/types/theme'
 import { isValidHex, normalizeHex, parseColor, formatColorAs } from './colorConversion'
+import { THEME_COLOR_KEYS, DEFAULT_COLOR } from './themeSchema.generated'
 
 export interface ParseResult {
   success: true
@@ -274,6 +275,54 @@ export function extractColors(style: ThemeStyle, basePath: string = 'style'): Co
 export function extractColorsAsMap(style: ThemeStyle, basePath: string = 'style'): Map<string, string> {
   const colors = extractColors(style, basePath)
   return new Map(colors.map((c) => [c.path, c.value]))
+}
+
+/**
+ * Extended color entry that includes whether the color is defined in the theme
+ * and description from schema
+ */
+export interface AllColorsEntry extends ColorEntry {
+  /** Whether this color is defined in the theme (false = using default) */
+  defined: boolean
+  /** Description from the Zed schema */
+  description?: string
+}
+
+/**
+ * Get all theme colors - both defined and undefined
+ * Merges colors from the theme with all possible colors from the Zed schema
+ *
+ * @param style - The theme style object
+ * @returns Array of all possible colors, with defined flag indicating if in theme
+ */
+export function getAllThemeColors(style: ThemeStyle): AllColorsEntry[] {
+  // Extract defined colors from the theme
+  const definedColors = extractColors(style)
+  const definedKeys = new Set(definedColors.map((c) => c.key))
+
+  // Build merged list starting with defined colors
+  const allColors: AllColorsEntry[] = definedColors.map((c) => ({
+    ...c,
+    defined: true,
+    description: THEME_COLOR_KEYS.find((k) => k.key === c.key)?.description,
+  }))
+
+  // Add undefined colors from schema
+  for (const schemaKey of THEME_COLOR_KEYS) {
+    if (!definedKeys.has(schemaKey.key)) {
+      allColors.push({
+        path: `style/${schemaKey.key}`,
+        segments: ['style', schemaKey.key],
+        key: schemaKey.key,
+        value: DEFAULT_COLOR,
+        defined: false,
+        description: schemaKey.description,
+      })
+    }
+  }
+
+  // Sort alphabetically by key for consistent display
+  return allColors.sort((a, b) => a.key.localeCompare(b.key))
 }
 
 /**

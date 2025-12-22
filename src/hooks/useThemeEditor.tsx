@@ -73,6 +73,7 @@ export type EditorAction =
   | { type: 'SELECT_COLOR'; payload: string | null }
   | { type: 'UPDATE_COLOR'; payload: { path: string; value: string } }
   | { type: 'UPDATE_COLOR_LIVE'; payload: { path: string; value: string } }
+  | { type: 'ADD_COLOR'; payload: { path: string; value: string } }
   | { type: 'COMMIT_PENDING_HISTORY' }
   | { type: 'SET_COLOR_FORMAT'; payload: ColorFormat }
   | { type: 'SET_DARK_MODE'; payload: boolean }
@@ -184,6 +185,33 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
       }
     }
 
+    case 'ADD_COLOR': {
+      // Add a new color property to the theme and select it
+      if (!state.themeFamily) return state
+
+      const { path, value } = action.payload
+      const updated = updateColorAtPath(state.themeFamily, state.activeThemeIndex, path, value)
+
+      // Trim history if we're not at the end
+      const newHistory = state.history.slice(0, state.historyIndex + 1)
+      newHistory.push(updated)
+
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY) {
+        newHistory.shift()
+      }
+
+      return {
+        ...state,
+        themeFamily: updated,
+        selectedColorPath: path,
+        hasUnsavedChanges: true,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+        pendingHistoryCommit: null,
+      }
+    }
+
     case 'COMMIT_PENDING_HISTORY': {
       // Commit pending changes to history
       if (!state.pendingHistoryCommit || !state.themeFamily) {
@@ -278,6 +306,7 @@ interface ThemeEditorContextValue {
   selectColor: (path: string | null) => void
   updateColor: (path: string, value: string) => void
   updateColorLive: (path: string, value: string) => void
+  addColor: (path: string, value: string) => void
   commitPendingHistory: () => void
   setColorFormat: (format: ColorFormat) => void
   setDarkMode: (isDark: boolean) => void
@@ -360,6 +389,10 @@ export function ThemeEditorProvider({
     dispatch({ type: 'UPDATE_COLOR_LIVE', payload: { path, value } })
   }, [])
 
+  const addColor = useCallback((path: string, value: string) => {
+    dispatch({ type: 'ADD_COLOR', payload: { path, value } })
+  }, [])
+
   const commitPendingHistory = useCallback(() => {
     dispatch({ type: 'COMMIT_PENDING_HISTORY' })
   }, [])
@@ -421,6 +454,7 @@ export function ThemeEditorProvider({
       selectColor,
       updateColor,
       updateColorLive,
+      addColor,
       commitPendingHistory,
       setColorFormat,
       setDarkMode,
@@ -442,6 +476,7 @@ export function ThemeEditorProvider({
       selectColor,
       updateColor,
       updateColorLive,
+      addColor,
       commitPendingHistory,
       setColorFormat,
       setDarkMode,
