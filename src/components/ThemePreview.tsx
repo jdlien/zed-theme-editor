@@ -9,6 +9,7 @@ import {
   faCodeBranch,
   faExpand,
   faCompress,
+  faCircleUser,
 } from '@fortawesome/free-solid-svg-icons'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import type { ThemeStyle } from '@/types/theme'
@@ -318,8 +319,7 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
                 className="flex items-center gap-2"
                 style={{ color: iconMuted as string }}
               >
-                <span>◧</span>
-                <span>▢</span>
+                <FontAwesomeIcon icon={faCircleUser} className="h-3 w-3" aria-hidden="true" />
               </div>
             </div>
 
