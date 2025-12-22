@@ -86,8 +86,6 @@ export interface ThemeColorKey {
 }
 
 export const THEME_COLOR_KEYS: ThemeColorKey[] = ${JSON.stringify(colorKeys, null, 2)}
-
-export const DEFAULT_COLOR = '#808080'
 `
 
   // Ensure output directory exists

@@ -1,119 +1,70 @@
 /**
  * Tooltip Component
- * Uses CSS Anchor Positioning API for modern browsers with native title fallback
+ * Single tooltip element that positions dynamically on hover
+ * Uses data attributes to avoid rendering 100+ tooltip elements
  */
 
-import { useId, useState, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef, createContext, useContext } from 'react'
+import { createPortal } from 'react-dom'
 
-export interface TooltipProps {
-  /** The content to show in the tooltip */
-  content?: string
-  /** The element to attach the tooltip to */
-  children: React.ReactNode
-  /** Position preference */
-  position?: 'top' | 'bottom' | 'left' | 'right'
-  /** Use muted/subdued text styling */
-  muted?: boolean
-  /** Additional class for the wrapper */
-  className?: string
+// ============================================================================
+// Tooltip Context - Single tooltip instance for the entire app
+// ============================================================================
+
+interface TooltipState {
+  content: string
+  x: number
+  y: number
+  visible: boolean
+  muted: boolean
 }
 
-// Check if anchor positioning is supported (cached)
-let anchorSupported: boolean | null = null
-function isAnchorPositioningSupported(): boolean {
-  if (anchorSupported === null) {
-    anchorSupported =
-      typeof CSS !== 'undefined' && CSS.supports && CSS.supports('anchor-name', '--test')
-  }
-  return anchorSupported
+interface TooltipContextValue {
+  show: (content: string, rect: DOMRect, muted?: boolean) => void
+  hide: () => void
 }
 
-export function Tooltip({
-  content,
-  children,
-  position = 'right',
-  muted = false,
-  className = '',
-}: TooltipProps) {
-  const id = useId()
-  const anchorName = `--tooltip-${id.replace(/:/g, '')}`
-  const [isVisible, setIsVisible] = useState(false)
-  const [supportsAnchor] = useState(isAnchorPositioningSupported)
+const TooltipContext = createContext<TooltipContextValue | null>(null)
+
+export function TooltipProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<TooltipState>({
+    content: '',
+    x: 0,
+    y: 0,
+    visible: false,
+    muted: false,
+  })
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Cleanup timeout on unmount
+  const show = useCallback((content: string, rect: DOMRect, muted = false) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => {
+      setState({
+        content,
+        // Position to the right of the element
+        x: rect.right + 8,
+        y: rect.top + rect.height / 2,
+        visible: true,
+        muted,
+      })
+    }, 50)
+  }, [])
+
+  const hide = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setState((prev) => ({ ...prev, visible: false }))
+  }, [])
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
   }, [])
 
-  // If no content, just render children
-  if (!content) {
-    return <>{children}</>
-  }
-
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => setIsVisible(true), 50)
-  }
-
-  const handleMouseLeave = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    setIsVisible(false)
-  }
-
-  // Position styles for the tooltip
-  const getPositionStyles = (): React.CSSProperties => {
-    if (!supportsAnchor) return {}
-
-    const styles: Record<string, React.CSSProperties> = {
-      top: {
-        positionAnchor: anchorName,
-        bottom: `anchor(top)`,
-        left: `anchor(center)`,
-        translate: '-50% -6px',
-      } as React.CSSProperties,
-      bottom: {
-        positionAnchor: anchorName,
-        top: `anchor(bottom)`,
-        left: `anchor(center)`,
-        translate: '-50% 6px',
-      } as React.CSSProperties,
-      left: {
-        positionAnchor: anchorName,
-        right: `anchor(left)`,
-        top: `anchor(center)`,
-        translate: '-6px -50%',
-      } as React.CSSProperties,
-      right: {
-        positionAnchor: anchorName,
-        left: `anchor(right)`,
-        top: `anchor(center)`,
-        translate: '6px -50%',
-      } as React.CSSProperties,
-    }
-    return styles[position]
-  }
-
   return (
-    <div
-      className={`relative ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onFocus={handleMouseEnter}
-      onBlur={handleMouseLeave}
-    >
-      {/* Anchor element - with native title fallback */}
-      <div
-        style={supportsAnchor ? ({ anchorName } as React.CSSProperties) : undefined}
-        title={!supportsAnchor ? content : undefined}
-      >
-        {children}
-      </div>
-
-      {/* Tooltip - only rendered when anchor positioning is supported */}
-      {supportsAnchor && (
+    <TooltipContext.Provider value={{ show, hide }}>
+      {children}
+      {createPortal(
         <div
           role="tooltip"
           className={`
@@ -123,17 +74,77 @@ export function Tooltip({
             bg-neutral-800 border border-neutral-600
             dark:bg-neutral-700 dark:border-neutral-500
             transition-opacity duration-100 ease-out
-            ${muted ? 'text-neutral-400 italic' : 'text-neutral-100'}
-            ${isVisible ? 'opacity-100' : 'opacity-0'}
+            ${state.muted ? 'text-neutral-400 italic' : 'text-neutral-100'}
+            ${state.visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
           `}
           style={{
-            position: 'fixed',
-            ...getPositionStyles(),
+            left: state.x,
+            top: state.y,
+            transform: 'translateY(-50%)',
           }}
         >
-          {content}
-        </div>
+          {state.content}
+        </div>,
+        document.body
       )}
+    </TooltipContext.Provider>
+  )
+}
+
+// ============================================================================
+// Tooltip trigger component
+// ============================================================================
+
+export interface TooltipProps {
+  /** The content to show in the tooltip */
+  content?: string
+  /** The element to attach the tooltip to */
+  children: React.ReactNode
+  /** Position preference (currently only 'right' is implemented) */
+  position?: 'top' | 'bottom' | 'left' | 'right'
+  /** Use muted/subdued text styling */
+  muted?: boolean
+  /** Additional class for the wrapper */
+  className?: string
+}
+
+export function Tooltip({
+  content,
+  children,
+  muted = false,
+  className = '',
+}: TooltipProps) {
+  const context = useContext(TooltipContext)
+  const ref = useRef<HTMLDivElement>(null)
+
+  // If no context (provider not set up) or no content, just render children with title fallback
+  if (!context || !content) {
+    return (
+      <div className={className} title={content}>
+        {children}
+      </div>
+    )
+  }
+
+  const handleMouseEnter = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect()
+      context.show(content, rect, muted)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    context.hide()
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
     </div>
   )
 }

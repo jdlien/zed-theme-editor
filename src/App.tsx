@@ -1,11 +1,14 @@
 import { ThemeEditorProvider } from '@/hooks/useThemeEditor'
 import { ThemeEditor } from '@/components/ThemeEditor'
+import { TooltipProvider } from '@/components/Tooltip'
 
 function App() {
   return (
-    <ThemeEditorProvider>
-      <ThemeEditor />
-    </ThemeEditorProvider>
+    <TooltipProvider>
+      <ThemeEditorProvider>
+        <ThemeEditor />
+      </ThemeEditorProvider>
+    </TooltipProvider>
   )
 }
 

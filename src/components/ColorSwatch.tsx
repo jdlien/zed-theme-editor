@@ -92,12 +92,18 @@ export function ColorSwatch({
       {hasChanged ? (
         // Split view: original on left, current on right
         <div className="pointer-events-none relative flex h-full w-full">
-          <div className="h-full w-1/2" style={{ backgroundColor: originalColor }} />
+          <div
+            className="h-full w-1/2"
+            style={{ backgroundColor: originalColor }}
+          />
           <div className="h-full w-1/2" style={{ backgroundColor: color }} />
         </div>
       ) : (
         // Single color
-        <div className="pointer-events-none relative h-full w-full" style={{ backgroundColor: color }} />
+        <div
+          className="pointer-events-none relative h-full w-full"
+          style={{ backgroundColor: color }}
+        />
       )}
     </>
   )
@@ -172,26 +178,21 @@ export function ColorSwatchRow({
       <button
         type="button"
         onClick={onClick}
-        className={`
-          flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
-          ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
-          ${!defined ? 'opacity-50' : ''}
-        `}
+        className={`flex w-full items-center gap-3 rounded px-2 pb-0.5 text-left transition-colors ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}`}
       >
-        <div className={`relative ${!defined ? 'rounded border border-dashed border-neutral-400 dark:border-neutral-600' : ''}`}>
+        <div className="pt-1">
           <ColorSwatch
             color={color}
             originalColor={originalColor}
             size="sm"
             isSelected={isSelected}
-            className={!defined ? 'opacity-70' : ''}
           />
         </div>
         <span
           className={`flex-1 truncate text-sm ${
             defined
               ? 'text-neutral-700 dark:text-neutral-300'
-              : 'italic text-neutral-500 dark:text-neutral-500'
+              : 'text-neutral-400 italic dark:text-neutral-600'
           }`}
         >
           {label}
@@ -201,7 +202,9 @@ export function ColorSwatchRow({
             {formatColorValue(color, displayFormat)}
           </span>
         ) : (
-          <span className="text-xs text-neutral-400 dark:text-neutral-600">+</span>
+          <span className="text-xs text-neutral-300 dark:text-neutral-700">
+            +
+          </span>
         )}
       </button>
     </Tooltip>

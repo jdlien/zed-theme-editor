@@ -116,7 +116,8 @@ export function ThemeEditor() {
   // Extract ALL colors from current theme (defined + undefined from schema)
   const colors = useMemo((): AllColorsEntry[] => {
     if (!currentTheme) return []
-    return getAllThemeColors(currentTheme.style)
+    const appearance = currentTheme.appearance || 'dark'
+    return getAllThemeColors(currentTheme.style, appearance)
   }, [currentTheme])
 
   // Filter colors based on search term

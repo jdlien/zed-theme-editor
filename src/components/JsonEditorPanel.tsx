@@ -3,7 +3,13 @@
  * CodeMirror 6 editor with JSON syntax highlighting and inline color swatches
  */
 
-import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
+import {
+  useEffect,
+  useRef,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from 'react'
 import { EditorState, StateEffect, StateField } from '@codemirror/state'
 import {
   EditorView,
@@ -14,7 +20,11 @@ import {
   keymap,
 } from '@codemirror/view'
 import { json } from '@codemirror/lang-json'
-import { editorThemes, getDefaultTheme, type EditorThemeName } from '@/lib/editorThemes'
+import {
+  editorThemes,
+  getDefaultTheme,
+  type EditorThemeName,
+} from '@/lib/editorThemes'
 import { toRgb } from '@/lib/colorConversion'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import {
@@ -85,8 +95,7 @@ class ColorSwatchWidget extends WidgetType {
   toDOM(): HTMLElement {
     const wrapper = document.createElement('span')
     wrapper.className = 'cm-color-swatch-wrapper'
-    wrapper.style.cssText =
-      'display: inline-flex; align-items: center; margin-left: 4px;'
+    wrapper.style.cssText = 'display: inline-flex; margin-left: 4px;'
 
     const hasChanged = this.originalColor && this.originalColor !== this.color
     const swatchWidth = hasChanged ? 28 : 14
@@ -521,21 +530,23 @@ const baseEditorStyles = EditorView.theme({
 // Main Component
 // ============================================================================
 
-export const JsonEditorPanel = forwardRef<JsonEditorPanelHandle, JsonEditorPanelProps>(
-  function JsonEditorPanel(
-    {
-      content,
-      onChange,
-      onColorClick,
-      selectedColorPath,
-      isDarkMode = true,
-      editorTheme,
-      readOnly = true,
-      originalColors,
-      className = '',
-    },
-    ref
-  ) {
+export const JsonEditorPanel = forwardRef<
+  JsonEditorPanelHandle,
+  JsonEditorPanelProps
+>(function JsonEditorPanel(
+  {
+    content,
+    onChange,
+    onColorClick,
+    selectedColorPath,
+    isDarkMode = true,
+    editorTheme,
+    readOnly = true,
+    originalColors,
+    className = '',
+  },
+  ref
+) {
   // Resolve the theme to use
   const themeName = editorTheme ?? getDefaultTheme(isDarkMode)
   const themeConfig = editorThemes[themeName]
@@ -551,28 +562,32 @@ export const JsonEditorPanel = forwardRef<JsonEditorPanelHandle, JsonEditorPanel
   originalColorsRef.current = originalColors
 
   // Expose scroll method via ref
-  useImperativeHandle(ref, () => ({
-    scrollToColorPath: (path: string) => {
-      const view = viewRef.current
-      if (!view) return
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToColorPath: (path: string) => {
+        const view = viewRef.current
+        if (!view) return
 
-      const docContent = view.state.doc.toString()
-      const colors = findColors(docContent)
+        const docContent = view.state.doc.toString()
+        const colors = findColors(docContent)
 
-      // Find the color that matches this path
-      for (const color of colors) {
-        const fullPath = buildJsonPath(docContent, color.from)
-        const { path: normalizedPath } = normalizeColorPath(fullPath)
+        // Find the color that matches this path
+        for (const color of colors) {
+          const fullPath = buildJsonPath(docContent, color.from)
+          const { path: normalizedPath } = normalizeColorPath(fullPath)
 
-        if (normalizedPath === path) {
-          view.dispatch({
-            effects: EditorView.scrollIntoView(color.from, { y: 'center' }),
-          })
-          break
+          if (normalizedPath === path) {
+            view.dispatch({
+              effects: EditorView.scrollIntoView(color.from, { y: 'center' }),
+            })
+            break
+          }
         }
-      }
-    },
-  }), [])
+      },
+    }),
+    []
+  )
 
   // Update color decorations
   const updateDecorations = useCallback(

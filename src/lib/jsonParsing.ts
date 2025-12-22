@@ -6,7 +6,8 @@
 import JSON5 from 'json5'
 import type { ThemeFamily, ThemeStyle, HighlightStyle, ColorFormat } from '@/types/theme'
 import { isValidHex, normalizeHex, parseColor, formatColorAs } from './colorConversion'
-import { THEME_COLOR_KEYS, DEFAULT_COLOR } from './themeSchema.generated'
+import { THEME_COLOR_KEYS } from './themeSchema.generated'
+import { getDefaultColor } from './themeDefaults'
 
 export interface ParseResult {
   success: true
@@ -293,9 +294,13 @@ export interface AllColorsEntry extends ColorEntry {
  * Merges colors from the theme with all possible colors from the Zed schema
  *
  * @param style - The theme style object
+ * @param appearance - The theme appearance ('dark' or 'light') for appropriate defaults
  * @returns Array of all possible colors, with defined flag indicating if in theme
  */
-export function getAllThemeColors(style: ThemeStyle): AllColorsEntry[] {
+export function getAllThemeColors(
+  style: ThemeStyle,
+  appearance: 'dark' | 'light' = 'dark'
+): AllColorsEntry[] {
   // Extract defined colors from the theme
   const definedColors = extractColors(style)
   const definedKeys = new Set(definedColors.map((c) => c.key))
@@ -307,14 +312,14 @@ export function getAllThemeColors(style: ThemeStyle): AllColorsEntry[] {
     description: THEME_COLOR_KEYS.find((k) => k.key === c.key)?.description,
   }))
 
-  // Add undefined colors from schema
+  // Add undefined colors from schema with appearance-appropriate defaults
   for (const schemaKey of THEME_COLOR_KEYS) {
     if (!definedKeys.has(schemaKey.key)) {
       allColors.push({
         path: `style/${schemaKey.key}`,
         segments: ['style', schemaKey.key],
         key: schemaKey.key,
-        value: DEFAULT_COLOR,
+        value: getDefaultColor(schemaKey.key, appearance),
         defined: false,
         description: schemaKey.description,
       })
