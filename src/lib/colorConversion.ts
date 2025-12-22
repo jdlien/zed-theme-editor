@@ -393,3 +393,42 @@ export function hexToOklch(hex: string): { l: number; c: number; h: number; a: n
   const oklchColor = toOklch(color)
   return { l: oklchColor.l, c: oklchColor.c, h: oklchColor.h, a: oklchColor.alpha }
 }
+
+// ============================================================================
+// Color Formatting
+// ============================================================================
+
+type ColorFormatType = 'hex' | 'rgb' | 'hsl' | 'oklch'
+
+/**
+ * Format a parsed color as a string in the specified format
+ */
+export function formatColorAs(parsed: ParsedColor, format: ColorFormatType): string {
+  switch (format) {
+    case 'hex':
+      return parsed.hex
+    case 'rgb': {
+      const { r, g, b } = parsed.rgb
+      if (parsed.alpha < 1) {
+        return `rgba(${r}, ${g}, ${b}, ${parsed.alpha.toFixed(2)})`
+      }
+      return `rgb(${r}, ${g}, ${b})`
+    }
+    case 'hsl': {
+      const { h, s, l } = parsed.hsl
+      if (parsed.alpha < 1) {
+        return `hsla(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%, ${parsed.alpha.toFixed(2)})`
+      }
+      return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`
+    }
+    case 'oklch': {
+      const { l, c, h } = parsed.oklch
+      if (parsed.alpha < 1) {
+        return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)} / ${parsed.alpha.toFixed(2)})`
+      }
+      return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)})`
+    }
+    default:
+      return parsed.hex
+  }
+}
