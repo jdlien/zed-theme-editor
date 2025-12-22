@@ -36,7 +36,7 @@ export interface EditorThemeConfig {
 const neutralDarkColors = {
   bg: '#171717', // neutral-900
   gutterBg: '#171717',
-  activeLine: 'rgba(255, 255, 255, 0.03)',
+  activeLine: 'rgba(255, 255, 255, 0.05)',
   selection: 'rgba(59, 130, 246, 0.3)',
   cursor: '#3b82f6',
 
@@ -103,7 +103,7 @@ const neutralDarkHighlight = HighlightStyle.define([
 const neutralLightColors = {
   bg: '#fafafa', // neutral-50
   gutterBg: '#fafafa',
-  activeLine: 'rgba(0, 0, 0, 0.03)',
+  activeLine: 'rgba(0, 0, 0, 0.05)',
   selection: 'rgba(59, 130, 246, 0.2)',
   cursor: '#3b82f6',
 

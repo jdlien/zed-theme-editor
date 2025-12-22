@@ -33,6 +33,10 @@ import {
   indentOnInput,
   bracketMatching,
   foldKeymap,
+  syntaxTree,
+  foldEffect,
+  unfoldEffect,
+  ensureSyntaxTree,
 } from '@codemirror/language'
 import {
   lineNumbers,
@@ -63,6 +67,8 @@ export interface JsonEditorPanelProps {
   originalColors?: Map<string, string>
   /** Additional CSS classes */
   className?: string
+  /** Active theme index for auto-folding inactive themes in multi-theme files */
+  activeThemeIndex?: number
 }
 
 export interface JsonEditorPanelHandle {
@@ -382,6 +388,97 @@ function parseJsonString(str: string): string {
     return str
   }
 }
+
+// ============================================================================
+// Theme Folding
+// ============================================================================
+
+/**
+ * Find the character ranges of each theme object in the "themes" array
+ * Uses CodeMirror's syntax tree for reliable boundary detection
+ * Returns "inside" ranges (content between braces) so folding shows {…}
+ */
+function findThemeRanges(
+  state: EditorState
+): Array<{ from: number; to: number }> {
+  const tree = syntaxTree(state)
+  const ranges: Array<{ from: number; to: number }> = []
+  const doc = state.doc.toString()
+
+  // Walk the syntax tree to find the "themes" property
+  tree.iterate({
+    enter: (node) => {
+      if (node.name === 'Property') {
+        // Get the property name node
+        const propNameNode = node.node.getChild('PropertyName')
+        if (propNameNode) {
+          // Extract the property name (strip quotes)
+          const propName = doc.slice(propNameNode.from + 1, propNameNode.to - 1)
+          if (propName === 'themes') {
+            // Get the Array value
+            const arrayNode = node.node.getChild('Array')
+            if (arrayNode) {
+              // Collect all Object children (each theme)
+              let child = arrayNode.firstChild
+              while (child) {
+                if (child.name === 'Object') {
+                  // Use "inside" range: after { and before }
+                  // This makes folding show {…} instead of just …
+                  const innerFrom = child.from + 1 // after {
+                  const innerTo = child.to - 1 // before }
+                  if (innerTo > innerFrom) {
+                    ranges.push({ from: innerFrom, to: innerTo })
+                  }
+                }
+                child = child.nextSibling
+              }
+            }
+            return false // Stop traversal, we found themes
+          }
+        }
+      }
+    },
+  })
+
+  return ranges
+}
+
+/**
+ * Fold inactive themes and unfold the active theme
+ * This is called when the active theme index changes
+ */
+function foldInactiveThemes(view: EditorView, activeIndex: number): void {
+  // Ensure syntax tree is fully parsed before trying to find theme ranges
+  // Wait up to 1 second for large files
+  const tree = ensureSyntaxTree(view.state, view.state.doc.length, 1000)
+  if (!tree) {
+    // Syntax tree not ready, try again shortly
+    setTimeout(() => foldInactiveThemes(view, activeIndex), 100)
+    return
+  }
+
+  const ranges = findThemeRanges(view.state)
+
+  // Guard: need at least 2 themes to fold
+  if (ranges.length < 2) return
+
+  const effects: StateEffect<{ from: number; to: number }>[] = []
+
+  ranges.forEach((range, index) => {
+    if (index === activeIndex) {
+      // Unfold active theme
+      effects.push(unfoldEffect.of(range))
+    } else {
+      // Fold inactive themes
+      effects.push(foldEffect.of(range))
+    }
+  })
+
+  if (effects.length > 0) {
+    view.dispatch({ effects })
+  }
+}
+
 // ============================================================================
 // CodeMirror Extensions
 // ============================================================================
@@ -503,6 +600,7 @@ export const JsonEditorPanel = forwardRef<
     readOnly = true,
     originalColors,
     className = '',
+    activeThemeIndex,
   },
   ref
 ) {
@@ -537,9 +635,14 @@ export const JsonEditorPanel = forwardRef<
           const { path: normalizedPath } = normalizeColorPath(fullPath)
 
           if (normalizedPath === path) {
+            // Set cursor position to the color value start
+            // This also sets the active line highlight
             view.dispatch({
+              selection: { anchor: color.from },
               effects: EditorView.scrollIntoView(color.from, { y: 'center' }),
             })
+            // Focus the editor so the cursor is visible
+            view.focus()
             break
           }
         }
@@ -637,6 +740,11 @@ export const JsonEditorPanel = forwardRef<
     // Initial decoration update
     updateDecorationsLocal(view)
 
+    // Initial fold of inactive themes (function handles waiting for syntax tree)
+    if (activeThemeIndex !== undefined) {
+      foldInactiveThemes(view, activeThemeIndex)
+    }
+
     return () => {
       view.destroy()
       viewRef.current = null
@@ -680,6 +788,19 @@ export const JsonEditorPanel = forwardRef<
       updateDecorations(view)
     }
   }, [selectedColorPath, updateDecorations, originalColors])
+
+  // Auto-fold inactive themes when active theme changes
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || activeThemeIndex === undefined) return
+
+    // Small delay to ensure syntax tree is ready after content changes
+    const timeoutId = setTimeout(() => {
+      foldInactiveThemes(view, activeThemeIndex)
+    }, 50)
+
+    return () => clearTimeout(timeoutId)
+  }, [activeThemeIndex, content])
 
   return (
     <div

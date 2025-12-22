@@ -102,6 +102,9 @@ export function ThemeEditor() {
   const colorListRef = useRef<HTMLDivElement>(null)
   const jsonEditorRef = useRef<JsonEditorPanelHandle>(null)
 
+  // Track pending scroll for newly added colors
+  const pendingScrollPath = useRef<string | null>(null)
+
   // Sidebar resize state
   const [sidebarWidth, setSidebarWidth] = useLocalStorage<number>(
     'zed-theme-editor-sidebar-width',
@@ -273,16 +276,31 @@ export function ThemeEditor() {
       if (!defined) {
         // Add the color to the theme with default value
         addColor(path, defaultValue)
-        // Scroll is handled after the update
+        // Store path for scrolling after content updates
+        pendingScrollPath.current = path
       } else {
         handleSelectColor(path)
+        // Scroll JSON editor to show this color
+        jsonEditorRef.current?.scrollToColorPath(path)
       }
-
-      // Scroll JSON editor to show this color
-      jsonEditorRef.current?.scrollToColorPath(path)
     },
     [handleSelectColor, addColor]
   )
+
+  // Scroll to newly added color when editor content updates
+  useEffect(() => {
+    if (pendingScrollPath.current && displayContent) {
+      const path = pendingScrollPath.current
+      pendingScrollPath.current = null
+      // Wait for React to render and editor to process the new content
+      // Double rAF ensures both the React render and CodeMirror update complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          jsonEditorRef.current?.scrollToColorPath(path)
+        })
+      })
+    }
+  }, [displayContent])
 
   // Handle color update from panel (uses debounced history)
   /* v8 ignore start -- forwards to updateColorLive which is tested in useThemeEditor */
@@ -487,6 +505,7 @@ export function ThemeEditor() {
                 isDarkMode={state.isDarkMode}
                 editorTheme={editorTheme}
                 originalColors={originalColors}
+                activeThemeIndex={state.activeThemeIndex}
               />
             </Suspense>
           </div>
