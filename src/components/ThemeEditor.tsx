@@ -442,6 +442,7 @@ export function ThemeEditor() {
           <ColorEditorPanel
             color={selectedColor?.value || null}
             colorPath={selectedColor?.path || null}
+            description={selectedColor?.description}
             originalColor={
               selectedColor ? originalColors.get(selectedColor.path) : undefined
             }

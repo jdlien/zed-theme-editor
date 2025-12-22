@@ -33,6 +33,8 @@ export interface ColorEditorPanelProps {
   color: string | null
   /** Property path being edited */
   colorPath: string | null
+  /** Description of the color property from schema */
+  description?: string
   /** Called when color changes */
   onChange: (hex: string) => void
   /** Original color for comparison */
@@ -385,6 +387,7 @@ function ColorSwatch({
 export function ColorEditorPanel({
   color,
   colorPath,
+  description,
   onChange,
   originalColor,
   className = '',
@@ -479,12 +482,15 @@ export function ColorEditorPanel({
 
   return (
     <div className={`flex flex-col gap-4 px-4 py-2 ${className}`}>
-      {/* Header with property path */}
+      {/* Header with property path and description */}
       {colorPath && (
-        <div className="">
-          <h3 className="text-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <div className="text-center">
+          <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {colorPath.replace(/^style\//, '')}
           </h3>
+          {description && (
+            <p className="mt-1 text-xs text-neutral-500">{description}</p>
+          )}
         </div>
       )}
 
