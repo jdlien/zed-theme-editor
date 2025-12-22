@@ -5,7 +5,11 @@
  */
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCodeBranch, faExpand, faCompress } from '@fortawesome/free-solid-svg-icons'
+import {
+  faCodeBranch,
+  faExpand,
+  faCompress,
+} from '@fortawesome/free-solid-svg-icons'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import type { ThemeStyle } from '@/types/theme'
 
@@ -20,15 +24,22 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
     false
   )
   // === UI Chrome Colors ===
-  const titleBarBg = style['title_bar.background'] || style.background || '#2d2d2d'
+  const titleBarBg =
+    style['title_bar.background'] || style.background || '#2d2d2d'
   const tabBarBg = style['tab_bar.background'] || style.background || '#252526'
-  const tabActiveBg = style['tab.active_background'] || style['surface.background'] || '#1e1e1e'
+  const tabActiveBg =
+    style['tab.active_background'] || style['surface.background'] || '#1e1e1e'
   const tabInactiveBg = style['tab.inactive_background'] || 'transparent'
-  const toolbarBg = style['toolbar.background'] || style['surface.background'] || '#333333'
-  const statusBarBg = style['status_bar.background'] || style.background || '#007acc'
+  const toolbarBg =
+    style['toolbar.background'] || style['surface.background'] || '#333333'
+  const statusBarBg =
+    style['status_bar.background'] || style.background || '#007acc'
   const panelBg = style['panel.background'] || style.background || '#252526'
   const surfaceBg = style['surface.background'] || style.background || '#1e1e1e'
-  const elevatedSurfaceBg = style['elevated_surface.background'] || style['surface.background'] || '#2d2d2d'
+  const elevatedSurfaceBg =
+    style['elevated_surface.background'] ||
+    style['surface.background'] ||
+    '#2d2d2d'
 
   // === Border Colors ===
   const border = style.border || '#404040'
@@ -51,7 +62,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const elementHover = style['element.hover'] || '#4a4a4a'
   const elementActive = style['element.active'] || '#505050'
   const elementSelected = style['element.selected'] || '#094771'
-  const ghostElementSelected = style['ghost_element.selected'] || 'rgba(255,255,255,0.12)'
+  const ghostElementSelected =
+    style['ghost_element.selected'] || 'rgba(255,255,255,0.12)'
 
   // === Editor Colors ===
   const editorBg = style['editor.background'] || surfaceBg || '#1e1e1e'
@@ -59,7 +71,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const gutterBg = style['editor.gutter.background'] || editorBg
   const lineNumber = style['editor.line_number'] || '#858585'
   const activeLineNumber = style['editor.active_line_number'] || '#c6c6c6'
-  const activeLine = style['editor.active_line.background'] || 'rgba(255,255,255,0.05)'
+  const activeLine =
+    style['editor.active_line.background'] || 'rgba(255,255,255,0.05)'
   const cursor = style['players']?.[0]?.cursor || '#aeafad'
   const indentGuide = style['editor.indent_guide'] || '#404040'
   const indentGuideActive = style['editor.indent_guide_active'] || '#707070'
@@ -67,7 +80,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
 
   // === Scrollbar Colors ===
   const scrollbarTrack = style['scrollbar.track.background'] || 'transparent'
-  const scrollbarThumb = style['scrollbar.thumb.background'] || 'rgba(121,121,121,0.4)'
+  const scrollbarThumb =
+    style['scrollbar.thumb.background'] || 'rgba(121,121,121,0.4)'
 
   // === Terminal Colors ===
   const terminalBg = style['terminal.background'] || '#000000'
@@ -85,7 +99,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const terminalBrightGreen = style['terminal.ansi.bright_green'] || '#23d18b'
   const terminalBrightYellow = style['terminal.ansi.bright_yellow'] || '#f5f543'
   const terminalBrightBlue = style['terminal.ansi.bright_blue'] || '#3b8eea'
-  const terminalBrightMagenta = style['terminal.ansi.bright_magenta'] || '#d670d6'
+  const terminalBrightMagenta =
+    style['terminal.ansi.bright_magenta'] || '#d670d6'
   const terminalBrightCyan = style['terminal.ansi.bright_cyan'] || '#29b8db'
   const terminalBrightWhite = style['terminal.ansi.bright_white'] || '#ffffff'
 
@@ -120,7 +135,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const punctuation = style.syntax?.punctuation?.color || editorFg
   const attribute = style.syntax?.attribute?.color || '#9cdcfe'
   const tag = style.syntax?.tag?.color || '#569cd6'
-  const link = style.syntax?.['link_uri']?.color || style['link_text.hover'] || '#4fc1ff'
+  const link =
+    style.syntax?.['link_uri']?.color || style['link_text.hover'] || '#4fc1ff'
   const boolean = style.syntax?.boolean?.color || '#569cd6'
 
   // Compact preview - window chrome with editor and terminal
@@ -141,9 +157,18 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
         }}
       >
         <div className="flex gap-1">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: errorColor as string }} />
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: warningColor as string }} />
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: successColor as string }} />
+          <div
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: errorColor as string }}
+          />
+          <div
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: warningColor as string }}
+          />
+          <div
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: successColor as string }}
+          />
         </div>
         {/* Tab */}
         <div
@@ -168,7 +193,7 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
           <div className="flex">
             {/* Line numbers */}
             <div
-              className="px-1.5 py-1 text-right select-none text-[10px]"
+              className="px-1.5 py-1 text-right text-[10px] select-none"
               style={{
                 backgroundColor: gutterBg as string,
                 color: lineNumber as string,
@@ -183,7 +208,7 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
             </div>
 
             {/* Code */}
-            <div className="flex-1 py-1 pl-1 pr-2 text-[10px]">
+            <div className="flex-1 py-1 pr-2 pl-1 text-[10px]">
               <div style={{ color: comment as string }}>// Theme preview</div>
               <div style={{ backgroundColor: activeLine as string }}>
                 <span style={{ color: keyword as string }}>const</span>{' '}
@@ -228,14 +253,18 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
 
   return (
     <div className={`p-2 pt-1 ${className}`}>
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="mt-0 ml-0.5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+      <div className="mb-1 flex items-center justify-between">
+        <h3 className="mt-0 ml-0.5 text-sm font-medium text-neutral-700 dark:text-neutral-300">
           Preview
         </h3>
         <button
           onClick={() => setIsFullPreview(!isFullPreview)}
-          className="flex items-center gap-1 px-1.5 py-0.5 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
-          title={isFullPreview ? 'Switch to compact preview' : 'Switch to full preview'}
+          className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+          title={
+            isFullPreview
+              ? 'Switch to compact preview'
+              : 'Switch to full preview'
+          }
         >
           <FontAwesomeIcon
             icon={isFullPreview ? faCompress : faExpand}
@@ -249,495 +278,845 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
       {!isFullPreview && compactPreview}
 
       {isFullPreview && (
-      <>
-      {/* Main IDE Window */}
-      <div
-        className="overflow-hidden rounded-lg text-xs"
-        style={{
-          backgroundColor: panelBg as string,
-          border: `1px solid ${border}`,
-        }}
-      >
-        {/* Title Bar */}
-        <div
-          className="flex items-center justify-between px-2 py-1"
-          style={{
-            backgroundColor: titleBarBg as string,
-            borderBottom: `1px solid ${borderVariant}`,
-          }}
-        >
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-1">
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: errorColor as string }} />
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: warningColor as string }} />
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: successColor as string }} />
-            </div>
-            <span className="ml-2" style={{ color: textMuted as string }}>Zed Theme Editor</span>
-          </div>
-          <div className="flex items-center gap-2" style={{ color: iconMuted as string }}>
-            <span>◧</span>
-            <span>▢</span>
-          </div>
-        </div>
-
-        {/* Tab Bar */}
-        <div
-          className="flex items-end gap-px px-1 pt-1"
-          style={{
-            backgroundColor: tabBarBg as string,
-            borderBottom: `1px solid ${borderVariant}`,
-          }}
-        >
-          {/* Active Tab */}
+        <>
+          {/* Main IDE Window */}
           <div
-            className="flex items-center gap-1.5 px-2 py-1 rounded-t"
-            style={{
-              backgroundColor: tabActiveBg as string,
-              color: text as string,
-              borderTop: `1px solid ${borderVariant}`,
-              borderLeft: `1px solid ${borderVariant}`,
-              borderRight: `1px solid ${borderVariant}`,
-            }}
-          >
-            <span style={{ color: modifiedColor as string }}>●</span>
-            <span>main.tsx</span>
-            <span style={{ color: textMuted as string }}>×</span>
-          </div>
-          {/* Inactive Tab */}
-          <div
-            className="flex items-center gap-1.5 px-2 py-1"
-            style={{
-              backgroundColor: tabInactiveBg as string,
-              color: textMuted as string,
-            }}
-          >
-            <span>config.json</span>
-          </div>
-          {/* Another Tab */}
-          <div
-            className="flex items-center gap-1.5 px-2 py-1"
-            style={{
-              backgroundColor: tabInactiveBg as string,
-              color: textMuted as string,
-            }}
-          >
-            <span style={{ color: createdColor as string }}>●</span>
-            <span>utils.ts</span>
-          </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex" style={{ height: '180px' }}>
-          {/* Sidebar / Project Panel */}
-          <div
-            className="w-36 flex-shrink-0 overflow-hidden"
+            className="overflow-hidden rounded-lg text-xs"
             style={{
               backgroundColor: panelBg as string,
-              borderRight: `1px solid ${borderVariant}`,
+              border: `1px solid ${border}`,
             }}
           >
-            {/* Toolbar */}
+            {/* Title Bar */}
             <div
-              className="flex items-center gap-1 px-2 py-1"
+              className="flex items-center justify-between px-2 py-1"
               style={{
-                backgroundColor: toolbarBg as string,
+                backgroundColor: titleBarBg as string,
                 borderBottom: `1px solid ${borderVariant}`,
-                color: icon as string,
               }}
             >
-              <span>📁</span>
-              <span style={{ color: text as string }}>Project</span>
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-1">
+                  <div
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: errorColor as string }}
+                  />
+                  <div
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: warningColor as string }}
+                  />
+                  <div
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: successColor as string }}
+                  />
+                </div>
+                <span className="ml-2" style={{ color: textMuted as string }}>
+                  Zed Theme Editor
+                </span>
+              </div>
+              <div
+                className="flex items-center gap-2"
+                style={{ color: iconMuted as string }}
+              >
+                <span>◧</span>
+                <span>▢</span>
+              </div>
             </div>
 
-            {/* File Tree */}
-            <div className="p-1 font-mono text-[10px]">
-              {/* Folder */}
-              <div className="flex items-center gap-1 px-1 py-0.5" style={{ color: text as string }}>
-                <span>▼</span>
-                <span style={{ color: iconMuted as string }}>📁</span>
-                <span>src</span>
-              </div>
-              {/* Active/Selected File */}
-              <div
-                className="ml-3 flex items-center gap-1 rounded px-1 py-0.5"
-                style={{
-                  backgroundColor: ghostElementSelected as string,
-                  color: text as string,
-                }}
-              >
-                <span style={{ color: type as string }}>📄</span>
-                <span>main.tsx</span>
-              </div>
-              {/* Modified File */}
-              <div
-                className="ml-3 flex items-center gap-1 px-1 py-0.5"
-                style={{ color: modifiedColor as string }}
-              >
-                <span style={{ color: type as string }}>📄</span>
-                <span>config.json</span>
-              </div>
-              {/* Created File */}
-              <div
-                className="ml-3 flex items-center gap-1 px-1 py-0.5"
-                style={{ color: createdColor as string }}
-              >
-                <span style={{ color: fnName as string }}>📄</span>
-                <span>utils.ts</span>
-              </div>
-              {/* Deleted File */}
-              <div
-                className="ml-3 flex items-center gap-1 px-1 py-0.5 line-through"
-                style={{ color: deletedColor as string }}
-              >
-                <span>📄</span>
-                <span>old.ts</span>
-              </div>
-              {/* Ignored File */}
-              <div
-                className="ml-3 flex items-center gap-1 px-1 py-0.5"
-                style={{ color: ignoredColor as string }}
-              >
-                <span>📄</span>
-                <span>.gitignore</span>
-              </div>
-              {/* Hidden File */}
-              <div
-                className="ml-3 flex items-center gap-1 px-1 py-0.5"
-                style={{ color: hiddenColor as string }}
-              >
-                <span>📄</span>
-                <span>.env</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Editor + Terminal */}
-          <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Editor */}
+            {/* Tab Bar */}
             <div
-              className="flex flex-1 overflow-hidden font-mono"
-              style={{ backgroundColor: editorBg as string }}
+              className="flex items-end gap-px px-1 pt-1"
+              style={{
+                backgroundColor: tabBarBg as string,
+                borderBottom: `1px solid ${borderVariant}`,
+              }}
             >
-              {/* Gutter (Line Numbers) */}
+              {/* Active Tab */}
               <div
-                className="flex-shrink-0 px-1.5 py-1 text-right select-none text-[10px]"
+                className="flex items-center gap-1.5 rounded-t px-2 py-1"
                 style={{
-                  backgroundColor: gutterBg as string,
-                  color: lineNumber as string,
+                  backgroundColor: tabActiveBg as string,
+                  color: text as string,
+                  borderTop: `1px solid ${borderVariant}`,
+                  borderLeft: `1px solid ${borderVariant}`,
                   borderRight: `1px solid ${borderVariant}`,
                 }}
               >
-                <div>1</div>
-                <div>2</div>
-                <div style={{ color: activeLineNumber as string }}>3</div>
-                <div>4</div>
-                <div>5</div>
-                <div>6</div>
-                <div>7</div>
-                <div>8</div>
+                <span style={{ color: modifiedColor as string }}>●</span>
+                <span>main.tsx</span>
+                <span style={{ color: textMuted as string }}>×</span>
               </div>
-
-              {/* Code Content */}
-              <div className="flex-1 overflow-hidden py-1 pr-1 text-[10px]">
-                {/* Line 1: Import */}
-                <div className="px-1">
-                  <span style={{ color: keyword as string }}>import</span>{' '}
-                  <span style={{ color: punctuation as string }}>{'{'}</span>
-                  <span style={{ color: variable as string }}> useState </span>
-                  <span style={{ color: punctuation as string }}>{'}'}</span>
-                  <span style={{ color: keyword as string }}> from</span>{' '}
-                  <span style={{ color: string as string }}>'react'</span>
-                </div>
-
-                {/* Line 2: Empty */}
-                <div className="px-1">&nbsp;</div>
-
-                {/* Line 3: Active Line with function def */}
-                <div
-                  className="px-1"
-                  style={{ backgroundColor: activeLine as string }}
-                >
-                  <span style={{ color: keyword as string }}>export function</span>{' '}
-                  <span style={{ color: fnName as string }}>App</span>
-                  <span style={{ color: punctuation as string }}>()</span>
-                  <span style={{ color: punctuation as string }}>:</span>{' '}
-                  <span style={{ color: type as string }}>JSX.Element</span>{' '}
-                  <span style={{ color: punctuation as string }}>{'{'}</span>
-                  {/* Cursor */}
-                  <span
-                    style={{
-                      borderLeft: `2px solid ${cursor}`,
-                      marginLeft: '2px',
-                    }}
-                  />
-                </div>
-
-                {/* Line 4: const with type */}
-                <div className="px-1">
-                  <span style={{ color: indentGuide as string }}>│</span>
-                  <span style={{ color: keyword as string }}> const</span>{' '}
-                  <span style={{ color: punctuation as string }}>[</span>
-                  <span style={{ color: variable as string }}>count</span>
-                  <span style={{ color: punctuation as string }}>,</span>{' '}
-                  <span style={{ color: fnName as string }}>setCount</span>
-                  <span style={{ color: punctuation as string }}>]</span>{' '}
-                  <span style={{ color: operator as string }}>=</span>{' '}
-                  <span style={{ color: fnName as string }}>useState</span>
-                  <span style={{ color: punctuation as string }}>&lt;</span>
-                  <span style={{ color: type as string }}>number</span>
-                  <span style={{ color: punctuation as string }}>&gt;(</span>
-                  <span style={{ color: number as string }}>0</span>
-                  <span style={{ color: punctuation as string }}>)</span>
-                </div>
-
-                {/* Line 5: const with boolean */}
-                <div className="px-1">
-                  <span style={{ color: indentGuideActive as string }}>│</span>
-                  <span style={{ color: keyword as string }}> const</span>{' '}
-                  <span style={{ color: variable as string }}>isActive</span>{' '}
-                  <span style={{ color: operator as string }}>=</span>{' '}
-                  <span style={{ color: boolean as string }}>true</span>
-                </div>
-
-                {/* Line 6: Comment */}
-                <div className="px-1">
-                  <span style={{ color: indentGuide as string }}>│</span>
-                  <span style={{ color: comment as string }}> {'// TODO: Add more features'}</span>
-                </div>
-
-                {/* Line 7: Return with JSX */}
-                <div className="px-1">
-                  <span style={{ color: indentGuide as string }}>│</span>
-                  <span style={{ color: keyword as string }}> return</span>{' '}
-                  <span style={{ color: punctuation as string }}>&lt;</span>
-                  <span style={{ color: tag as string }}>div</span>{' '}
-                  <span style={{ color: attribute as string }}>className</span>
-                  <span style={{ color: operator as string }}>=</span>
-                  <span style={{ color: string as string }}>"app"</span>
-                  <span style={{ color: punctuation as string }}>&gt;</span>
-                  <span
-                    style={{
-                      backgroundColor: searchMatch as string,
-                      color: variable as string,
-                    }}
-                  >
-                    {'{count}'}
-                  </span>
-                  <span style={{ color: punctuation as string }}>&lt;/</span>
-                  <span style={{ color: tag as string }}>div</span>
-                  <span style={{ color: punctuation as string }}>&gt;</span>
-                </div>
-
-                {/* Line 8: Close brace */}
-                <div className="px-1" style={{ color: punctuation as string }}>{'}'}</div>
-              </div>
-
-              {/* Scrollbar */}
+              {/* Inactive Tab */}
               <div
-                className="w-2 flex-shrink-0"
-                style={{ backgroundColor: scrollbarTrack as string }}
-              >
-                <div
-                  className="mx-0.5 mt-1 h-8 rounded-sm"
-                  style={{ backgroundColor: scrollbarThumb as string }}
-                />
-              </div>
-            </div>
-
-            {/* Terminal */}
-            <div
-              className="flex-shrink-0 font-mono text-[10px]"
-              style={{
-                backgroundColor: terminalBg as string,
-                borderTop: `1px solid ${borderVariant}`,
-                height: '60px',
-              }}
-            >
-              {/* Terminal header */}
-              <div
-                className="flex items-center gap-2 px-2 py-0.5"
+                className="flex items-center gap-1.5 px-2 py-1"
                 style={{
-                  backgroundColor: panelBg as string,
-                  borderBottom: `1px solid ${borderVariant}`,
+                  backgroundColor: tabInactiveBg as string,
                   color: textMuted as string,
                 }}
               >
-                <span>Terminal</span>
+                <span>config.json</span>
               </div>
-              {/* Terminal content */}
-              <div className="p-1" style={{ color: terminalFg as string }}>
-                <div>
-                  <span style={{ color: terminalGreen as string }}>➜</span>{' '}
-                  <span style={{ color: terminalCyan as string }}>~/project</span>{' '}
-                  <span style={{ color: terminalBlue as string }}>git:(</span>
-                  <span style={{ color: terminalRed as string }}>main</span>
-                  <span style={{ color: terminalBlue as string }}>)</span>{' '}
-                  <span>npm run build</span>
+              {/* Another Tab */}
+              <div
+                className="flex items-center gap-1.5 px-2 py-1"
+                style={{
+                  backgroundColor: tabInactiveBg as string,
+                  color: textMuted as string,
+                }}
+              >
+                <span style={{ color: createdColor as string }}>●</span>
+                <span>utils.ts</span>
+              </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex" style={{ height: '180px' }}>
+              {/* Sidebar / Project Panel */}
+              <div
+                className="w-36 flex-shrink-0 overflow-hidden"
+                style={{
+                  backgroundColor: panelBg as string,
+                  borderRight: `1px solid ${borderVariant}`,
+                }}
+              >
+                {/* Toolbar */}
+                <div
+                  className="flex items-center gap-1 px-2 py-1"
+                  style={{
+                    backgroundColor: toolbarBg as string,
+                    borderBottom: `1px solid ${borderVariant}`,
+                    color: icon as string,
+                  }}
+                >
+                  <span>📁</span>
+                  <span style={{ color: text as string }}>Project</span>
                 </div>
-                <div>
-                  <span style={{ color: terminalBrightBlack as string }}>[</span>
-                  <span style={{ color: terminalBrightGreen as string }}>✓</span>
-                  <span style={{ color: terminalBrightBlack as string }}>]</span>{' '}
-                  <span style={{ color: terminalBrightWhite as string }}>Build</span>{' '}
-                  <span style={{ color: terminalBrightGreen as string }}>successful</span>{' '}
-                  <span style={{ color: terminalYellow as string }}>in 1.2s</span>
+
+                {/* File Tree */}
+                <div className="p-1 font-mono text-[10px]">
+                  {/* Folder */}
+                  <div
+                    className="flex items-center gap-1 px-1 py-0.5"
+                    style={{ color: text as string }}
+                  >
+                    <span>▼</span>
+                    <span style={{ color: iconMuted as string }}>📁</span>
+                    <span>src</span>
+                  </div>
+                  {/* Active/Selected File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 rounded px-1 py-0.5"
+                    style={{
+                      backgroundColor: ghostElementSelected as string,
+                      color: text as string,
+                    }}
+                  >
+                    <span style={{ color: type as string }}>📄</span>
+                    <span>main.tsx</span>
+                  </div>
+                  {/* Modified File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 px-1 py-0.5"
+                    style={{ color: modifiedColor as string }}
+                  >
+                    <span style={{ color: type as string }}>📄</span>
+                    <span>config.json</span>
+                  </div>
+                  {/* Created File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 px-1 py-0.5"
+                    style={{ color: createdColor as string }}
+                  >
+                    <span style={{ color: fnName as string }}>📄</span>
+                    <span>utils.ts</span>
+                  </div>
+                  {/* Deleted File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 px-1 py-0.5 line-through"
+                    style={{ color: deletedColor as string }}
+                  >
+                    <span>📄</span>
+                    <span>old.ts</span>
+                  </div>
+                  {/* Ignored File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 px-1 py-0.5"
+                    style={{ color: ignoredColor as string }}
+                  >
+                    <span>📄</span>
+                    <span>.gitignore</span>
+                  </div>
+                  {/* Hidden File */}
+                  <div
+                    className="ml-3 flex items-center gap-1 px-1 py-0.5"
+                    style={{ color: hiddenColor as string }}
+                  >
+                    <span>📄</span>
+                    <span>.env</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Editor + Terminal */}
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {/* Editor */}
+                <div
+                  className="flex flex-1 overflow-hidden font-mono"
+                  style={{ backgroundColor: editorBg as string }}
+                >
+                  {/* Gutter (Line Numbers) */}
+                  <div
+                    className="flex-shrink-0 px-1.5 py-1 text-right text-[10px] select-none"
+                    style={{
+                      backgroundColor: gutterBg as string,
+                      color: lineNumber as string,
+                      borderRight: `1px solid ${borderVariant}`,
+                    }}
+                  >
+                    <div>1</div>
+                    <div>2</div>
+                    <div style={{ color: activeLineNumber as string }}>3</div>
+                    <div>4</div>
+                    <div>5</div>
+                    <div>6</div>
+                    <div>7</div>
+                    <div>8</div>
+                  </div>
+
+                  {/* Code Content */}
+                  <div className="flex-1 overflow-hidden py-1 pr-1 text-[10px]">
+                    {/* Line 1: Import */}
+                    <div className="px-1">
+                      <span style={{ color: keyword as string }}>import</span>{' '}
+                      <span style={{ color: punctuation as string }}>
+                        {'{'}
+                      </span>
+                      <span style={{ color: variable as string }}>
+                        {' '}
+                        useState{' '}
+                      </span>
+                      <span style={{ color: punctuation as string }}>
+                        {'}'}
+                      </span>
+                      <span style={{ color: keyword as string }}> from</span>{' '}
+                      <span style={{ color: string as string }}>'react'</span>
+                    </div>
+
+                    {/* Line 2: Empty */}
+                    <div className="px-1">&nbsp;</div>
+
+                    {/* Line 3: Active Line with function def */}
+                    <div
+                      className="px-1"
+                      style={{ backgroundColor: activeLine as string }}
+                    >
+                      <span style={{ color: keyword as string }}>
+                        export function
+                      </span>{' '}
+                      <span style={{ color: fnName as string }}>App</span>
+                      <span style={{ color: punctuation as string }}>()</span>
+                      <span style={{ color: punctuation as string }}>
+                        :
+                      </span>{' '}
+                      <span style={{ color: type as string }}>JSX.Element</span>{' '}
+                      <span style={{ color: punctuation as string }}>
+                        {'{'}
+                      </span>
+                      {/* Cursor */}
+                      <span
+                        style={{
+                          borderLeft: `2px solid ${cursor}`,
+                          marginLeft: '2px',
+                        }}
+                      />
+                    </div>
+
+                    {/* Line 4: const with type */}
+                    <div className="px-1">
+                      <span style={{ color: indentGuide as string }}>│</span>
+                      <span style={{ color: keyword as string }}>
+                        {' '}
+                        const
+                      </span>{' '}
+                      <span style={{ color: punctuation as string }}>[</span>
+                      <span style={{ color: variable as string }}>count</span>
+                      <span style={{ color: punctuation as string }}>
+                        ,
+                      </span>{' '}
+                      <span style={{ color: fnName as string }}>setCount</span>
+                      <span style={{ color: punctuation as string }}>
+                        ]
+                      </span>{' '}
+                      <span style={{ color: operator as string }}>=</span>{' '}
+                      <span style={{ color: fnName as string }}>useState</span>
+                      <span style={{ color: punctuation as string }}>&lt;</span>
+                      <span style={{ color: type as string }}>number</span>
+                      <span style={{ color: punctuation as string }}>
+                        &gt;(
+                      </span>
+                      <span style={{ color: number as string }}>0</span>
+                      <span style={{ color: punctuation as string }}>)</span>
+                    </div>
+
+                    {/* Line 5: const with boolean */}
+                    <div className="px-1">
+                      <span style={{ color: indentGuideActive as string }}>
+                        │
+                      </span>
+                      <span style={{ color: keyword as string }}> const</span>{' '}
+                      <span style={{ color: variable as string }}>
+                        isActive
+                      </span>{' '}
+                      <span style={{ color: operator as string }}>=</span>{' '}
+                      <span style={{ color: boolean as string }}>true</span>
+                    </div>
+
+                    {/* Line 6: Comment */}
+                    <div className="px-1">
+                      <span style={{ color: indentGuide as string }}>│</span>
+                      <span style={{ color: comment as string }}>
+                        {' '}
+                        {'// TODO: Add more features'}
+                      </span>
+                    </div>
+
+                    {/* Line 7: Return with JSX */}
+                    <div className="px-1">
+                      <span style={{ color: indentGuide as string }}>│</span>
+                      <span style={{ color: keyword as string }}>
+                        {' '}
+                        return
+                      </span>{' '}
+                      <span style={{ color: punctuation as string }}>&lt;</span>
+                      <span style={{ color: tag as string }}>div</span>{' '}
+                      <span style={{ color: attribute as string }}>
+                        className
+                      </span>
+                      <span style={{ color: operator as string }}>=</span>
+                      <span style={{ color: string as string }}>"app"</span>
+                      <span style={{ color: punctuation as string }}>&gt;</span>
+                      <span
+                        style={{
+                          backgroundColor: searchMatch as string,
+                          color: variable as string,
+                        }}
+                      >
+                        {'{count}'}
+                      </span>
+                      <span style={{ color: punctuation as string }}>
+                        &lt;/
+                      </span>
+                      <span style={{ color: tag as string }}>div</span>
+                      <span style={{ color: punctuation as string }}>&gt;</span>
+                    </div>
+
+                    {/* Line 8: Close brace */}
+                    <div
+                      className="px-1"
+                      style={{ color: punctuation as string }}
+                    >
+                      {'}'}
+                    </div>
+                  </div>
+
+                  {/* Scrollbar */}
+                  <div
+                    className="w-2 flex-shrink-0"
+                    style={{ backgroundColor: scrollbarTrack as string }}
+                  >
+                    <div
+                      className="mx-0.5 mt-1 h-8 rounded-sm"
+                      style={{ backgroundColor: scrollbarThumb as string }}
+                    />
+                  </div>
+                </div>
+
+                {/* Terminal */}
+                <div
+                  className="flex-shrink-0 font-mono text-[10px]"
+                  style={{
+                    backgroundColor: terminalBg as string,
+                    borderTop: `1px solid ${borderVariant}`,
+                    height: '60px',
+                  }}
+                >
+                  {/* Terminal header */}
+                  <div
+                    className="flex items-center gap-2 px-2 py-0.5"
+                    style={{
+                      backgroundColor: panelBg as string,
+                      borderBottom: `1px solid ${borderVariant}`,
+                      color: textMuted as string,
+                    }}
+                  >
+                    <span>Terminal</span>
+                  </div>
+                  {/* Terminal content */}
+                  <div className="p-1" style={{ color: terminalFg as string }}>
+                    <div>
+                      <span style={{ color: terminalGreen as string }}>➜</span>{' '}
+                      <span style={{ color: terminalCyan as string }}>
+                        ~/project
+                      </span>{' '}
+                      <span style={{ color: terminalBlue as string }}>
+                        git:(
+                      </span>
+                      <span style={{ color: terminalRed as string }}>main</span>
+                      <span style={{ color: terminalBlue as string }}>
+                        )
+                      </span>{' '}
+                      <span>npm run build</span>
+                    </div>
+                    <div>
+                      <span style={{ color: terminalBrightBlack as string }}>
+                        [
+                      </span>
+                      <span style={{ color: terminalBrightGreen as string }}>
+                        ✓
+                      </span>
+                      <span style={{ color: terminalBrightBlack as string }}>
+                        ]
+                      </span>{' '}
+                      <span style={{ color: terminalBrightWhite as string }}>
+                        Build
+                      </span>{' '}
+                      <span style={{ color: terminalBrightGreen as string }}>
+                        successful
+                      </span>{' '}
+                      <span style={{ color: terminalYellow as string }}>
+                        in 1.2s
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Status Bar */}
-        <div
-          className="flex items-center justify-between px-2 py-0.5 text-[10px]"
-          style={{
-            backgroundColor: statusBarBg as string,
-            borderTop: `1px solid ${borderVariant}`,
-            color: text as string,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <span style={{ color: infoColor as string }}>
-              <FontAwesomeIcon icon={faCodeBranch} className="mr-0.5" aria-hidden="true" />
-              main
-            </span>
-            <span>TypeScript</span>
-            <span style={{ color: warningColor as string }}>⚠ 2</span>
-            <span style={{ color: errorColor as string }}>✕ 0</span>
+            {/* Status Bar */}
+            <div
+              className="flex items-center justify-between px-2 py-0.5 text-[10px]"
+              style={{
+                backgroundColor: statusBarBg as string,
+                borderTop: `1px solid ${borderVariant}`,
+                color: text as string,
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span style={{ color: infoColor as string }}>
+                  <FontAwesomeIcon
+                    icon={faCodeBranch}
+                    className="mr-0.5"
+                    aria-hidden="true"
+                  />
+                  main
+                </span>
+                <span>TypeScript</span>
+                <span style={{ color: warningColor as string }}>⚠ 2</span>
+                <span style={{ color: errorColor as string }}>✕ 0</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span>Ln 3, Col 42</span>
+                <span>UTF-8</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span>Ln 3, Col 42</span>
-            <span>UTF-8</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Status Color Palette */}
-      <div className="mt-2 rounded p-2" style={{ backgroundColor: surfaceBg as string, border: `1px solid ${border}` }}>
-        <div className="mb-1 text-[10px]" style={{ color: textMuted as string }}>Status Colors</div>
-        <div className="flex flex-wrap gap-1">
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: errorBg as string, color: errorColor as string }}>
-            error
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: warningBg as string, color: warningColor as string }}>
-            warning
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: infoBg as string, color: infoColor as string }}>
-            info
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: successBg as string, color: successColor as string }}>
-            success
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${hintColor}22`, color: hintColor as string }}>
-            hint
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${createdColor}22`, color: createdColor as string }}>
-            created
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${modifiedColor}22`, color: modifiedColor as string }}>
-            modified
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${deletedColor}22`, color: deletedColor as string }}>
-            deleted
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${conflictColor}22`, color: conflictColor as string }}>
-            conflict
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${renamedColor}22`, color: renamedColor as string }}>
-            renamed
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${ignoredColor}22`, color: ignoredColor as string }}>
-            ignored
-          </div>
-          <div className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]" style={{ backgroundColor: `${predictiveColor}22`, color: predictiveColor as string }}>
-            predictive
-          </div>
-        </div>
-      </div>
-
-      {/* Terminal ANSI Color Palette */}
-      <div className="mt-2 rounded p-2" style={{ backgroundColor: terminalBg as string, border: `1px solid ${border}` }}>
-        <div className="mb-1 text-[10px]" style={{ color: terminalFg as string }}>Terminal ANSI Colors</div>
-        <div className="grid grid-cols-8 gap-1 text-[9px] font-mono">
-          {/* Normal colors */}
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBlack as string, color: terminalWhite as string }}>blk</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalRed as string, color: '#fff' }}>red</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalGreen as string, color: '#000' }}>grn</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalYellow as string, color: '#000' }}>yel</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBlue as string, color: '#fff' }}>blu</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalMagenta as string, color: '#fff' }}>mag</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalCyan as string, color: '#000' }}>cyn</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalWhite as string, color: '#000' }}>wht</div>
-          {/* Bright colors */}
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightBlack as string, color: '#fff' }}>B.blk</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightRed as string, color: '#fff' }}>B.red</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightGreen as string, color: '#000' }}>B.grn</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightYellow as string, color: '#000' }}>B.yel</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightBlue as string, color: '#fff' }}>B.blu</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightMagenta as string, color: '#fff' }}>B.mag</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightCyan as string, color: '#000' }}>B.cyn</div>
-          <div className="rounded px-1 py-0.5 text-center" style={{ backgroundColor: terminalBrightWhite as string, color: '#000' }}>B.wht</div>
-        </div>
-      </div>
-
-      {/* UI Element Samples */}
-      <div className="mt-2 rounded p-2" style={{ backgroundColor: surfaceBg as string, border: `1px solid ${border}` }}>
-        <div className="mb-1 text-[10px]" style={{ color: textMuted as string }}>UI Elements</div>
-        <div className="flex flex-wrap gap-2 text-[10px]">
-          {/* Buttons */}
-          <button
-            className="rounded px-2 py-0.5"
-            style={{ backgroundColor: elementBg as string, color: text as string, border: `1px solid ${border}` }}
+          {/* Status Color Palette */}
+          <div
+            className="mt-2 rounded p-2"
+            style={{
+              backgroundColor: surfaceBg as string,
+              border: `1px solid ${border}`,
+            }}
           >
-            Button
-          </button>
-          <button
-            className="rounded px-2 py-0.5"
-            style={{ backgroundColor: elementHover as string, color: text as string, border: `1px solid ${border}` }}
-          >
-            Hover
-          </button>
-          <button
-            className="rounded px-2 py-0.5"
-            style={{ backgroundColor: elementActive as string, color: text as string, border: `1px solid ${border}` }}
-          >
-            Active
-          </button>
-          <button
-            className="rounded px-2 py-0.5"
-            style={{ backgroundColor: elementSelected as string, color: text as string, border: `1px solid ${borderFocused}` }}
-          >
-            Selected
-          </button>
-          {/* Text samples */}
-          <span style={{ color: text as string }}>Text</span>
-          <span style={{ color: textMuted as string }}>Muted</span>
-          <span style={{ color: textPlaceholder as string }}>Placeholder</span>
-          <span style={{ color: textAccent as string }}>Accent</span>
-          <a href="#" style={{ color: link as string, textDecoration: 'underline' }}>Link</a>
-        </div>
-      </div>
+            <div
+              className="mb-1 text-[10px]"
+              style={{ color: textMuted as string }}
+            >
+              Status Colors
+            </div>
+            <div className="flex flex-wrap gap-1">
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: errorBg as string,
+                  color: errorColor as string,
+                }}
+              >
+                error
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: warningBg as string,
+                  color: warningColor as string,
+                }}
+              >
+                warning
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: infoBg as string,
+                  color: infoColor as string,
+                }}
+              >
+                info
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: successBg as string,
+                  color: successColor as string,
+                }}
+              >
+                success
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${hintColor}22`,
+                  color: hintColor as string,
+                }}
+              >
+                hint
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${createdColor}22`,
+                  color: createdColor as string,
+                }}
+              >
+                created
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${modifiedColor}22`,
+                  color: modifiedColor as string,
+                }}
+              >
+                modified
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${deletedColor}22`,
+                  color: deletedColor as string,
+                }}
+              >
+                deleted
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${conflictColor}22`,
+                  color: conflictColor as string,
+                }}
+              >
+                conflict
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${renamedColor}22`,
+                  color: renamedColor as string,
+                }}
+              >
+                renamed
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${ignoredColor}22`,
+                  color: ignoredColor as string,
+                }}
+              >
+                ignored
+              </div>
+              <div
+                className="flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${predictiveColor}22`,
+                  color: predictiveColor as string,
+                }}
+              >
+                predictive
+              </div>
+            </div>
+          </div>
 
-      {/* Elevated Surface Sample */}
-      <div className="mt-2 flex gap-2">
-        <div className="flex-1 rounded p-2 text-[10px]" style={{ backgroundColor: panelBg as string, border: `1px solid ${border}`, color: text as string }}>
-          <div style={{ color: textMuted as string }}>Panel</div>
-        </div>
-        <div className="flex-1 rounded p-2 text-[10px]" style={{ backgroundColor: elevatedSurfaceBg as string, border: `1px solid ${border}`, color: text as string }}>
-          <div style={{ color: textMuted as string }}>Elevated</div>
-        </div>
-        <div
-          className="flex-1 rounded p-2 text-[10px]"
-          style={{
-            backgroundColor: surfaceBg as string,
-            border: `1px solid ${panelFocusedBorder}`,
-            color: text as string,
-          }}
-        >
-          <div style={{ color: textMuted as string }}>Focused</div>
-        </div>
-      </div>
-      </>
+          {/* Terminal ANSI Color Palette */}
+          <div
+            className="mt-2 rounded p-2"
+            style={{
+              backgroundColor: terminalBg as string,
+              border: `1px solid ${border}`,
+            }}
+          >
+            <div
+              className="mb-1 text-[10px]"
+              style={{ color: terminalFg as string }}
+            >
+              Terminal ANSI Colors
+            </div>
+            <div className="grid grid-cols-8 gap-1 font-mono text-[9px]">
+              {/* Normal colors */}
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBlack as string,
+                  color: terminalWhite as string,
+                }}
+              >
+                blk
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalRed as string,
+                  color: '#fff',
+                }}
+              >
+                red
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalGreen as string,
+                  color: '#000',
+                }}
+              >
+                grn
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalYellow as string,
+                  color: '#000',
+                }}
+              >
+                yel
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBlue as string,
+                  color: '#fff',
+                }}
+              >
+                blu
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalMagenta as string,
+                  color: '#fff',
+                }}
+              >
+                mag
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalCyan as string,
+                  color: '#000',
+                }}
+              >
+                cyn
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalWhite as string,
+                  color: '#000',
+                }}
+              >
+                wht
+              </div>
+              {/* Bright colors */}
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightBlack as string,
+                  color: '#fff',
+                }}
+              >
+                B.blk
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightRed as string,
+                  color: '#fff',
+                }}
+              >
+                B.red
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightGreen as string,
+                  color: '#000',
+                }}
+              >
+                B.grn
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightYellow as string,
+                  color: '#000',
+                }}
+              >
+                B.yel
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightBlue as string,
+                  color: '#fff',
+                }}
+              >
+                B.blu
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightMagenta as string,
+                  color: '#fff',
+                }}
+              >
+                B.mag
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightCyan as string,
+                  color: '#000',
+                }}
+              >
+                B.cyn
+              </div>
+              <div
+                className="rounded px-1 py-0.5 text-center"
+                style={{
+                  backgroundColor: terminalBrightWhite as string,
+                  color: '#000',
+                }}
+              >
+                B.wht
+              </div>
+            </div>
+          </div>
+
+          {/* UI Element Samples */}
+          <div
+            className="mt-2 rounded p-2"
+            style={{
+              backgroundColor: surfaceBg as string,
+              border: `1px solid ${border}`,
+            }}
+          >
+            <div
+              className="mb-1 text-[10px]"
+              style={{ color: textMuted as string }}
+            >
+              UI Elements
+            </div>
+            <div className="flex flex-wrap gap-2 text-[10px]">
+              {/* Buttons */}
+              <button
+                className="rounded px-2 py-0.5"
+                style={{
+                  backgroundColor: elementBg as string,
+                  color: text as string,
+                  border: `1px solid ${border}`,
+                }}
+              >
+                Button
+              </button>
+              <button
+                className="rounded px-2 py-0.5"
+                style={{
+                  backgroundColor: elementHover as string,
+                  color: text as string,
+                  border: `1px solid ${border}`,
+                }}
+              >
+                Hover
+              </button>
+              <button
+                className="rounded px-2 py-0.5"
+                style={{
+                  backgroundColor: elementActive as string,
+                  color: text as string,
+                  border: `1px solid ${border}`,
+                }}
+              >
+                Active
+              </button>
+              <button
+                className="rounded px-2 py-0.5"
+                style={{
+                  backgroundColor: elementSelected as string,
+                  color: text as string,
+                  border: `1px solid ${borderFocused}`,
+                }}
+              >
+                Selected
+              </button>
+              {/* Text samples */}
+              <span style={{ color: text as string }}>Text</span>
+              <span style={{ color: textMuted as string }}>Muted</span>
+              <span style={{ color: textPlaceholder as string }}>
+                Placeholder
+              </span>
+              <span style={{ color: textAccent as string }}>Accent</span>
+              <a
+                href="#"
+                style={{ color: link as string, textDecoration: 'underline' }}
+              >
+                Link
+              </a>
+            </div>
+          </div>
+
+          {/* Elevated Surface Sample */}
+          <div className="mt-2 flex gap-2">
+            <div
+              className="flex-1 rounded p-2 text-[10px]"
+              style={{
+                backgroundColor: panelBg as string,
+                border: `1px solid ${border}`,
+                color: text as string,
+              }}
+            >
+              <div style={{ color: textMuted as string }}>Panel</div>
+            </div>
+            <div
+              className="flex-1 rounded p-2 text-[10px]"
+              style={{
+                backgroundColor: elevatedSurfaceBg as string,
+                border: `1px solid ${border}`,
+                color: text as string,
+              }}
+            >
+              <div style={{ color: textMuted as string }}>Elevated</div>
+            </div>
+            <div
+              className="flex-1 rounded p-2 text-[10px]"
+              style={{
+                backgroundColor: surfaceBg as string,
+                border: `1px solid ${panelFocusedBorder}`,
+                color: text as string,
+              }}
+            >
+              <div style={{ color: textMuted as string }}>Focused</div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )

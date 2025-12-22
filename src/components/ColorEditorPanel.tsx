@@ -478,11 +478,11 @@ export function ColorEditorPanel({
   )
 
   return (
-    <div className={`flex flex-col gap-4 p-4 ${className}`}>
+    <div className={`flex flex-col gap-4 px-4 py-2 ${className}`}>
       {/* Header with property path */}
       {colorPath && (
         <div className="">
-          <h3 className="text-center font-mono text-sm text-neutral-700 dark:text-neutral-300">
+          <h3 className="text-center text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {colorPath.replace(/^style\//, '')}
           </h3>
         </div>
