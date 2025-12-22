@@ -8,17 +8,14 @@ import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 import { Extension } from '@codemirror/state'
 
+// Re-export types from metadata file for convenience
+export type { EditorThemeName, EditorThemeMeta } from './editorThemeMeta'
+export { editorThemeMeta, getDefaultTheme, getThemeNames, getThemesByMode } from './editorThemeMeta'
+import type { EditorThemeName } from './editorThemeMeta'
+
 // ============================================================================
 // Theme Definitions
 // ============================================================================
-
-export type EditorThemeName =
-  | 'neutral-dark'
-  | 'neutral-light'
-  | 'one-dark'
-  | 'github-dark'
-  | 'github-light'
-  | 'midnight'
 
 export interface EditorThemeConfig {
   name: string
@@ -424,26 +421,4 @@ export const editorThemes: Record<EditorThemeName, EditorThemeConfig> = {
     isDark: true,
     extension: [midnightTheme, syntaxHighlighting(midnightHighlight)],
   },
-}
-
-/**
- * Get the appropriate theme based on dark mode preference
- * Returns 'neutral-dark' or 'neutral-light' by default
- */
-export function getDefaultTheme(isDarkMode: boolean): EditorThemeName {
-  return isDarkMode ? 'neutral-dark' : 'neutral-light'
-}
-
-/**
- * Get all available theme names
- */
-export function getThemeNames(): EditorThemeName[] {
-  return Object.keys(editorThemes) as EditorThemeName[]
-}
-
-/**
- * Get themes filtered by dark/light mode
- */
-export function getThemesByMode(isDark: boolean): EditorThemeConfig[] {
-  return Object.values(editorThemes).filter(t => t.isDark === isDark)
 }

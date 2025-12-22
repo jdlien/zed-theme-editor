@@ -6,7 +6,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSun, faMoon, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
 import { formatShortcut } from '@/lib/keyboard'
-import { editorThemes, type EditorThemeName } from '@/lib/editorThemes'
+import { editorThemeMeta, type EditorThemeName } from '@/lib/editorThemeMeta'
 import { ZedLogo } from './ZedLogo'
 import type { ColorFormat } from '@/types/theme'
 
@@ -100,7 +100,7 @@ export function Toolbar({
             className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
             title="Editor theme"
           >
-            {Object.values(editorThemes)
+            {Object.values(editorThemeMeta)
               .filter((theme) => theme.isDark === isDarkMode)
               .map((theme) => (
                 <option key={theme.name} value={theme.name}>

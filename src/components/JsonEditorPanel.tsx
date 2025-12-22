@@ -26,6 +26,7 @@ import {
   type EditorThemeName,
 } from '@/lib/editorThemes'
 import { toRgb } from '@/lib/colorConversion'
+import { normalizeColorPath } from '@/lib/jsonParsing'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import {
   foldGutter,
@@ -381,44 +382,6 @@ function parseJsonString(str: string): string {
     return str
   }
 }
-
-/**
- * Transform a full document path to a theme-relative path
- * Converts "themes/[0]/style/background" to "style/background"
- * Also handles the accents object flattening - the parsed theme object
- * has accents properties merged into style, so we strip "accents/" from paths.
- * The themeIndex is extracted and returned for multi-theme support
- */
-export function normalizeColorPath(fullPath: string): {
-  path: string
-  themeIndex: number | null
-} {
-  let path = fullPath
-  let themeIndex: number | null = null
-
-  // Match themes/[n]/ prefix
-  const themePrefixMatch = fullPath.match(/^themes\/\[(\d+)\]\/(.+)$/)
-  if (themePrefixMatch) {
-    path = themePrefixMatch[2]
-    themeIndex = parseInt(themePrefixMatch[1], 10)
-  } else {
-    // Match themes/style/ without array index (legacy format)
-    const legacyPrefixMatch = fullPath.match(/^themes\/(.+)$/)
-    if (legacyPrefixMatch) {
-      path = legacyPrefixMatch[1]
-    }
-  }
-
-  // The theme parser flattens the accents object (when it contains named properties),
-  // merging its properties into style. So "style/accents/border.variant" in JSON
-  // becomes "style/border.variant" in the parsed object.
-  // Only strip "accents/" when followed by a property name, NOT an array index.
-  // This preserves paths like "style/accents/[2]" for actual accents color arrays.
-  path = path.replace(/^style\/accents\/(?!\[)/, 'style/')
-
-  return { path, themeIndex }
-}
-
 // ============================================================================
 // CodeMirror Extensions
 // ============================================================================
@@ -518,6 +481,14 @@ const baseEditorStyles = EditorView.theme({
 // Main Component
 // ============================================================================
 
+/**
+ * CodeMirror integration component.
+ * Testing requires a real browser environment (Playwright/Cypress) because:
+ * - CodeMirror creates complex DOM structures that jsdom doesn't fully support
+ * - Editor lifecycle (create/destroy) depends on actual DOM measurements
+ * - Scroll position and selection APIs require real layout
+ */
+/* v8 ignore start -- CodeMirror requires real browser for testing */
 export const JsonEditorPanel = forwardRef<
   JsonEditorPanelHandle,
   JsonEditorPanelProps
@@ -718,5 +689,6 @@ export const JsonEditorPanel = forwardRef<
     />
   )
 })
+/* v8 ignore stop */
 
 export default JsonEditorPanel

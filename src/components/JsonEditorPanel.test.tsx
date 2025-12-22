@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { normalizeColorPath } from './JsonEditorPanel'
+import { normalizeColorPath } from '@/lib/jsonParsing'
 
 // ============================================================================
 // Color Detection Tests

@@ -494,3 +494,37 @@ export function getColorStats(style: ThemeStyle): ColorStats {
     colorsByCategory: categories,
   }
 }
+
+/**
+ * Normalize a color path from the JSON editor format to the theme-relative format
+ * Handles stripping theme array indices and flattening the accents object path
+ */
+export function normalizeColorPath(fullPath: string): {
+  path: string
+  themeIndex: number | null
+} {
+  let path = fullPath
+  let themeIndex: number | null = null
+
+  // Match themes/[n]/ prefix
+  const themePrefixMatch = fullPath.match(/^themes\/\[(\d+)\]\/(.+)$/)
+  if (themePrefixMatch) {
+    path = themePrefixMatch[2]
+    themeIndex = parseInt(themePrefixMatch[1], 10)
+  } else {
+    // Match themes/style/ without array index (legacy format)
+    const legacyPrefixMatch = fullPath.match(/^themes\/(.+)$/)
+    if (legacyPrefixMatch) {
+      path = legacyPrefixMatch[1]
+    }
+  }
+
+  // The theme parser flattens the accents object (when it contains named properties),
+  // merging its properties into style. So "style/accents/border.variant" in JSON
+  // becomes "style/border.variant" in the parsed object.
+  // Only strip "accents/" when followed by a property name, NOT an array index.
+  // This preserves paths like "style/accents/[2]" for actual accents color arrays.
+  path = path.replace(/^style\/accents\/(?!\[)/, 'style/')
+
+  return { path, themeIndex }
+}

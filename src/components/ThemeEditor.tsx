@@ -3,18 +3,22 @@
  * Main application layout integrating all editor components
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { getAllThemeColors, extractColorsAsMap, transformColorsInJson, type AllColorsEntry } from '@/lib/jsonParsing'
+import { getAllThemeColors, extractColorsAsMap, transformColorsInJson, normalizeColorPath, type AllColorsEntry } from '@/lib/jsonParsing'
 import type { ColorFormat } from '@/types/theme'
 import { formatShortcut } from '@/lib/keyboard'
-import type { EditorThemeName } from '@/lib/editorThemes'
+import type { EditorThemeName } from '@/lib/editorThemeMeta'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
-import { JsonEditorPanel, normalizeColorPath, type JsonEditorPanelHandle } from './JsonEditorPanel'
+import type { JsonEditorPanelHandle } from './JsonEditorPanel'
+
+// Lazy load the JSON editor (CodeMirror is ~250KB)
+const JsonEditorPanel = lazy(() => import('./JsonEditorPanel'))
+
 import { ColorEditorPanel } from './ColorEditorPanel'
 import { ThemePreview } from './ThemePreview'
 import { ColorSwatchRow } from './ColorSwatch'
@@ -188,6 +192,7 @@ export function ThemeEditor() {
   )
 
   // Scroll sidebar to show a color path
+  /* v8 ignore start -- scroll behavior requires real DOM for testing */
   const scrollSidebarToPath = useCallback((path: string) => {
     const container = colorListRef.current
     if (!container) return
@@ -208,8 +213,10 @@ export function ThemeEditor() {
       }
     })
   }, [])
+  /* v8 ignore stop */
 
   // Handle color click in JSON editor - scroll sidebar to show the color
+  /* v8 ignore start -- passed to JsonEditorPanel which is excluded from coverage */
   const handleColorClick = useCallback(
     (path: string, _color: string, _position: number) => {
       // Normalize path from full document format to theme-relative format
@@ -228,6 +235,7 @@ export function ThemeEditor() {
     },
     [handleSelectColor, setActiveTheme, state.activeThemeIndex, scrollSidebarToPath]
   )
+  /* v8 ignore stop */
 
   // Handle color click in sidebar - scroll JSON editor to show the color
   // If color is not defined, add it to the theme first
@@ -248,6 +256,7 @@ export function ThemeEditor() {
   )
 
   // Handle color update from panel (uses debounced history)
+  /* v8 ignore start -- forwards to updateColorLive which is tested in useThemeEditor */
   const handleColorChange = useCallback(
     (newColor: string) => {
       if (state.selectedColorPath) {
@@ -256,6 +265,7 @@ export function ThemeEditor() {
     },
     [state.selectedColorPath, updateColorLive]
   )
+  /* v8 ignore stop */
 
   // Handle undo with pending history commit
   const handleUndo = useCallback(() => {
@@ -273,6 +283,12 @@ export function ThemeEditor() {
     }
     redo()
   }, [hasPendingHistory, commitPendingHistory, redo])
+
+  // Preload the JSON editor chunk immediately (non-blocking)
+  // This ensures it's ready by the time the user loads a file
+  useEffect(() => {
+    import('./JsonEditorPanel')
+  }, [])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -319,12 +335,14 @@ export function ThemeEditor() {
           onColorFormatChange={setJsonColorFormat}
         />
         <div className="flex flex-1 items-center justify-center p-8">
+          {/* v8 ignore start -- callbacks delegate to tested functions */}
           <DropZone
             onFileLoad={(content, fileName, handle) => {
               loadFile({ content, name: fileName, handle })
             }}
             onError={(error) => console.error('File load error:', error)}
           />
+          {/* v8 ignore stop */}
         </div>
         {state.error && (
           <div className="bg-red-300/50 px-4 py-2 text-center text-sm text-red-900 dark:bg-red-900/50 dark:text-red-200">
@@ -419,15 +437,23 @@ export function ThemeEditor() {
         {/* Center: JSON Editor */}
         <main className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-hidden p-0">
-            <JsonEditorPanel
-              ref={jsonEditorRef}
-              content={displayContent}
-              onColorClick={handleColorClick}
-              selectedColorPath={state.selectedColorPath}
-              isDarkMode={state.isDarkMode}
-              editorTheme={editorTheme}
-              originalColors={originalColors}
-            />
+            <Suspense
+              fallback={
+                <div className="flex h-full items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+                  <span className="text-neutral-500">Loading editor...</span>
+                </div>
+              }
+            >
+              <JsonEditorPanel
+                ref={jsonEditorRef}
+                content={displayContent}
+                onColorClick={handleColorClick}
+                selectedColorPath={state.selectedColorPath}
+                isDarkMode={state.isDarkMode}
+                editorTheme={editorTheme}
+                originalColors={originalColors}
+              />
+            </Suspense>
           </div>
 
           {/* Theme Preview */}
