@@ -14,7 +14,6 @@ import { NumberField } from './NumberField'
 import {
   isValidHex,
   normalizeHex,
-  parseColor,
   hexToRgb,
   hexToHsl,
   hexToOklch,
@@ -401,9 +400,6 @@ export function ColorEditorPanel({
     )
   }
 
-  // Parse current color into all formats
-  const parsed = useMemo(() => parseColor(color), [color])
-
   const [rgb, setRgb] = useState<RgbValues>(
     () => hexToRgb(color) ?? { r: 0, g: 0, b: 0, a: 1 }
   )
@@ -541,25 +537,18 @@ export function ColorEditorPanel({
         />
       </div>
 
-      {/* Parsed color info */}
-      {parsed && (
-        <div className="">
-          <div className="flex items-center justify-center gap-2 text-xs">
-            <span
-              className={`flex items-center gap-1 ${parsed.isInGamut ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}
-            >
-              <FontAwesomeIcon
-                icon={parsed.isInGamut ? faCheck : faTriangleExclamation}
-                className="h-3 w-3"
-              />
-              {parsed.isInGamut ? 'In gamut' : 'Out of gamut'}
-            </span>
-            {/*{parsed.alpha < 1 && (
-              <span>• Alpha: {Math.round(parsed.alpha * 100)}%</span>
-            )}*/}
-          </div>
-        </div>
-      )}
+      {/* Gamut status - uses OKLCH state to match the OKLCH warning */}
+      <div className="flex items-center justify-center gap-2 text-xs">
+        <span
+          className={`flex items-center gap-1 ${!isOutOfGamut ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}
+        >
+          <FontAwesomeIcon
+            icon={!isOutOfGamut ? faCheck : faTriangleExclamation}
+            className="h-3 w-3"
+          />
+          {!isOutOfGamut ? 'In gamut' : 'Out of gamut'}
+        </span>
+      </div>
     </div>
   )
 }
