@@ -340,8 +340,12 @@ export function ColorPicker({ value, onChange, showAlpha = true, className = '' 
       const parsed = hexToHsl(value)
       if (parsed) {
         // Only update if significantly different to avoid feedback loops
+        // Scale alpha by 100 since it's 0-1 while H/S/L are 0-360/0-100
         const diff =
-          Math.abs(parsed.h - hsl.h) + Math.abs(parsed.s - hsl.s) + Math.abs(parsed.l - hsl.l) + Math.abs((parsed.a ?? 1) - hsl.a)
+          Math.abs(parsed.h - hsl.h) +
+          Math.abs(parsed.s - hsl.s) +
+          Math.abs(parsed.l - hsl.l) +
+          Math.abs((parsed.a ?? 1) - hsl.a) * 100
         if (diff > 1) {
           setHsl({ ...parsed, a: parsed.a ?? 1 })
         }
