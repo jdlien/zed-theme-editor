@@ -138,7 +138,7 @@ export function Toolbar({
           <button
             onClick={onSave}
             disabled={!canSave || !hasUnsavedChanges}
-            className="flex items-center gap-2 rounded border-indigo-500 bg-indigo-600 bg-linear-to-b from-indigo-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors hover:to-indigo-500 enabled:hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded border-indigo-500 bg-indigo-600 bg-linear-to-b from-indigo-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors enabled:hover:bg-indigo-500 enabled:hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             title={`Save (${formatShortcut('S')})`}
           >
             Save

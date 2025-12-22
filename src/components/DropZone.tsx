@@ -97,7 +97,7 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
   )
 
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
+    <div className="flex flex-1 items-center justify-center py-4">
       <div
         role="button"
         tabIndex={0}
@@ -134,12 +134,12 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
             <p className="text-lg text-neutral-700 dark:text-neutral-300">
               {dragState === 'over'
                 ? 'Drop to open file'
-                : 'Drop a Zed theme file here'}
+                : 'Drop a Zed theme .json file here'}
             </p>
             <p className="mt-2 text-sm text-neutral-500">or click to browse</p>
-            <p className="mt-4 text-xs text-neutral-500 dark:text-neutral-600">
+            {/*<p className="mt-4 text-xs text-neutral-500 dark:text-neutral-600">
               Supports .json and .json5 files
-            </p>
+            </p>*/}
             {!isSupported && (
               <p className="mt-2 text-xs text-yellow-600">
                 Note: Save-in-place not supported in this browser
