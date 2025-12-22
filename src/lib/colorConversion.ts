@@ -330,3 +330,66 @@ export function colorToHex(color: ParsedColor): string {
   }
   return color.hex.slice(0, 7)
 }
+
+// ============================================================================
+// Convenience conversion functions
+// ============================================================================
+
+/**
+ * Convert HSL values directly to hex string
+ */
+export function hslToHex(h: number, s: number, l: number, a: number = 1): string {
+  const color = fromHsl(h, s, l, a)
+  return toHex(color)
+}
+
+/**
+ * Convert hex string to HSL values
+ */
+export function hexToHsl(hex: string): { h: number; s: number; l: number; a: number } | null {
+  if (!isValidHex(hex)) return null
+  const color = parseHex(hex)
+  if (!color) return null
+  const hslColor = toHsl(color)
+  return { h: hslColor.h, s: hslColor.s, l: hslColor.l, a: hslColor.alpha }
+}
+
+/**
+ * Convert RGB values directly to hex string
+ */
+export function rgbToHex(r: number, g: number, b: number, a: number = 1): string {
+  const color = fromRgb(r, g, b, a)
+  return toHex(color)
+}
+
+/**
+ * Convert hex string to RGB values
+ */
+export function hexToRgb(hex: string): { r: number; g: number; b: number; a: number } | null {
+  if (!isValidHex(hex)) return null
+  const color = parseHex(hex)
+  if (!color) return null
+  const rgbColor = toRgb(color)
+  return { r: rgbColor.r, g: rgbColor.g, b: rgbColor.b, a: rgbColor.alpha }
+}
+
+/**
+ * Convert OKLCH values directly to hex string
+ */
+export function oklchToHex(l: number, c: number, h: number, a: number = 1): string {
+  const color = fromOklch(l, c, h, a)
+  // Gamut map to ensure displayable color
+  const mappedColor = gamutMapToSrgb(color)
+  return toHex(mappedColor)
+}
+
+/**
+ * Convert hex string to OKLCH values
+ */
+export function hexToOklch(hex: string): { l: number; c: number; h: number; a: number } | null {
+  if (!isValidHex(hex)) return null
+  const color = parseHex(hex)
+  if (!color) return null
+  const oklchColor = toOklch(color)
+  return { l: oklchColor.l, c: oklchColor.c, h: oklchColor.h, a: oklchColor.alpha }
+}
