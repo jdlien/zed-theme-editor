@@ -488,9 +488,15 @@ export function ColorEditorPanel({
           <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {colorPath.replace(/^style\//, '')}
           </h3>
-          {description && (
-            <p className="mt-1 text-xs text-neutral-500">{description}</p>
-          )}
+          <p
+            className={`mt-1 line-clamp-2 min-h-8 text-xs ${
+              description
+                ? 'text-neutral-500'
+                : 'italic text-neutral-300 dark:text-neutral-700'
+            }`}
+          >
+            {description || 'No description'}
+          </p>
         </div>
       )}
 
