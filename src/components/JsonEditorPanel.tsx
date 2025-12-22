@@ -120,19 +120,19 @@ class ColorSwatchWidget extends WidgetType {
 
 /**
  * Find all hex color values in JSON content with their keys
+ * Matches both object properties and array elements
  */
 function findColors(content: string): ColorMatch[] {
   const colors: ColorMatch[] = []
+
   // Match hex colors in JSON string values: "key": "#RRGGBB" or "#RGB"
   const hexPattern = /"([^"]+)":\s*"(#[0-9A-Fa-f]{3,8})"/g
-
   let match
   while ((match = hexPattern.exec(content)) !== null) {
     const key = match[1]
     const color = match[2]
 
     if (isValidHex(color)) {
-      // Find the position of the color value (the hex string itself)
       const fullMatch = match[0]
       const colorIndex = fullMatch.lastIndexOf(color)
       const colorStart = match.index + colorIndex
@@ -146,6 +146,34 @@ function findColors(content: string): ColorMatch[] {
       })
     }
   }
+
+  // Match hex colors in arrays: ["#RRGGBB", "#RGB"]
+  // This catches colors in accents array and similar
+  const arrayColorPattern = /(?:[\[,]\s*)"(#[0-9A-Fa-f]{3,8})"/g
+  while ((match = arrayColorPattern.exec(content)) !== null) {
+    const color = match[1]
+
+    if (isValidHex(color)) {
+      const colorStart = match.index + match[0].indexOf(color)
+      const colorEnd = colorStart + color.length
+
+      // Avoid duplicates (in case a pattern matched both)
+      const isDuplicate = colors.some(
+        (c) => c.from === colorStart && c.to === colorEnd
+      )
+      if (!isDuplicate) {
+        colors.push({
+          from: colorStart,
+          to: colorEnd,
+          color: color.toUpperCase(),
+          key: 'array-element',
+        })
+      }
+    }
+  }
+
+  // Sort by position
+  colors.sort((a, b) => a.from - b.from)
 
   return colors
 }
