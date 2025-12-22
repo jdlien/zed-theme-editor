@@ -290,6 +290,40 @@ function parseJsonString(str: string): string {
   }
 }
 
+/**
+ * Transform a full document path to a theme-relative path
+ * Converts "themes/[0]/style/background" to "style/background"
+ * The themeIndex is extracted and returned for multi-theme support
+ */
+export function normalizeColorPath(fullPath: string): {
+  path: string
+  themeIndex: number | null
+} {
+  // Match themes/[n]/ prefix
+  const themePrefixMatch = fullPath.match(/^themes\/\[(\d+)\]\/(.+)$/)
+  if (themePrefixMatch) {
+    return {
+      path: themePrefixMatch[2],
+      themeIndex: parseInt(themePrefixMatch[1], 10),
+    }
+  }
+
+  // Match themes/style/ without array index (legacy format)
+  const legacyPrefixMatch = fullPath.match(/^themes\/(.+)$/)
+  if (legacyPrefixMatch) {
+    return {
+      path: legacyPrefixMatch[1],
+      themeIndex: null,
+    }
+  }
+
+  // Already a theme-relative path
+  return {
+    path: fullPath,
+    themeIndex: null,
+  }
+}
+
 // ============================================================================
 // CodeMirror Extensions
 // ============================================================================
