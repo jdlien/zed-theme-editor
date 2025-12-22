@@ -405,6 +405,7 @@ export function ThemeEditor() {
                     originalColor={originalColors.get(color.path)}
                     isSelected={color.path === state.selectedColorPath}
                     defined={color.defined}
+                    description={color.description}
                     onClick={() => handleSidebarColorClick(color.path, color.defined, color.value)}
                     displayFormat={state.colorDisplayFormat}
                   />

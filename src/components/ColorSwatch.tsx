@@ -144,6 +144,8 @@ export interface ColorSwatchRowProps {
   isSelected?: boolean
   /** Whether this color is defined in the theme (false = placeholder) */
   defined?: boolean
+  /** Description/tooltip text from schema */
+  description?: string
   /** Click handler */
   onClick?: () => void
   /** Color format to display */
@@ -156,6 +158,7 @@ export function ColorSwatchRow({
   originalColor,
   isSelected = false,
   defined = true,
+  description,
   onClick,
   displayFormat = 'hex',
 }: ColorSwatchRowProps) {
@@ -163,6 +166,7 @@ export function ColorSwatchRow({
     <button
       type="button"
       onClick={onClick}
+      title={description}
       className={`
         flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
         ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
