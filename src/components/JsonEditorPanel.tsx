@@ -88,15 +88,20 @@ class ColorSwatchWidget extends WidgetType {
       vertical-align: middle;
       box-shadow: ${this.isSelected ? '0 0 0 2px #3b82f6' : 'none'};
       transition: box-shadow 0.15s ease;
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
     `
     swatch.title = `${this.path}: ${this.color}`
 
     if (this.onClick) {
-      swatch.addEventListener('click', (e) => {
+      const onClickHandler = this.onClick
+      const handleClick = (e: Event) => {
         e.preventDefault()
         e.stopPropagation()
-        this.onClick!(this.path, this.color, this.position)
-      })
+        onClickHandler(this.path, this.color, this.position)
+      }
+      swatch.addEventListener('mousedown', handleClick)
     }
 
     wrapper.appendChild(swatch)
@@ -107,12 +112,15 @@ class ColorSwatchWidget extends WidgetType {
     return (
       other.color === this.color &&
       other.path === this.path &&
-      other.isSelected === this.isSelected
+      other.isSelected === this.isSelected &&
+      other.onClick === this.onClick
     )
   }
 
-  ignoreEvent(): boolean {
-    return false
+  ignoreEvent(event: Event): boolean {
+    // Return true for mouse events to let our widget handle them, not CodeMirror
+    const eventType = event.type
+    return eventType === 'mousedown' || eventType === 'mouseup' || eventType === 'click'
   }
 }
 
@@ -187,96 +195,117 @@ function findColors(content: string): ColorMatch[] {
  */
 function buildJsonPath(content: string, position: number): string {
   const segments: string[] = []
+  const contextStack: Array<
+    | { type: 'object'; expectingKey: boolean }
+    | { type: 'array'; index: number }
+  > = []
+  const valueStack: number[] = []
+
   let inString = false
-  let currentKey = ''
+  let stringIsKey = false
   let keyStart = -1
-  // Stack to track context: each entry is either -1 (object) or array index (>=0)
-  const contextStack: number[] = []
+  let pendingKey: string | null = null
+  let inPrimitive = false
+
+  const currentContext = () => contextStack[contextStack.length - 1]
+
+  const startValue = () => {
+    const restoreLength = segments.length
+    if (pendingKey) {
+      segments.push(pendingKey)
+      pendingKey = null
+    }
+    const ctx = currentContext()
+    if (ctx && ctx.type === 'array') {
+      segments.push(`[${ctx.index}]`)
+    }
+    valueStack.push(restoreLength)
+  }
+
+  const endValue = () => {
+    const restoreLength = valueStack.pop()
+    if (restoreLength !== undefined) {
+      segments.length = restoreLength
+    }
+  }
 
   for (let i = 0; i < position && i < content.length; i++) {
     const char = content[i]
 
-    // Handle escaped characters in strings
     if (inString) {
       if (char === '\\' && i + 1 < content.length) {
-        // Skip the next character (escaped)
         i++
         continue
       }
       if (char === '"') {
         inString = false
-        // Check if this is a key (followed by :)
-        const rest = content.slice(i + 1).trimStart()
-        if (rest.startsWith(':')) {
-          currentKey = parseJsonString(content.slice(keyStart, i))
+        if (stringIsKey) {
+          pendingKey = parseJsonString(content.slice(keyStart, i))
+          const ctx = currentContext()
+          if (ctx && ctx.type === 'object') {
+            ctx.expectingKey = false
+          }
+        } else {
+          endValue()
         }
       }
       continue
     }
 
-    // Not in string
+    if (inPrimitive) {
+      if (char === ',' || char === '}' || char === ']') {
+        inPrimitive = false
+        endValue()
+      } else {
+        continue
+      }
+    }
+
     if (char === '"') {
+      const ctx = currentContext()
+      stringIsKey = !!(ctx && ctx.type === 'object' && ctx.expectingKey)
+      if (!stringIsKey) {
+        startValue()
+      }
       inString = true
       keyStart = i + 1
     } else if (char === '{') {
-      if (currentKey) {
-        segments.push(currentKey)
-        currentKey = ''
-      }
-      contextStack.push(-1) // Object context
+      startValue()
+      contextStack.push({ type: 'object', expectingKey: true })
     } else if (char === '[') {
-      if (currentKey) {
-        segments.push(currentKey)
-        currentKey = ''
-      }
-      contextStack.push(0) // Array context, starting at index 0
+      startValue()
+      contextStack.push({ type: 'array', index: 0 })
     } else if (char === '}') {
       contextStack.pop()
-      // Pop segments to match current depth
-      while (segments.length > contextStack.length) {
-        segments.pop()
-      }
+      endValue()
     } else if (char === ']') {
       contextStack.pop()
-      // Pop segments to match current depth
-      while (segments.length > contextStack.length) {
-        segments.pop()
-      }
+      endValue()
     } else if (char === ',') {
-      // Increment array index if we're in an array
-      const lastContext = contextStack[contextStack.length - 1]
-      if (lastContext !== undefined && lastContext >= 0) {
-        contextStack[contextStack.length - 1] = lastContext + 1
+      const ctx = currentContext()
+      if (ctx && ctx.type === 'array') {
+        ctx.index += 1
+      } else if (ctx && ctx.type === 'object') {
+        ctx.expectingKey = true
       }
-      currentKey = ''
+      pendingKey = null
+    } else if (
+      char === '-' ||
+      (char >= '0' && char <= '9') ||
+      char === 't' ||
+      char === 'f' ||
+      char === 'n'
+    ) {
+      startValue()
+      inPrimitive = true
     }
   }
 
-  if (currentKey) {
-    segments.push(currentKey)
+  if (pendingKey) {
+    segments.push(pendingKey)
   }
 
-  // Build the final path with array indices where appropriate
-  const result: string[] = []
-  let segmentIdx = 0
-  for (let i = 0; i < contextStack.length && segmentIdx < segments.length; i++) {
-    const ctx = contextStack[i]
-    if (ctx >= 0) {
-      // This was an array - include the index
-      result.push(`[${ctx}]`)
-    }
-    if (segmentIdx < segments.length) {
-      result.push(segments[segmentIdx])
-      segmentIdx++
-    }
-  }
-  // Add remaining segments
-  while (segmentIdx < segments.length) {
-    result.push(segments[segmentIdx])
-    segmentIdx++
-  }
-
-  return result.join('/')
+  return segments.join('/')
 }
 
 /**
@@ -295,35 +324,38 @@ function parseJsonString(str: string): string {
 /**
  * Transform a full document path to a theme-relative path
  * Converts "themes/[0]/style/background" to "style/background"
+ * Also handles the accents object flattening - the parsed theme object
+ * has accents properties merged into style, so we strip "accents/" from paths.
  * The themeIndex is extracted and returned for multi-theme support
  */
 export function normalizeColorPath(fullPath: string): {
   path: string
   themeIndex: number | null
 } {
+  let path = fullPath
+  let themeIndex: number | null = null
+
   // Match themes/[n]/ prefix
   const themePrefixMatch = fullPath.match(/^themes\/\[(\d+)\]\/(.+)$/)
   if (themePrefixMatch) {
-    return {
-      path: themePrefixMatch[2],
-      themeIndex: parseInt(themePrefixMatch[1], 10),
+    path = themePrefixMatch[2]
+    themeIndex = parseInt(themePrefixMatch[1], 10)
+  } else {
+    // Match themes/style/ without array index (legacy format)
+    const legacyPrefixMatch = fullPath.match(/^themes\/(.+)$/)
+    if (legacyPrefixMatch) {
+      path = legacyPrefixMatch[1]
     }
   }
 
-  // Match themes/style/ without array index (legacy format)
-  const legacyPrefixMatch = fullPath.match(/^themes\/(.+)$/)
-  if (legacyPrefixMatch) {
-    return {
-      path: legacyPrefixMatch[1],
-      themeIndex: null,
-    }
-  }
+  // The theme parser flattens the accents object (when it contains named properties),
+  // merging its properties into style. So "style/accents/border.variant" in JSON
+  // becomes "style/border.variant" in the parsed object.
+  // Only strip "accents/" when followed by a property name, NOT an array index.
+  // This preserves paths like "style/accents/[2]" for actual accents color arrays.
+  path = path.replace(/^style\/accents\/(?!\[)/, 'style/')
 
-  // Already a theme-relative path
-  return {
-    path: fullPath,
-    themeIndex: null,
-  }
+  return { path, themeIndex }
 }
 
 // ============================================================================
@@ -349,7 +381,9 @@ const colorDecorationsField = StateField.define<DecorationSet>({
         const { colors, selectedPath, onClick, docContent } = effect.value
         const widgets = colors.map((c) => {
           const fullPath = buildJsonPath(docContent, c.from)
-          const isSelected = fullPath === selectedPath || c.key === selectedPath
+          // Normalize the path for comparison (selectedPath is already normalized)
+          const { path: normalizedPath } = normalizeColorPath(fullPath)
+          const isSelected = normalizedPath === selectedPath || c.key === selectedPath
           return Decoration.widget({
             widget: new ColorSwatchWidget(c.color, fullPath, onClick, c.from, isSelected),
             side: 1,
@@ -533,7 +567,7 @@ export function JsonEditorPanel({
   return (
     <div
       ref={containerRef}
-      className={`h-full overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900 ${className}`}
+      className={`h-full overflow-hidden rounded-lg border border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900 ${className}`}
       data-testid="json-editor-panel"
     />
   )
