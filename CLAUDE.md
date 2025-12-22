@@ -128,6 +128,23 @@ For each feature:
 - Single quotes
 - 2-space indentation
 
+### Icons
+Use FontAwesome 7+ icons instead of emoji or inline SVGs:
+
+```typescript
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+
+// Usage
+<FontAwesomeIcon icon={faCheck} className="h-4 w-4" />
+```
+
+- Import icons individually from `@fortawesome/free-solid-svg-icons`
+- Use `className` for sizing (e.g., `h-4 w-4`) - Tailwind classes work directly
+- Add `aria-hidden="true"` for decorative icons
+- Prefer icons over emoji for UI elements (status indicators, buttons, actions)
+- Available icon sets: `free-solid-svg-icons`, `free-regular-svg-icons`, `free-brands-svg-icons`
+
 ## Git Workflow
 
 Git commits should be done 'atomically' when possible: One commit per logical change to the codebase. This makes it easy to trace back and figure out what change may have broken something or affected some aspect of the application.
