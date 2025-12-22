@@ -488,15 +488,22 @@ export function ColorEditorPanel({
           <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {colorPath.replace(/^style\//, '')}
           </h3>
-          <p
-            className={`mt-1 line-clamp-2 min-h-7 text-xs ${
-              description
-                ? 'text-neutral-500'
-                : 'text-neutral-300 italic dark:text-neutral-700'
-            }`}
-          >
-            {description || 'No description'}
-          </p>
+          {/* Relative container maintains stable height; text expands on hover */}
+          <div className="relative mt-1 min-h-8">
+            <p
+              className={`line-clamp-2 text-xs transition-all duration-150
+                hover:absolute hover:inset-x-0 hover:top-0 hover:z-10
+                hover:line-clamp-none hover:rounded hover:px-1 hover:py-0.5 hover:shadow-md
+                hover:bg-neutral-100 dark:hover:bg-neutral-800
+                ${
+                  description
+                    ? 'text-neutral-500'
+                    : 'text-neutral-300 italic dark:text-neutral-700'
+                }`}
+            >
+              {description || 'No description'}
+            </p>
+          </div>
         </div>
       )}
 
