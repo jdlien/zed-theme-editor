@@ -33,5 +33,5 @@
 }
 
 .animate-hue-cycle {
-  animation: hue-cycle 15s linear infinite;
+  animation: hue-cycle 60s linear infinite;
 }
