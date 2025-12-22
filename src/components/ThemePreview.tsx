@@ -1,10 +1,12 @@
 /**
  * ThemePreview Component
  * Shows a comprehensive preview of the theme resembling a Zed IDE window
+ * Supports compact and full preview modes with localStorage persistence
  */
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCodeBranch } from '@fortawesome/free-solid-svg-icons'
+import { faCodeBranch, faExpand, faCompress } from '@fortawesome/free-solid-svg-icons'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import type { ThemeStyle } from '@/types/theme'
 
 interface ThemePreviewProps {
@@ -13,6 +15,10 @@ interface ThemePreviewProps {
 }
 
 export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
+  const [isFullPreview, setIsFullPreview] = useLocalStorage<boolean>(
+    'zed-theme-editor-full-preview',
+    false
+  )
   // === UI Chrome Colors ===
   const titleBarBg = style['title_bar.background'] || style.background || '#2d2d2d'
   const tabBarBg = style['tab_bar.background'] || style.background || '#252526'
@@ -117,12 +123,93 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const link = style.syntax?.['link_uri']?.color || style['link_text.hover'] || '#4fc1ff'
   const boolean = style.syntax?.boolean?.color || '#569cd6'
 
+  // Compact preview - just editor and terminal side by side
+  const compactPreview = (
+    <div className="flex gap-2">
+      {/* Editor preview */}
+      <div
+        className="flex-1 overflow-hidden rounded font-mono text-xs"
+        style={{ backgroundColor: editorBg as string }}
+      >
+        <div className="flex">
+          {/* Line numbers */}
+          <div
+            className="px-2 py-1 text-right select-none"
+            style={{ color: lineNumber as string }}
+          >
+            <div>1</div>
+            <div style={{ color: activeLineNumber as string }}>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+          </div>
+
+          {/* Code */}
+          <div className="flex-1 py-1 pr-2">
+            <div style={{ color: comment as string }}>// Theme preview</div>
+            <div style={{ backgroundColor: activeLine as string }}>
+              <span style={{ color: keyword as string }}>const</span>{' '}
+              <span style={{ color: variable as string }}>theme</span>{' '}
+              <span style={{ color: editorFg as string }}>=</span>{' '}
+              <span style={{ color: string as string }}>"My Theme"</span>
+            </div>
+            <div>
+              <span style={{ color: keyword as string }}>function</span>{' '}
+              <span style={{ color: fnName as string }}>apply</span>
+              <span style={{ color: editorFg as string }}>()</span>{' '}
+              <span style={{ color: editorFg as string }}>{'{'}</span>
+            </div>
+            <div>
+              <span style={{ color: editorFg as string }}>{'  '}</span>
+              <span style={{ color: keyword as string }}>return</span>{' '}
+              <span style={{ color: variable as string }}>theme</span>
+            </div>
+            <div style={{ color: editorFg as string }}>{'}'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Terminal preview */}
+      <div
+        className="w-32 overflow-hidden rounded p-2 font-mono text-xs"
+        style={{
+          backgroundColor: terminalBg as string,
+          color: terminalFg as string,
+        }}
+      >
+        <div>
+          <span style={{ color: terminalGreen as string }}>$</span> npm run build
+        </div>
+        <div style={{ color: terminalYellow as string }}>Building...</div>
+        <div style={{ color: terminalBlue as string }}>Done in 1.2s</div>
+      </div>
+    </div>
+  )
+
   return (
     <div className={`p-2 pt-1 ${className}`}>
-      <h3 className="mt-0 mb-1 ml-0.5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-        Preview
-      </h3>
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="mt-0 ml-0.5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+          Preview
+        </h3>
+        <button
+          onClick={() => setIsFullPreview(!isFullPreview)}
+          className="flex items-center gap-1 px-1.5 py-0.5 text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded transition-colors"
+          title={isFullPreview ? 'Switch to compact preview' : 'Switch to full preview'}
+        >
+          <FontAwesomeIcon
+            icon={isFullPreview ? faCompress : faExpand}
+            className="h-3 w-3"
+            aria-hidden="true"
+          />
+          <span>{isFullPreview ? 'Compact' : 'Full'}</span>
+        </button>
+      </div>
 
+      {!isFullPreview && compactPreview}
+
+      {isFullPreview && (
+      <>
       {/* Main IDE Window */}
       <div
         className="overflow-hidden rounded-lg text-xs"
@@ -610,6 +697,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
           <div style={{ color: textMuted as string }}>Focused</div>
         </div>
       </div>
+      </>
+      )}
     </div>
   )
 }
