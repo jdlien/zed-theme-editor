@@ -10,7 +10,7 @@ import { extractColors } from '@/lib/jsonParsing'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
-import { JsonEditorPanel } from './JsonEditorPanel'
+import { JsonEditorPanel, normalizeColorPath } from './JsonEditorPanel'
 import { ColorEditorPanel } from './ColorEditorPanel'
 import { ThemePreview } from './ThemePreview'
 import { ColorSwatchRow } from './ColorSwatch'
@@ -63,9 +63,17 @@ export function ThemeEditor() {
   // Handle color click in editor
   const handleColorClick = useCallback(
     (path: string, _color: string, _position: number) => {
-      selectColor(path)
+      // Normalize path from full document format to theme-relative format
+      const { path: normalizedPath, themeIndex } = normalizeColorPath(path)
+
+      // If clicking in a different theme, switch to it
+      if (themeIndex !== null && themeIndex !== state.activeThemeIndex) {
+        setActiveTheme(themeIndex)
+      }
+
+      selectColor(normalizedPath)
     },
-    [selectColor]
+    [selectColor, setActiveTheme, state.activeThemeIndex]
   )
 
   // Handle color update from panel
@@ -76,16 +84,6 @@ export function ThemeEditor() {
       }
     },
     [state.selectedColorPath, updateColor]
-  )
-
-  // Handle JSON content change from editor
-  const handleContentChange = useCallback(
-    (_newContent: string) => {
-      // For now, we don't update state on every keystroke
-      // This will be refined when we make CodeMirror the source of truth
-      // The JsonEditorPanel handles its own state internally
-    },
-    []
   )
 
   // Keyboard shortcuts
@@ -185,7 +183,6 @@ export function ThemeEditor() {
           <div className="flex-1 overflow-hidden p-4">
             <JsonEditorPanel
               content={serializedTheme}
-              onChange={handleContentChange}
               onColorClick={handleColorClick}
               selectedColorPath={state.selectedColorPath}
               isDarkMode={state.isDarkMode}
