@@ -33,6 +33,8 @@ export interface EditorState {
   // History for undo/redo
   history: ThemeFamily[]
   historyIndex: number
+  /** The history index that was last saved (for tracking unsaved changes) */
+  savedHistoryIndex: number
 }
 
 const initialState: EditorState = {
@@ -52,6 +54,7 @@ const initialState: EditorState = {
 
   history: [],
   historyIndex: -1,
+  savedHistoryIndex: -1,
 }
 
 // ============================================================================
@@ -103,6 +106,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         error: null,
         history: [themeFamily],
         historyIndex: 0,
+        savedHistoryIndex: 0,
       }
     }
 
@@ -173,6 +177,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
       return {
         ...state,
         hasUnsavedChanges: false,
+        savedHistoryIndex: state.historyIndex,
         fileHandle: action.payload.handle ?? state.fileHandle,
         originalText: state.themeFamily ? serializeTheme(state.themeFamily) : state.originalText,
       }
@@ -185,7 +190,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         themeFamily: state.history[newIndex],
         historyIndex: newIndex,
-        hasUnsavedChanges: true,
+        hasUnsavedChanges: newIndex !== state.savedHistoryIndex,
       }
     }
 
@@ -197,7 +202,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         themeFamily: state.history[newIndex],
         historyIndex: newIndex,
-        hasUnsavedChanges: true,
+        hasUnsavedChanges: newIndex !== state.savedHistoryIndex,
       }
     }
 

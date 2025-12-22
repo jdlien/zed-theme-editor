@@ -131,7 +131,7 @@ describe('useThemeEditor', () => {
       // Make some changes
       act(() => {
         result.current.setActiveTheme(1)
-        result.current.selectColor('style.background')
+        result.current.selectColor('style/background')
       })
 
       // Load another file
@@ -190,10 +190,10 @@ describe('useThemeEditor', () => {
 
       act(() => {
         result.current.loadFile(createFileData())
-        result.current.selectColor('style.background')
+        result.current.selectColor('style/background')
       })
 
-      expect(result.current.state.selectedColorPath).toBe('style.background')
+      expect(result.current.state.selectedColorPath).toBe('style/background')
 
       act(() => {
         result.current.setActiveTheme(1)
@@ -212,10 +212,10 @@ describe('useThemeEditor', () => {
       })
 
       act(() => {
-        result.current.selectColor('style.background')
+        result.current.selectColor('style/background')
       })
 
-      expect(result.current.state.selectedColorPath).toBe('style.background')
+      expect(result.current.state.selectedColorPath).toBe('style/background')
 
       act(() => {
         result.current.selectColor(null)
@@ -236,7 +236,7 @@ describe('useThemeEditor', () => {
       const originalBg = result.current.currentTheme?.style.background
 
       act(() => {
-        result.current.updateColor('style.background', '#FF0000')
+        result.current.updateColor('style/background', '#FF0000')
       })
 
       expect(result.current.currentTheme?.style.background).toBe('#FF0000')
@@ -248,7 +248,7 @@ describe('useThemeEditor', () => {
       const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
 
       act(() => {
-        result.current.updateColor('style.background', '#FF0000')
+        result.current.updateColor('style/background', '#FF0000')
       })
 
       expect(result.current.state.themeFamily).toBeNull()
@@ -266,7 +266,7 @@ describe('useThemeEditor', () => {
       const originalBg = result.current.currentTheme?.style.background
 
       act(() => {
-        result.current.updateColor('style.background', '#FF0000')
+        result.current.updateColor('style/background', '#FF0000')
       })
 
       expect(result.current.currentTheme?.style.background).toBe('#FF0000')
@@ -288,7 +288,7 @@ describe('useThemeEditor', () => {
       })
 
       act(() => {
-        result.current.updateColor('style.background', '#FF0000')
+        result.current.updateColor('style/background', '#FF0000')
       })
 
       act(() => {
@@ -305,6 +305,33 @@ describe('useThemeEditor', () => {
       expect(result.current.canRedo).toBe(false)
     })
 
+    it('hasUnsavedChanges becomes false when undoing to initial state', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      // Initially no unsaved changes
+      expect(result.current.state.hasUnsavedChanges).toBe(false)
+
+      // Make a change
+      act(() => {
+        result.current.updateColor('style/background', '#FF0000')
+      })
+
+      // Now has unsaved changes
+      expect(result.current.state.hasUnsavedChanges).toBe(true)
+
+      // Undo to initial state
+      act(() => {
+        result.current.undo()
+      })
+
+      // No more unsaved changes
+      expect(result.current.state.hasUnsavedChanges).toBe(false)
+    })
+
     it('clears redo history when new change is made', () => {
       const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
 
@@ -313,8 +340,8 @@ describe('useThemeEditor', () => {
       })
 
       act(() => {
-        result.current.updateColor('style.background', '#FF0000')
-        result.current.updateColor('style.background', '#00FF00')
+        result.current.updateColor('style/background', '#FF0000')
+        result.current.updateColor('style/background', '#00FF00')
       })
 
       act(() => {
@@ -325,7 +352,7 @@ describe('useThemeEditor', () => {
 
       // Make new change
       act(() => {
-        result.current.updateColor('style.background', '#0000FF')
+        result.current.updateColor('style/background', '#0000FF')
       })
 
       expect(result.current.canRedo).toBe(false)
@@ -341,7 +368,7 @@ describe('useThemeEditor', () => {
       // Make 60 changes (max is 50)
       for (let i = 0; i < 60; i++) {
         act(() => {
-          result.current.updateColor('style.background', `#${i.toString(16).padStart(6, '0')}`)
+          result.current.updateColor('style/background', `#${i.toString(16).padStart(6, '0')}`)
         })
       }
 
@@ -389,7 +416,7 @@ describe('useThemeEditor', () => {
 
       act(() => {
         result.current.loadFile(createFileData())
-        result.current.updateColor('style.background', '#FF0000')
+        result.current.updateColor('style/background', '#FF0000')
       })
 
       expect(result.current.state.hasUnsavedChanges).toBe(true)
