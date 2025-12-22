@@ -10,7 +10,12 @@ import { Extension } from '@codemirror/state'
 
 // Re-export types from metadata file for convenience
 export type { EditorThemeName, EditorThemeMeta } from './editorThemeMeta'
-export { editorThemeMeta, getDefaultTheme, getThemeNames, getThemesByMode } from './editorThemeMeta'
+export {
+  editorThemeMeta,
+  getDefaultTheme,
+  getThemeNames,
+  getThemesByMode,
+} from './editorThemeMeta'
 import type { EditorThemeName } from './editorThemeMeta'
 
 // ============================================================================
@@ -29,48 +34,52 @@ export interface EditorThemeConfig {
 // ============================================================================
 
 const neutralDarkColors = {
-  bg: '#171717',           // neutral-900
+  bg: '#171717', // neutral-900
   gutterBg: '#171717',
   activeLine: 'rgba(255, 255, 255, 0.03)',
   selection: 'rgba(59, 130, 246, 0.3)',
   cursor: '#3b82f6',
 
   // Syntax
-  comment: '#737373',      // neutral-500
-  string: '#86efac',       // green-300
-  keyword: '#c4b5fd',      // violet-300
-  number: '#fdba74',       // orange-300
-  property: '#93c5fd',     // blue-300
-  punctuation: '#a3a3a3',  // neutral-400
-  definition: '#fca5a5',   // red-300
+  comment: '#737373', // neutral-500
+  string: '#edf3ac', // pale yellow
+  keyword: '#c4b5fd', // violet-300
+  number: '#fdba74', // orange-300
+  property: '#c4b5fd', // indigo-300
+  punctuation: '#a3a3a3', // neutral-400
+  definition: '#fca5a5', // red-300
 }
 
-const neutralDarkTheme = EditorView.theme({
-  '&': {
-    backgroundColor: neutralDarkColors.bg,
-    color: '#e5e5e5',
+const neutralDarkTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: neutralDarkColors.bg,
+      color: '#e5e5e5',
+    },
+    '.cm-content': {
+      caretColor: neutralDarkColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: neutralDarkColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: neutralDarkColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: neutralDarkColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: neutralDarkColors.gutterBg,
+      color: '#525252',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: neutralDarkColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: neutralDarkColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: neutralDarkColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: neutralDarkColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: neutralDarkColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: neutralDarkColors.gutterBg,
-    color: '#525252',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: neutralDarkColors.activeLine,
-  },
-}, { dark: true })
+  { dark: true }
+)
 
 const neutralDarkHighlight = HighlightStyle.define([
   { tag: tags.comment, color: neutralDarkColors.comment, fontStyle: 'italic' },
@@ -79,7 +88,10 @@ const neutralDarkHighlight = HighlightStyle.define([
   { tag: tags.number, color: neutralDarkColors.number },
   { tag: tags.propertyName, color: neutralDarkColors.property },
   { tag: tags.punctuation, color: neutralDarkColors.punctuation },
-  { tag: tags.definition(tags.variableName), color: neutralDarkColors.definition },
+  {
+    tag: tags.definition(tags.variableName),
+    color: neutralDarkColors.definition,
+  },
   { tag: tags.bool, color: neutralDarkColors.number },
   { tag: tags.null, color: neutralDarkColors.keyword },
 ])
@@ -89,48 +101,52 @@ const neutralDarkHighlight = HighlightStyle.define([
 // ============================================================================
 
 const neutralLightColors = {
-  bg: '#fafafa',           // neutral-50
+  bg: '#fafafa', // neutral-50
   gutterBg: '#fafafa',
   activeLine: 'rgba(0, 0, 0, 0.03)',
   selection: 'rgba(59, 130, 246, 0.2)',
   cursor: '#3b82f6',
 
   // Syntax
-  comment: '#737373',      // neutral-500
-  string: '#16a34a',       // green-600
-  keyword: '#7c3aed',      // violet-600
-  number: '#ea580c',       // orange-600
-  property: '#2563eb',     // blue-600
-  punctuation: '#525252',  // neutral-600
-  definition: '#dc2626',   // red-600
+  comment: '#737373', // neutral-500
+  string: '#a16207', // yellow-700
+  keyword: '#7c3aed', // violet-600
+  number: '#ea580c', // orange-600
+  property: '#4338ca', // indigo-700
+  punctuation: '#525252', // neutral-600
+  definition: '#dc2626', // red-600
 }
 
-const neutralLightTheme = EditorView.theme({
-  '&': {
-    backgroundColor: neutralLightColors.bg,
-    color: '#171717',
+const neutralLightTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: neutralLightColors.bg,
+      color: '#171717',
+    },
+    '.cm-content': {
+      caretColor: neutralLightColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: neutralLightColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: neutralLightColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: neutralLightColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: neutralLightColors.gutterBg,
+      color: '#a3a3a3',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: neutralLightColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: neutralLightColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: neutralLightColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: neutralLightColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: neutralLightColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: neutralLightColors.gutterBg,
-    color: '#a3a3a3',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: neutralLightColors.activeLine,
-  },
-}, { dark: false })
+  { dark: false }
+)
 
 const neutralLightHighlight = HighlightStyle.define([
   { tag: tags.comment, color: neutralLightColors.comment, fontStyle: 'italic' },
@@ -139,7 +155,10 @@ const neutralLightHighlight = HighlightStyle.define([
   { tag: tags.number, color: neutralLightColors.number },
   { tag: tags.propertyName, color: neutralLightColors.property },
   { tag: tags.punctuation, color: neutralLightColors.punctuation },
-  { tag: tags.definition(tags.variableName), color: neutralLightColors.definition },
+  {
+    tag: tags.definition(tags.variableName),
+    color: neutralLightColors.definition,
+  },
   { tag: tags.bool, color: neutralLightColors.number },
   { tag: tags.null, color: neutralLightColors.keyword },
 ])
@@ -164,32 +183,36 @@ const githubDarkColors = {
   definition: '#d2a8ff',
 }
 
-const githubDarkTheme = EditorView.theme({
-  '&': {
-    backgroundColor: githubDarkColors.bg,
-    color: '#c9d1d9',
+const githubDarkTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: githubDarkColors.bg,
+      color: '#c9d1d9',
+    },
+    '.cm-content': {
+      caretColor: githubDarkColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: githubDarkColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: githubDarkColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: githubDarkColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: githubDarkColors.gutterBg,
+      color: '#484f58',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: githubDarkColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: githubDarkColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: githubDarkColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: githubDarkColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: githubDarkColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: githubDarkColors.gutterBg,
-    color: '#484f58',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: githubDarkColors.activeLine,
-  },
-}, { dark: true })
+  { dark: true }
+)
 
 const githubDarkHighlight = HighlightStyle.define([
   { tag: tags.comment, color: githubDarkColors.comment, fontStyle: 'italic' },
@@ -198,7 +221,10 @@ const githubDarkHighlight = HighlightStyle.define([
   { tag: tags.number, color: githubDarkColors.number },
   { tag: tags.propertyName, color: githubDarkColors.property },
   { tag: tags.punctuation, color: githubDarkColors.punctuation },
-  { tag: tags.definition(tags.variableName), color: githubDarkColors.definition },
+  {
+    tag: tags.definition(tags.variableName),
+    color: githubDarkColors.definition,
+  },
   { tag: tags.bool, color: githubDarkColors.keyword },
   { tag: tags.null, color: githubDarkColors.keyword },
 ])
@@ -223,32 +249,36 @@ const githubLightColors = {
   definition: '#8250df',
 }
 
-const githubLightTheme = EditorView.theme({
-  '&': {
-    backgroundColor: githubLightColors.bg,
-    color: '#24292f',
+const githubLightTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: githubLightColors.bg,
+      color: '#24292f',
+    },
+    '.cm-content': {
+      caretColor: githubLightColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: githubLightColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: githubLightColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: githubLightColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: githubLightColors.gutterBg,
+      color: '#8c959f',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: githubLightColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: githubLightColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: githubLightColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: githubLightColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: githubLightColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: githubLightColors.gutterBg,
-    color: '#8c959f',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: githubLightColors.activeLine,
-  },
-}, { dark: false })
+  { dark: false }
+)
 
 const githubLightHighlight = HighlightStyle.define([
   { tag: tags.comment, color: githubLightColors.comment, fontStyle: 'italic' },
@@ -257,7 +287,10 @@ const githubLightHighlight = HighlightStyle.define([
   { tag: tags.number, color: githubLightColors.number },
   { tag: tags.propertyName, color: githubLightColors.property },
   { tag: tags.punctuation, color: githubLightColors.punctuation },
-  { tag: tags.definition(tags.variableName), color: githubLightColors.definition },
+  {
+    tag: tags.definition(tags.variableName),
+    color: githubLightColors.definition,
+  },
   { tag: tags.bool, color: githubLightColors.keyword },
   { tag: tags.null, color: githubLightColors.keyword },
 ])
@@ -267,47 +300,51 @@ const githubLightHighlight = HighlightStyle.define([
 // ============================================================================
 
 const midnightColors = {
-  bg: '#0f172a',           // slate-900
+  bg: '#0f172a', // slate-900
   gutterBg: '#0f172a',
   activeLine: 'rgba(148, 163, 184, 0.1)',
   selection: 'rgba(56, 189, 248, 0.3)',
   cursor: '#38bdf8',
 
-  comment: '#64748b',      // slate-500
-  string: '#34d399',       // emerald-400
-  keyword: '#f472b6',      // pink-400
-  number: '#fbbf24',       // amber-400
-  property: '#60a5fa',     // blue-400
-  punctuation: '#94a3b8',  // slate-400
-  definition: '#c084fc',   // purple-400
+  comment: '#64748b', // slate-500
+  string: '#34d399', // emerald-400
+  keyword: '#f472b6', // pink-400
+  number: '#fbbf24', // amber-400
+  property: '#60a5fa', // blue-400
+  punctuation: '#94a3b8', // slate-400
+  definition: '#c084fc', // purple-400
 }
 
-const midnightTheme = EditorView.theme({
-  '&': {
-    backgroundColor: midnightColors.bg,
-    color: '#e2e8f0',
+const midnightTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: midnightColors.bg,
+      color: '#e2e8f0',
+    },
+    '.cm-content': {
+      caretColor: midnightColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: midnightColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: midnightColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: midnightColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: midnightColors.gutterBg,
+      color: '#475569',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: midnightColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: midnightColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: midnightColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: midnightColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: midnightColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: midnightColors.gutterBg,
-    color: '#475569',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: midnightColors.activeLine,
-  },
-}, { dark: true })
+  { dark: true }
+)
 
 const midnightHighlight = HighlightStyle.define([
   { tag: tags.comment, color: midnightColors.comment, fontStyle: 'italic' },
@@ -341,32 +378,36 @@ const oneDarkColors = {
   definition: '#e06c75',
 }
 
-const oneDarkTheme = EditorView.theme({
-  '&': {
-    backgroundColor: oneDarkColors.bg,
-    color: '#abb2bf',
+const oneDarkTheme = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: oneDarkColors.bg,
+      color: '#abb2bf',
+    },
+    '.cm-content': {
+      caretColor: oneDarkColors.cursor,
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: oneDarkColors.cursor,
+    },
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+      {
+        backgroundColor: oneDarkColors.selection,
+      },
+    '.cm-activeLine': {
+      backgroundColor: oneDarkColors.activeLine,
+    },
+    '.cm-gutters': {
+      backgroundColor: oneDarkColors.gutterBg,
+      color: '#4b5263',
+      borderRight: 'none',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: oneDarkColors.activeLine,
+    },
   },
-  '.cm-content': {
-    caretColor: oneDarkColors.cursor,
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: oneDarkColors.cursor,
-  },
-  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-    backgroundColor: oneDarkColors.selection,
-  },
-  '.cm-activeLine': {
-    backgroundColor: oneDarkColors.activeLine,
-  },
-  '.cm-gutters': {
-    backgroundColor: oneDarkColors.gutterBg,
-    color: '#4b5263',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: oneDarkColors.activeLine,
-  },
-}, { dark: true })
+  { dark: true }
+)
 
 const oneDarkHighlight = HighlightStyle.define([
   { tag: tags.comment, color: oneDarkColors.comment, fontStyle: 'italic' },
@@ -415,7 +456,7 @@ export const editorThemes: Record<EditorThemeName, EditorThemeConfig> = {
     isDark: false,
     extension: [githubLightTheme, syntaxHighlighting(githubLightHighlight)],
   },
-  'midnight': {
+  midnight: {
     name: 'midnight',
     label: 'Midnight',
     isDark: true,
