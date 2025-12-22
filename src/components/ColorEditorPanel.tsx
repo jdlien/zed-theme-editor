@@ -491,15 +491,11 @@ export function ColorEditorPanel({
           {/* Relative container maintains stable height; text expands on hover */}
           <div className="relative mt-1 min-h-8">
             <p
-              className={`line-clamp-2 text-xs transition-all duration-150
-                hover:absolute hover:inset-x-0 hover:top-0 hover:z-10
-                hover:line-clamp-none hover:rounded hover:px-1 hover:py-0.5 hover:shadow-md
-                hover:bg-neutral-100 dark:hover:bg-neutral-800
-                ${
-                  description
-                    ? 'text-neutral-500'
-                    : 'text-neutral-300 italic dark:text-neutral-700'
-                }`}
+              className={`line-clamp-2 text-xs hover:absolute hover:inset-x-0 hover:top-0 hover:z-10 hover:line-clamp-none hover:rounded hover:bg-neutral-50 hover:pb-0.5 hover:shadow-md dark:hover:bg-neutral-900 ${
+                description
+                  ? 'text-neutral-500'
+                  : 'text-neutral-300 italic dark:text-neutral-700'
+              }`}
             >
               {description || 'No description'}
             </p>
