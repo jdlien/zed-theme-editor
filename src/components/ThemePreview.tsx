@@ -123,65 +123,105 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const link = style.syntax?.['link_uri']?.color || style['link_text.hover'] || '#4fc1ff'
   const boolean = style.syntax?.boolean?.color || '#569cd6'
 
-  // Compact preview - just editor and terminal side by side
+  // Compact preview - window chrome with editor and terminal
   const compactPreview = (
-    <div className="flex gap-2">
-      {/* Editor preview */}
+    <div
+      className="overflow-hidden rounded-lg text-xs"
+      style={{
+        backgroundColor: panelBg as string,
+        border: `1px solid ${border}`,
+      }}
+    >
+      {/* Title bar */}
       <div
-        className="flex-1 overflow-hidden rounded font-mono text-xs"
-        style={{ backgroundColor: editorBg as string }}
+        className="flex items-center gap-1.5 px-2 py-1"
+        style={{
+          backgroundColor: titleBarBg as string,
+          borderBottom: `1px solid ${borderVariant}`,
+        }}
       >
-        <div className="flex">
-          {/* Line numbers */}
-          <div
-            className="px-2 py-1 text-right select-none"
-            style={{ color: lineNumber as string }}
-          >
-            <div>1</div>
-            <div style={{ color: activeLineNumber as string }}>2</div>
-            <div>3</div>
-            <div>4</div>
-            <div>5</div>
-          </div>
-
-          {/* Code */}
-          <div className="flex-1 py-1 pr-2">
-            <div style={{ color: comment as string }}>// Theme preview</div>
-            <div style={{ backgroundColor: activeLine as string }}>
-              <span style={{ color: keyword as string }}>const</span>{' '}
-              <span style={{ color: variable as string }}>theme</span>{' '}
-              <span style={{ color: editorFg as string }}>=</span>{' '}
-              <span style={{ color: string as string }}>"My Theme"</span>
-            </div>
-            <div>
-              <span style={{ color: keyword as string }}>function</span>{' '}
-              <span style={{ color: fnName as string }}>apply</span>
-              <span style={{ color: editorFg as string }}>()</span>{' '}
-              <span style={{ color: editorFg as string }}>{'{'}</span>
-            </div>
-            <div>
-              <span style={{ color: editorFg as string }}>{'  '}</span>
-              <span style={{ color: keyword as string }}>return</span>{' '}
-              <span style={{ color: variable as string }}>theme</span>
-            </div>
-            <div style={{ color: editorFg as string }}>{'}'}</div>
-          </div>
+        <div className="flex gap-1">
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: errorColor as string }} />
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: warningColor as string }} />
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: successColor as string }} />
+        </div>
+        {/* Tab */}
+        <div
+          className="ml-2 flex items-center gap-1 rounded-t px-2 py-0.5"
+          style={{
+            backgroundColor: tabActiveBg as string,
+            color: text as string,
+          }}
+        >
+          <span style={{ color: modifiedColor as string }}>●</span>
+          <span>main.ts</span>
         </div>
       </div>
 
-      {/* Terminal preview */}
-      <div
-        className="w-32 overflow-hidden rounded p-2 font-mono text-xs"
-        style={{
-          backgroundColor: terminalBg as string,
-          color: terminalFg as string,
-        }}
-      >
-        <div>
-          <span style={{ color: terminalGreen as string }}>$</span> npm run build
+      {/* Editor + Terminal */}
+      <div className="flex">
+        {/* Editor */}
+        <div
+          className="flex-1 overflow-hidden font-mono"
+          style={{ backgroundColor: editorBg as string }}
+        >
+          <div className="flex">
+            {/* Line numbers */}
+            <div
+              className="px-1.5 py-1 text-right select-none text-[10px]"
+              style={{
+                backgroundColor: gutterBg as string,
+                color: lineNumber as string,
+                borderRight: `1px solid ${borderVariant}`,
+              }}
+            >
+              <div>1</div>
+              <div style={{ color: activeLineNumber as string }}>2</div>
+              <div>3</div>
+              <div>4</div>
+              <div>5</div>
+            </div>
+
+            {/* Code */}
+            <div className="flex-1 py-1 pl-1 pr-2 text-[10px]">
+              <div style={{ color: comment as string }}>// Theme preview</div>
+              <div style={{ backgroundColor: activeLine as string }}>
+                <span style={{ color: keyword as string }}>const</span>{' '}
+                <span style={{ color: variable as string }}>theme</span>{' '}
+                <span style={{ color: punctuation as string }}>=</span>{' '}
+                <span style={{ color: string as string }}>"My Theme"</span>
+              </div>
+              <div>
+                <span style={{ color: keyword as string }}>function</span>{' '}
+                <span style={{ color: fnName as string }}>apply</span>
+                <span style={{ color: punctuation as string }}>()</span>{' '}
+                <span style={{ color: punctuation as string }}>{'{'}</span>
+              </div>
+              <div>
+                <span style={{ color: punctuation as string }}>{'  '}</span>
+                <span style={{ color: keyword as string }}>return</span>{' '}
+                <span style={{ color: variable as string }}>theme</span>
+              </div>
+              <div style={{ color: punctuation as string }}>{'}'}</div>
+            </div>
+          </div>
         </div>
-        <div style={{ color: terminalYellow as string }}>Building...</div>
-        <div style={{ color: terminalBlue as string }}>Done in 1.2s</div>
+
+        {/* Terminal */}
+        <div
+          className="w-28 overflow-hidden p-1.5 font-mono text-[10px]"
+          style={{
+            backgroundColor: terminalBg as string,
+            color: terminalFg as string,
+            borderLeft: `1px solid ${borderVariant}`,
+          }}
+        >
+          <div>
+            <span style={{ color: terminalGreen as string }}>$</span> npm build
+          </div>
+          <div style={{ color: terminalYellow as string }}>Building...</div>
+          <div style={{ color: terminalBlue as string }}>Done 1.2s</div>
+        </div>
       </div>
     </div>
   )
