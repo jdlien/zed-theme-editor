@@ -34,14 +34,16 @@ import { isValidHex } from '@/lib/colorConversion'
 export interface JsonEditorPanelProps {
   /** JSON content to display */
   content: string
-  /** Called when content changes */
-  onChange: (content: string) => void
+  /** Called when content changes (only if readOnly is false) */
+  onChange?: (content: string) => void
   /** Called when a color is clicked */
   onColorClick?: (path: string, color: string, position: number) => void
   /** Currently selected color path */
   selectedColorPath?: string | null
   /** Whether to use dark theme */
   isDarkMode?: boolean
+  /** Whether the editor is read-only (default: true to prevent data loss) */
+  readOnly?: boolean
   /** Additional CSS classes */
   className?: string
 }
@@ -405,6 +407,7 @@ export function JsonEditorPanel({
   onColorClick,
   selectedColorPath,
   isDarkMode = true,
+  readOnly = true,
   className = '',
 }: JsonEditorPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -438,7 +441,7 @@ export function JsonEditorPanel({
     if (!containerRef.current) return
 
     const updateListener = EditorView.updateListener.of((update: ViewUpdate) => {
-      if (update.docChanged) {
+      if (update.docChanged && onChangeRef.current) {
         const newContent = update.state.doc.toString()
         onChangeRef.current(newContent)
         // Update decorations after content change
@@ -450,18 +453,22 @@ export function JsonEditorPanel({
       lineNumbers(),
       highlightActiveLineGutter(),
       highlightActiveLine(),
-      history(),
       foldGutter(),
-      indentOnInput(),
       bracketMatching(),
       colorDecorationsField,
       json(),
-      keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap]),
+      keymap.of([...foldKeymap]),
       updateListener,
       editorTheme,
+      // Read-only mode by default to prevent accidental edits
+      EditorState.readOnly.of(readOnly),
       ...(isDarkMode
         ? [oneDark, syntaxHighlighting(defaultHighlightStyle, { fallback: true })]
         : [syntaxHighlighting(defaultHighlightStyle)]),
+      // Only include editing features if not read-only
+      ...(!readOnly
+        ? [history(), indentOnInput(), keymap.of([...defaultKeymap, ...historyKeymap])]
+        : []),
     ]
 
     const state = EditorState.create({
@@ -483,7 +490,7 @@ export function JsonEditorPanel({
       view.destroy()
       viewRef.current = null
     }
-  }, [isDarkMode]) // Only recreate on theme change
+  }, [isDarkMode, readOnly]) // Recreate on theme or readOnly change
 
   // Update content when it changes externally
   useEffect(() => {
@@ -492,13 +499,25 @@ export function JsonEditorPanel({
 
     const currentContent = view.state.doc.toString()
     if (currentContent !== content) {
+      // Preserve scroll position and selection
+      const scrollTop = view.scrollDOM.scrollTop
+      const selection = view.state.selection
+
       view.dispatch({
         changes: {
           from: 0,
           to: currentContent.length,
           insert: content,
         },
+        // Try to preserve selection if it's still valid
+        selection: selection.main.to <= content.length ? selection : undefined,
       })
+
+      // Restore scroll position after DOM update
+      requestAnimationFrame(() => {
+        view.scrollDOM.scrollTop = scrollTop
+      })
+
       updateDecorations(view)
     }
   }, [content, updateDecorations])
