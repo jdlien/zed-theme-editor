@@ -5,6 +5,7 @@
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSun, faMoon, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
+import { formatShortcut } from '@/lib/keyboard'
 
 interface ToolbarProps {
   fileName?: string
@@ -52,7 +53,7 @@ export function Toolbar({
             onClick={onSave}
             disabled={!canSave || !hasUnsavedChanges}
             className="flex items-center gap-2 rounded bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-            title="Save (Ctrl+S)"
+            title={`Save (${formatShortcut('S')})`}
           >
             <FontAwesomeIcon icon={faFloppyDisk} className="h-4 w-4" />
             Save

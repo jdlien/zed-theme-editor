@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
+import { formatShortcut } from '@/lib/keyboard'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
@@ -242,9 +243,9 @@ export function ThemeEditor() {
           {state.themeFamily.name} by {state.themeFamily.author}
         </div>
         <div className="flex items-center gap-4">
-          {canUndo && <span>Ctrl+Z to undo</span>}
-          {canRedo && <span>Ctrl+Shift+Z to redo</span>}
-          {state.hasUnsavedChanges && <span>Ctrl+S to save</span>}
+          {canUndo && <span>{formatShortcut('Z')} to undo</span>}
+          {canRedo && <span>{formatShortcut('Z', true)} to redo</span>}
+          {state.hasUnsavedChanges && <span>{formatShortcut('S')} to save</span>}
         </div>
       </footer>
     </div>
