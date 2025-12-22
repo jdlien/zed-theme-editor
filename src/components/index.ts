@@ -1,6 +1,2 @@
 export { DropZone } from './DropZone'
-export { Toolbar } from './Toolbar'
-export { JsonEditorPanel } from './JsonEditorPanel'
-export { ColorEditorPanel } from './ColorEditorPanel'
-export { ThemePreview } from './ThemePreview'
-export { ThemeTabs } from './ThemeTabs'
+export { NumberField } from './NumberField'
