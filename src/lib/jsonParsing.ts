@@ -268,6 +268,15 @@ export function extractColors(style: ThemeStyle, basePath: string = 'style'): Co
 }
 
 /**
+ * Extract colors as a Map for quick lookup by path
+ * Useful for comparing current colors to original colors
+ */
+export function extractColorsAsMap(style: ThemeStyle, basePath: string = 'style'): Map<string, string> {
+  const colors = extractColors(style, basePath)
+  return new Map(colors.map((c) => [c.path, c.value]))
+}
+
+/**
  * Update a color value at a specific path in the theme
  * Accepts either a segments array or a /-separated path string
  */
