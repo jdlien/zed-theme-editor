@@ -115,7 +115,7 @@ export function ThemeEditor() {
   // Show drop zone if no file loaded
   if (!state.themeFamily) {
     return (
-      <div className="flex h-screen flex-col bg-neutral-950 text-white">
+      <div className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}>
         <Toolbar
           isDarkMode={state.isDarkMode}
           onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
@@ -129,7 +129,7 @@ export function ThemeEditor() {
           />
         </div>
         {state.error && (
-          <div className="bg-red-900/50 px-4 py-2 text-center text-sm text-red-200">
+          <div className="bg-red-300/50 text-red-900 dark:bg-red-900/50 px-4 py-2 text-center text-sm dark:text-red-200">
             {state.error}
           </div>
         )}
@@ -138,7 +138,7 @@ export function ThemeEditor() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-neutral-950 text-white">
+    <div className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}>
       {/* Toolbar */}
       <Toolbar
         fileName={state.fileName || undefined}
@@ -159,9 +159,9 @@ export function ThemeEditor() {
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: Color list */}
-        <aside className="flex w-64 flex-col border-r border-neutral-700 bg-neutral-900">
-          <div className="border-b border-neutral-700 px-3 py-2">
-            <h2 className="text-sm font-medium text-neutral-300">Colors</h2>
+        <aside className="flex w-64 flex-col border-r border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="border-b border-neutral-300 px-3 py-2 dark:border-neutral-700">
+            <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Colors</h2>
             <p className="text-xs text-neutral-500">{colors.length} properties</p>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
@@ -191,14 +191,14 @@ export function ThemeEditor() {
 
           {/* Theme Preview */}
           {currentTheme && (
-            <div className="border-t border-neutral-700 p-4">
+            <div className="border-t border-neutral-300 p-4 dark:border-neutral-700">
               <ThemePreview style={currentTheme.style} />
             </div>
           )}
         </main>
 
         {/* Right panel: Color Editor */}
-        <aside className="w-80 overflow-y-auto border-l border-neutral-700 bg-neutral-900">
+        <aside className="w-80 overflow-y-auto border-l border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
           <ColorEditorPanel
             color={selectedColor?.value || null}
             colorPath={selectedColor?.path || null}
@@ -208,7 +208,7 @@ export function ThemeEditor() {
       </div>
 
       {/* Status bar */}
-      <footer className="flex items-center justify-between border-t border-neutral-700 bg-neutral-900 px-4 py-1 text-xs text-neutral-500">
+      <footer className="flex items-center justify-between border-t border-neutral-300 bg-neutral-50 px-4 py-1 text-xs text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900">
         <div>
           {state.themeFamily.name} by {state.themeFamily.author}
         </div>
