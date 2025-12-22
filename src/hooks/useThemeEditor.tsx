@@ -334,12 +334,14 @@ interface ThemeEditorProviderProps {
   children: ReactNode
   initialColorFormat?: ColorFormat
   initialDarkMode?: boolean
+  onDarkModeChange?: (isDark: boolean) => void
 }
 
 export function ThemeEditorProvider({
   children,
   initialColorFormat = 'hex',
   initialDarkMode = true,
+  onDarkModeChange,
 }: ThemeEditorProviderProps) {
   const [state, dispatch] = useReducer(editorReducer, {
     ...initialState,
@@ -404,7 +406,8 @@ export function ThemeEditorProvider({
 
   const setDarkMode = useCallback((isDark: boolean) => {
     dispatch({ type: 'SET_DARK_MODE', payload: isDark })
-  }, [])
+    onDarkModeChange?.(isDark)
+  }, [onDarkModeChange])
 
   const markSaved = useCallback((handle?: FileSystemFileHandle) => {
     dispatch({ type: 'MARK_SAVED', payload: { handle } })
