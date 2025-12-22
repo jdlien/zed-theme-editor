@@ -4,8 +4,8 @@
  */
 
 import JSON5 from 'json5'
-import type { ThemeFamily, ThemeStyle, HighlightStyle } from '@/types/theme'
-import { isValidHex, normalizeHex } from './colorConversion'
+import type { ThemeFamily, ThemeStyle, HighlightStyle, ColorFormat } from '@/types/theme'
+import { isValidHex, normalizeHex, parseColor, formatColorAs } from './colorConversion'
 
 export interface ParseResult {
   success: true
@@ -330,9 +330,87 @@ export function updateColorAtPath(
 
 /**
  * Serialize theme to JSON string for saving
+ * Aligns color values within each object for readability
  */
 export function serializeTheme(theme: ThemeFamily): string {
-  return JSON.stringify(theme, null, 2)
+  const json = JSON.stringify(theme, null, 2)
+  return alignColorValues(json)
+}
+
+/**
+ * Align color values within each object block
+ * Groups consecutive color properties at the same indentation and aligns the colons
+ */
+function alignColorValues(json: string): string {
+  const lines = json.split('\n')
+  const result: string[] = []
+
+  // Pattern to match a color property line: "key": "#hexcolor"
+  const colorLinePattern = /^(\s*)"([^"]+)":\s*"(#[0-9A-Fa-f]{3,8})"(,?)$/
+
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    const match = line.match(colorLinePattern)
+
+    if (match) {
+      // Found a color line - collect consecutive color lines at same indentation
+      const indent = match[1]
+      const colorLines: { key: string; value: string; comma: string }[] = []
+
+      while (i < lines.length) {
+        const currentLine = lines[i]
+        const currentMatch = currentLine.match(colorLinePattern)
+
+        if (currentMatch && currentMatch[1] === indent) {
+          colorLines.push({
+            key: currentMatch[2],
+            value: currentMatch[3],
+            comma: currentMatch[4],
+          })
+          i++
+        } else {
+          break
+        }
+      }
+
+      // Find max key length (cap at 28 to handle long keys gracefully)
+      const maxKeyLen = Math.min(
+        28,
+        Math.max(...colorLines.map((l) => l.key.length))
+      )
+
+      // Output aligned lines
+      for (const { key, value, comma } of colorLines) {
+        const padding = ' '.repeat(Math.max(0, maxKeyLen - key.length))
+        result.push(`${indent}"${key}":${padding} "${value}"${comma}`)
+      }
+    } else {
+      result.push(line)
+      i++
+    }
+  }
+
+  return result.join('\n')
+}
+
+/**
+ * Transform colors in a JSON string to a different format for display
+ * Replaces hex color values with the specified format (rgb, hsl, oklch)
+ */
+export function transformColorsInJson(json: string, format: ColorFormat): string {
+  if (format === 'hex') return json
+
+  // Pattern to match hex colors in JSON string values
+  const hexPattern = /"(#[0-9A-Fa-f]{3,8})"/g
+
+  return json.replace(hexPattern, (match, hexColor) => {
+    const parsed = parseColor(hexColor)
+    if (!parsed) return match
+
+    const formatted = formatColorAs(parsed, format)
+    return `"${formatted}"`
+  })
 }
 
 /**

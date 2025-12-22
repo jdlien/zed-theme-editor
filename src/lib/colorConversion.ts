@@ -9,6 +9,7 @@ import {
   formatHex8,
   rgb,
   hsl,
+  hsv,
   oklch,
   displayable,
   clampRgb,
@@ -16,6 +17,7 @@ import {
   type Color,
   type Rgb,
   type Hsl,
+  type Hsv,
   type Oklch,
 } from 'culori'
 
@@ -394,6 +396,38 @@ export function hexToOklch(hex: string): { l: number; c: number; h: number; a: n
   return { l: oklchColor.l, c: oklchColor.c, h: oklchColor.h, a: oklchColor.alpha }
 }
 
+/**
+ * Convert HSV values directly to hex string
+ * h: 0-360, s: 0-100, v: 0-100
+ */
+export function hsvToHex(h: number, s: number, v: number, a: number = 1): string {
+  const color: Color = {
+    mode: 'hsv',
+    h,
+    s: s / 100,
+    v: v / 100,
+    alpha: a,
+  }
+  return toHex(color)
+}
+
+/**
+ * Convert hex string to HSV values
+ * Returns h: 0-360, s: 0-100, v: 0-100
+ */
+export function hexToHsv(hex: string): { h: number; s: number; v: number; a: number } | null {
+  if (!isValidHex(hex)) return null
+  const color = parseHex(hex)
+  if (!color) return null
+  const hsvColor = hsv(color) as Hsv
+  return {
+    h: roundHue(hsvColor.h ?? 0),
+    s: roundPercent((hsvColor.s ?? 0) * 100),
+    v: roundPercent((hsvColor.v ?? 0) * 100),
+    a: roundAlpha(hsvColor.alpha ?? 1),
+  }
+}
+
 // ============================================================================
 // Color Formatting
 // ============================================================================
@@ -416,17 +450,21 @@ export function formatColorAs(parsed: ParsedColor, format: ColorFormatType): str
     }
     case 'hsl': {
       const { h, s, l } = parsed.hsl
+      // Zero-pad hue to 3 digits for alignment (e.g., 1 -> 001)
+      const hueStr = String(Math.round(h)).padStart(3, '0')
       if (parsed.alpha < 1) {
-        return `hsla(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%, ${parsed.alpha.toFixed(2)})`
+        return `hsl(${hueStr} ${Math.round(s)}% ${Math.round(l)}% / ${parsed.alpha.toFixed(2)})`
       }
-      return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`
+      return `hsl(${hueStr} ${Math.round(s)}% ${Math.round(l)}%)`
     }
     case 'oklch': {
       const { l, c, h } = parsed.oklch
+      // Zero-pad hue to 3 digits before decimal for alignment (e.g., 1.0 -> 001.0)
+      const hueStr = h.toFixed(1).padStart(5, '0')
       if (parsed.alpha < 1) {
-        return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)} / ${parsed.alpha.toFixed(2)})`
+        return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${hueStr} / ${parsed.alpha.toFixed(2)})`
       }
-      return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)})`
+      return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${hueStr})`
     }
     default:
       return parsed.hex

@@ -4,7 +4,7 @@
  */
 
 import { useRef, useCallback, useEffect, useState, type MouseEvent, type TouchEvent } from 'react'
-import { hslToHex, hexToHsl, isValidHex } from '@/lib/colorConversion'
+import { hsvToHex, hexToHsv, isValidHex } from '@/lib/colorConversion'
 
 // ============================================================================
 // Types
@@ -21,11 +21,11 @@ export interface ColorPickerProps {
   className?: string
 }
 
-interface HSLColor {
-  h: number
-  s: number
-  l: number
-  a: number
+interface HSVColor {
+  h: number  // 0-360
+  s: number  // 0-100
+  v: number  // 0-100
+  a: number  // 0-1
 }
 
 // ============================================================================
@@ -66,24 +66,24 @@ function getEventPosition(
 }
 
 /**
- * Convert HSL position to S/L values
- * X axis = saturation (0-100)
- * Y axis = lightness (100-0, inverted)
+ * Convert position to HSV S/V values
+ * X axis = saturation (0-100, left to right)
+ * Y axis = value/brightness (100-0, top to bottom)
  */
-function positionToSL(x: number, y: number, width: number, height: number): { s: number; l: number } {
+function positionToSV(x: number, y: number, width: number, height: number): { s: number; v: number } {
   return {
     s: (x / width) * 100,
-    l: 100 - (y / height) * 100,
+    v: 100 - (y / height) * 100,
   }
 }
 
 /**
- * Convert S/L values to position
+ * Convert HSV S/V values to position
  */
-function slToPosition(s: number, l: number, width: number, height: number): { x: number; y: number } {
+function svToPosition(s: number, v: number, width: number, height: number): { x: number; y: number } {
   return {
     x: (s / 100) * width,
-    y: ((100 - l) / 100) * height,
+    y: ((100 - v) / 100) * height,
   }
 }
 
@@ -92,14 +92,14 @@ function slToPosition(s: number, l: number, width: number, height: number): { x:
 // ============================================================================
 
 /**
- * Saturation-Lightness gradient square
+ * Saturation-Value gradient square (HSV model)
  */
-function SaturationLightnessPicker({
-  hsl,
+function SaturationValuePicker({
+  hsv,
   onChange,
 }: {
-  hsl: HSLColor
-  onChange: (s: number, l: number) => void
+  hsv: HSVColor
+  onChange: (s: number, v: number) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -110,9 +110,9 @@ function SaturationLightnessPicker({
 
       const pos = getEventPosition(e, containerRef.current)
       const rect = containerRef.current.getBoundingClientRect()
-      const { s, l } = positionToSL(pos.x, pos.y, rect.width, rect.height)
+      const { s, v } = positionToSV(pos.x, pos.y, rect.width, rect.height)
 
-      onChange(s, l)
+      onChange(s, v)
     },
     [onChange]
   )
@@ -162,11 +162,11 @@ function SaturationLightnessPicker({
   // Calculate cursor position
   const containerWidth = containerRef.current?.getBoundingClientRect().width ?? 200
   const containerHeight = containerRef.current?.getBoundingClientRect().height ?? 200
-  const cursorPos = slToPosition(hsl.s, hsl.l, containerWidth, containerHeight)
+  const cursorPos = svToPosition(hsv.s, hsv.v, containerWidth, containerHeight)
 
   // Generate gradient background
-  // Base hue color at full saturation
-  const hueColor = `hsl(${hsl.h}, 100%, 50%)`
+  // Base hue color at full saturation and value
+  const hueColor = `hsl(${hsv.h}, 100%, 50%)`
 
   return (
     <div
@@ -181,8 +181,8 @@ function SaturationLightnessPicker({
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       role="slider"
-      aria-label="Saturation and lightness picker"
-      aria-valuenow={hsl.s}
+      aria-label="Saturation and brightness picker"
+      aria-valuenow={hsv.s}
       tabIndex={0}
     >
       {/* Cursor */}
@@ -191,7 +191,7 @@ function SaturationLightnessPicker({
         style={{
           left: cursorPos.x,
           top: cursorPos.y,
-          backgroundColor: hslToHex(hsl.h, hsl.s, hsl.l),
+          backgroundColor: hsvToHex(hsv.h, hsv.s, hsv.v),
         }}
       />
     </div>
@@ -328,71 +328,71 @@ function CheckerboardBackground({ children, className = '' }: { children: React.
 // ============================================================================
 
 export function ColorPicker({ value, onChange, showAlpha = true, className = '' }: ColorPickerProps) {
-  // Parse current color to HSL
-  const [hsl, setHsl] = useState<HSLColor>(() => {
-    const parsed = isValidHex(value) ? hexToHsl(value) : null
-    return parsed ?? { h: 0, s: 100, l: 50, a: 1 }
+  // Parse current color to HSV (picker uses HSV internally)
+  const [hsv, setHsv] = useState<HSVColor>(() => {
+    const parsed = isValidHex(value) ? hexToHsv(value) : null
+    return parsed ?? { h: 0, s: 100, v: 100, a: 1 }
   })
 
   // Sync internal state with external value
   useEffect(() => {
     if (isValidHex(value)) {
-      const parsed = hexToHsl(value)
+      const parsed = hexToHsv(value)
       if (parsed) {
         // Only update if significantly different to avoid feedback loops
-        // Scale alpha by 100 since it's 0-1 while H/S/L are 0-360/0-100
+        // Scale alpha by 100 since it's 0-1 while H/S/V are 0-360/0-100
         const diff =
-          Math.abs(parsed.h - hsl.h) +
-          Math.abs(parsed.s - hsl.s) +
-          Math.abs(parsed.l - hsl.l) +
-          Math.abs((parsed.a ?? 1) - hsl.a) * 100
+          Math.abs(parsed.h - hsv.h) +
+          Math.abs(parsed.s - hsv.s) +
+          Math.abs(parsed.v - hsv.v) +
+          Math.abs((parsed.a ?? 1) - hsv.a) * 100
         if (diff > 1) {
-          setHsl({ ...parsed, a: parsed.a ?? 1 })
+          setHsv({ ...parsed, a: parsed.a ?? 1 })
         }
       }
     }
   }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update handlers
-  const handleSLChange = useCallback(
-    (s: number, l: number) => {
-      const newHsl = { ...hsl, s, l }
-      setHsl(newHsl)
-      onChange(hslToHex(newHsl.h, newHsl.s, newHsl.l, newHsl.a))
+  const handleSVChange = useCallback(
+    (s: number, v: number) => {
+      const newHsv = { ...hsv, s, v }
+      setHsv(newHsv)
+      onChange(hsvToHex(newHsv.h, newHsv.s, newHsv.v, newHsv.a))
     },
-    [hsl, onChange]
+    [hsv, onChange]
   )
 
   const handleHueChange = useCallback(
     (h: number) => {
-      const newHsl = { ...hsl, h }
-      setHsl(newHsl)
-      onChange(hslToHex(newHsl.h, newHsl.s, newHsl.l, newHsl.a))
+      const newHsv = { ...hsv, h }
+      setHsv(newHsv)
+      onChange(hsvToHex(newHsv.h, newHsv.s, newHsv.v, newHsv.a))
     },
-    [hsl, onChange]
+    [hsv, onChange]
   )
 
   const handleAlphaChange = useCallback(
     (a: number) => {
-      const newHsl = { ...hsl, a }
-      setHsl(newHsl)
-      onChange(hslToHex(newHsl.h, newHsl.s, newHsl.l, newHsl.a))
+      const newHsv = { ...hsv, a }
+      setHsv(newHsv)
+      onChange(hsvToHex(newHsv.h, newHsv.s, newHsv.v, newHsv.a))
     },
-    [hsl, onChange]
+    [hsv, onChange]
   )
 
   // Generate alpha slider gradient
-  const opaqueColor = hslToHex(hsl.h, hsl.s, hsl.l, 1)
-  const transparentColor = hslToHex(hsl.h, hsl.s, hsl.l, 0)
+  const opaqueColor = hsvToHex(hsv.h, hsv.s, hsv.v, 1)
+  const transparentColor = hsvToHex(hsv.h, hsv.s, hsv.v, 0)
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      {/* Saturation-Lightness square */}
-      <SaturationLightnessPicker hsl={hsl} onChange={handleSLChange} />
+      {/* Saturation-Value square (HSV model) */}
+      <SaturationValuePicker hsv={hsv} onChange={handleSVChange} />
 
       {/* Hue slider */}
       <Slider
-        value={hsl.h}
+        value={hsv.h}
         onChange={handleHueChange}
         min={0}
         max={360}
@@ -410,7 +410,7 @@ export function ColorPicker({ value, onChange, showAlpha = true, className = '' 
             }}
           >
             <Slider
-              value={hsl.a}
+              value={hsv.a}
               onChange={handleAlphaChange}
               min={0}
               max={1}
@@ -426,7 +426,7 @@ export function ColorPicker({ value, onChange, showAlpha = true, className = '' 
         <CheckerboardBackground className="h-8 flex-1 rounded">
           <div
             className="h-full w-full rounded"
-            style={{ backgroundColor: hslToHex(hsl.h, hsl.s, hsl.l, hsl.a) }}
+            style={{ backgroundColor: hsvToHex(hsv.h, hsv.s, hsv.v, hsv.a) }}
           />
         </CheckerboardBackground>
       </div>

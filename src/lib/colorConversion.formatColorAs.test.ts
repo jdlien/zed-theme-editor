@@ -24,13 +24,14 @@ describe('formatColorAs', () => {
 
   it('formats as hsl', () => {
     const parsed = parseColor('#ff0000')!
-    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(0, 100%, 50%)')
+    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(000 100% 50%)')
   })
 
   it('formats as hsla with alpha', () => {
     const parsed = parseColor('#ff000080')!
     const result = formatColorAs(parsed, 'hsl')
-    expect(result).toMatch(/^hsla\(0, 100%, 50%, 0\.5\d*\)$/)
+    // Modern HSL syntax with zero-padded hue and slash for alpha
+    expect(result).toMatch(/^hsl\(000 100% 50% \/ 0\.5\d*\)$/)
   })
 
   it('formats as oklch', () => {
@@ -53,12 +54,12 @@ describe('formatColorAs', () => {
   it('handles white color', () => {
     const parsed = parseColor('#ffffff')!
     expect(formatColorAs(parsed, 'rgb')).toBe('rgb(255, 255, 255)')
-    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(0, 0%, 100%)')
+    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(000 0% 100%)')
   })
 
   it('handles black color', () => {
     const parsed = parseColor('#000000')!
     expect(formatColorAs(parsed, 'rgb')).toBe('rgb(0, 0, 0)')
-    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(0, 0%, 0%)')
+    expect(formatColorAs(parsed, 'hsl')).toBe('hsl(000 0% 0%)')
   })
 })

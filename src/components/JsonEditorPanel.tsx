@@ -15,6 +15,7 @@ import {
 } from '@codemirror/view'
 import { json } from '@codemirror/lang-json'
 import { editorThemes, getDefaultTheme, type EditorThemeName } from '@/lib/editorThemes'
+import { toRgb } from '@/lib/colorConversion'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import {
   foldGutter,
@@ -27,7 +28,6 @@ import {
   highlightActiveLineGutter,
   highlightActiveLine,
 } from '@codemirror/view'
-import { isValidHex } from '@/lib/colorConversion'
 
 // ============================================================================
 // Types
@@ -172,45 +172,37 @@ class ColorSwatchWidget extends WidgetType {
 // ============================================================================
 
 /**
- * Find all hex color values in JSON content with their keys
- * Matches both object properties and array elements
+ * Find all color values in JSON content with their keys
+ * Matches hex, rgb, hsl, and oklch formats
  */
 function findColors(content: string): ColorMatch[] {
   const colors: ColorMatch[] = []
 
-  // Match hex colors in JSON string values: "key": "#RRGGBB" or "#RGB"
-  const hexPattern = /"([^"]+)":\s*"(#[0-9A-Fa-f]{3,8})"/g
-  let match
-  while ((match = hexPattern.exec(content)) !== null) {
-    const key = match[1]
-    const color = match[2]
+  // Define patterns for each color format in JSON property context: "key": "color"
+  // Each pattern captures: [1] = key, [2] = color value
+  const propertyPatterns = [
+    // Hex colors: "#RGB", "#RRGGBB", "#RRGGBBAA"
+    /"([^"]+)":\s*"(#[0-9A-Fa-f]{3,8})"/g,
+    // RGB: rgb(r, g, b) or rgba(r, g, b, a)
+    /"([^"]+)":\s*"(rgba?\([^)]+\))"/g,
+    // HSL: hsl(...) or hsla(...)
+    /"([^"]+)":\s*"(hsla?\([^)]+\))"/g,
+    // OKLCH: oklch(...)
+    /"([^"]+)":\s*"(oklch\([^)]+\))"/g,
+  ]
 
-    if (isValidHex(color)) {
+  // Process each pattern
+  for (const pattern of propertyPatterns) {
+    let match
+    while ((match = pattern.exec(content)) !== null) {
+      const key = match[1]
+      const color = match[2]
       const fullMatch = match[0]
       const colorIndex = fullMatch.lastIndexOf(color)
       const colorStart = match.index + colorIndex
       const colorEnd = colorStart + color.length
 
-      colors.push({
-        from: colorStart,
-        to: colorEnd,
-        color: color.toUpperCase(),
-        key,
-      })
-    }
-  }
-
-  // Match hex colors in arrays: ["#RRGGBB", "#RGB"]
-  // This catches colors in accents array and similar
-  const arrayColorPattern = /(?:[\[,]\s*)"(#[0-9A-Fa-f]{3,8})"/g
-  while ((match = arrayColorPattern.exec(content)) !== null) {
-    const color = match[1]
-
-    if (isValidHex(color)) {
-      const colorStart = match.index + match[0].indexOf(color)
-      const colorEnd = colorStart + color.length
-
-      // Avoid duplicates (in case a pattern matched both)
+      // Avoid duplicates
       const isDuplicate = colors.some(
         (c) => c.from === colorStart && c.to === colorEnd
       )
@@ -218,7 +210,37 @@ function findColors(content: string): ColorMatch[] {
         colors.push({
           from: colorStart,
           to: colorEnd,
-          color: color.toUpperCase(),
+          color,
+          key,
+        })
+      }
+    }
+  }
+
+  // Define patterns for colors in arrays: ["#RRGGBB", "rgb(...)", etc.]
+  const arrayPatterns = [
+    /(?:[\[,]\s*)"(#[0-9A-Fa-f]{3,8})"/g,
+    /(?:[\[,]\s*)"(rgba?\([^)]+\))"/g,
+    /(?:[\[,]\s*)"(hsla?\([^)]+\))"/g,
+    /(?:[\[,]\s*)"(oklch\([^)]+\))"/g,
+  ]
+
+  for (const pattern of arrayPatterns) {
+    let match
+    while ((match = pattern.exec(content)) !== null) {
+      const color = match[1]
+      const colorStart = match.index + match[0].indexOf(color)
+      const colorEnd = colorStart + color.length
+
+      // Avoid duplicates
+      const isDuplicate = colors.some(
+        (c) => c.from === colorStart && c.to === colorEnd
+      )
+      if (!isDuplicate) {
+        colors.push({
+          from: colorStart,
+          to: colorEnd,
+          color,
           key: 'array-element',
         })
       }
@@ -431,6 +453,25 @@ const colorDecorationsField = StateField.define<DecorationSet>({
             normalizedPath === selectedPath || c.key === selectedPath
           // Look up original color for this path
           const originalColor = originalColors?.get(normalizedPath)
+
+          // Compare colors using RGB values with tolerance to account for
+          // rounding errors when converting between formats (especially HSL)
+          let displayOriginalColor: string | undefined = originalColor
+          if (originalColor) {
+            const currentRgb = toRgb(c.color)
+            const originalRgb = toRgb(originalColor)
+            // Allow ±3 tolerance per channel for rounding errors
+            const isMatch =
+              Math.abs(currentRgb.r - originalRgb.r) <= 3 &&
+              Math.abs(currentRgb.g - originalRgb.g) <= 3 &&
+              Math.abs(currentRgb.b - originalRgb.b) <= 3 &&
+              Math.abs(currentRgb.alpha - originalRgb.alpha) < 0.02
+            if (isMatch) {
+              // Same color (within rounding tolerance) - don't show as changed
+              displayOriginalColor = undefined
+            }
+          }
+
           return Decoration.widget({
             widget: new ColorSwatchWidget(
               c.color,
@@ -438,7 +479,7 @@ const colorDecorationsField = StateField.define<DecorationSet>({
               onClick,
               c.from,
               isSelected,
-              originalColor
+              displayOriginalColor
             ),
             side: 1,
           }).range(c.to)
@@ -658,13 +699,13 @@ export const JsonEditorPanel = forwardRef<JsonEditorPanelHandle, JsonEditorPanel
     }
   }, [content, updateDecorations])
 
-  // Update decorations when selected path changes
+  // Update decorations when selected path or originalColors changes
   useEffect(() => {
     const view = viewRef.current
     if (view) {
       updateDecorations(view)
     }
-  }, [selectedColorPath, updateDecorations])
+  }, [selectedColorPath, updateDecorations, originalColors])
 
   return (
     <div
