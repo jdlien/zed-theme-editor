@@ -7,7 +7,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
+import { extractColors, extractColorsAsMap, transformColorsInJson } from '@/lib/jsonParsing'
+import type { ColorFormat } from '@/types/theme'
 import { formatShortcut } from '@/lib/keyboard'
 import type { EditorThemeName } from '@/lib/editorThemes'
 import { DropZone } from './DropZone'
@@ -38,7 +39,15 @@ export function ThemeEditor() {
     serializedTheme,
   } = useThemeEditor()
 
-  const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
+  const { openFile, saveFile, isSupported: canSaveInPlace } = useFileAccess()
+
+  // Handle opening a new file
+  const handleOpenFile = useCallback(async () => {
+    const result = await openFile()
+    if (result) {
+      loadFile({ content: result.content, name: result.name, handle: result.handle })
+    }
+  }, [openFile, loadFile])
 
   // Editor theme state - separate preferences for dark and light modes
   const [darkEditorTheme, setDarkEditorTheme] =
@@ -51,6 +60,18 @@ export function ThemeEditor() {
   const setEditorTheme = state.isDarkMode
     ? setDarkEditorTheme
     : setLightEditorTheme
+
+  // Color format for JSON display (persisted)
+  const [jsonColorFormat, setJsonColorFormat] = useLocalStorage<ColorFormat>(
+    'jsonColorFormat',
+    'hex'
+  )
+
+  // Transform serialized theme for display in selected color format
+  const displayContent = useMemo(() => {
+    if (!serializedTheme) return ''
+    return transformColorsInJson(serializedTheme, jsonColorFormat)
+  }, [serializedTheme, jsonColorFormat])
 
   // Color filter state
   const [colorFilter, setColorFilter] = useState('')
@@ -248,8 +269,11 @@ export function ThemeEditor() {
         <Toolbar
           isDarkMode={state.isDarkMode}
           onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+          onOpenFile={handleOpenFile}
           editorTheme={editorTheme}
           onEditorThemeChange={setEditorTheme}
+          colorFormat={jsonColorFormat}
+          onColorFormatChange={setJsonColorFormat}
         />
         <div className="flex flex-1 items-center justify-center p-8">
           <DropZone
@@ -277,11 +301,14 @@ export function ThemeEditor() {
         fileName={state.fileName || undefined}
         hasUnsavedChanges={state.hasUnsavedChanges}
         onSave={handleSave}
+        onOpenFile={handleOpenFile}
         canSave={canSaveInPlace}
         isDarkMode={state.isDarkMode}
         onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
         editorTheme={editorTheme}
         onEditorThemeChange={setEditorTheme}
+        colorFormat={jsonColorFormat}
+        onColorFormatChange={setJsonColorFormat}
       />
 
       {/* Theme tabs */}
@@ -340,7 +367,7 @@ export function ThemeEditor() {
           <div className="flex-1 overflow-hidden p-0">
             <JsonEditorPanel
               ref={jsonEditorRef}
-              content={serializedTheme}
+              content={displayContent}
               onColorClick={handleColorClick}
               selectedColorPath={state.selectedColorPath}
               isDarkMode={state.isDarkMode}
