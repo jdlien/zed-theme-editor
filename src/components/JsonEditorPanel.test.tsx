@@ -132,10 +132,39 @@ describe('JSON path building', () => {
 
   function buildJsonPath(content: string, position: number): string {
     const segments: string[] = []
+    const contextStack: Array<
+      | { type: 'object'; expectingKey: boolean }
+      | { type: 'array'; index: number }
+    > = []
+    const valueStack: number[] = []
+
     let inString = false
-    let currentKey = ''
+    let stringIsKey = false
     let keyStart = -1
-    const contextStack: number[] = []
+    let pendingKey: string | null = null
+    let inPrimitive = false
+
+    const currentContext = () => contextStack[contextStack.length - 1]
+
+    const startValue = () => {
+      const restoreLength = segments.length
+      if (pendingKey) {
+        segments.push(pendingKey)
+        pendingKey = null
+      }
+      const ctx = currentContext()
+      if (ctx && ctx.type === 'array') {
+        segments.push(`[${ctx.index}]`)
+      }
+      valueStack.push(restoreLength)
+    }
+
+    const endValue = () => {
+      const restoreLength = valueStack.pop()
+      if (restoreLength !== undefined) {
+        segments.length = restoreLength
+      }
+    }
 
     for (let i = 0; i < position && i < content.length; i++) {
       const char = content[i]
@@ -147,71 +176,73 @@ describe('JSON path building', () => {
         }
         if (char === '"') {
           inString = false
-          const rest = content.slice(i + 1).trimStart()
-          if (rest.startsWith(':')) {
-            currentKey = parseJsonString(content.slice(keyStart, i))
+          if (stringIsKey) {
+            pendingKey = parseJsonString(content.slice(keyStart, i))
+            const ctx = currentContext()
+            if (ctx && ctx.type === 'object') {
+              ctx.expectingKey = false
+            }
+          } else {
+            endValue()
           }
         }
         continue
       }
 
+      if (inPrimitive) {
+        if (char === ',' || char === '}' || char === ']') {
+          inPrimitive = false
+          endValue()
+        } else {
+          continue
+        }
+      }
+
       if (char === '"') {
+        const ctx = currentContext()
+        stringIsKey = !!(ctx && ctx.type === 'object' && ctx.expectingKey)
+        if (!stringIsKey) {
+          startValue()
+        }
         inString = true
         keyStart = i + 1
       } else if (char === '{') {
-        if (currentKey) {
-          segments.push(currentKey)
-          currentKey = ''
-        }
-        contextStack.push(-1)
+        startValue()
+        contextStack.push({ type: 'object', expectingKey: true })
       } else if (char === '[') {
-        if (currentKey) {
-          segments.push(currentKey)
-          currentKey = ''
-        }
-        contextStack.push(0)
+        startValue()
+        contextStack.push({ type: 'array', index: 0 })
       } else if (char === '}') {
         contextStack.pop()
-        while (segments.length > contextStack.length) {
-          segments.pop()
-        }
+        endValue()
       } else if (char === ']') {
         contextStack.pop()
-        while (segments.length > contextStack.length) {
-          segments.pop()
-        }
+        endValue()
       } else if (char === ',') {
-        const lastContext = contextStack[contextStack.length - 1]
-        if (lastContext !== undefined && lastContext >= 0) {
-          contextStack[contextStack.length - 1] = lastContext + 1
+        const ctx = currentContext()
+        if (ctx && ctx.type === 'array') {
+          ctx.index += 1
+        } else if (ctx && ctx.type === 'object') {
+          ctx.expectingKey = true
         }
-        currentKey = ''
+        pendingKey = null
+      } else if (
+        char === '-' ||
+        (char >= '0' && char <= '9') ||
+        char === 't' ||
+        char === 'f' ||
+        char === 'n'
+      ) {
+        startValue()
+        inPrimitive = true
       }
     }
 
-    if (currentKey) {
-      segments.push(currentKey)
+    if (pendingKey) {
+      segments.push(pendingKey)
     }
 
-    // Build the final path with array indices
-    const result: string[] = []
-    let segmentIdx = 0
-    for (let i = 0; i < contextStack.length && segmentIdx < segments.length; i++) {
-      const ctx = contextStack[i]
-      if (ctx >= 0) {
-        result.push(`[${ctx}]`)
-      }
-      if (segmentIdx < segments.length) {
-        result.push(segments[segmentIdx])
-        segmentIdx++
-      }
-    }
-    while (segmentIdx < segments.length) {
-      result.push(segments[segmentIdx])
-      segmentIdx++
-    }
-
-    return result.join('/')
+    return segments.join('/')
   }
 
   it('builds path for top-level key', () => {
@@ -269,6 +300,13 @@ describe('JSON path building', () => {
     const path = buildJsonPath(json, position)
     expect(path).toBe('items/[1]/color')
   })
+
+  it('does not leak array keys into sibling paths', () => {
+    const json = '{"style": {"accents": [], "border.variant": "#fff"}}'
+    const position = json.indexOf('#fff')
+    const path = buildJsonPath(json, position)
+    expect(path).toBe('style/border.variant')
+  })
 })
 
 // ============================================================================
@@ -306,9 +344,16 @@ describe('normalizeColorPath', () => {
     expect(result.themeIndex).toBeNull()
   })
 
-  it('handles nested accents path', () => {
+  it('handles nested accents array path (preserves array index)', () => {
     const result = normalizeColorPath('themes/[0]/style/accents/[2]')
     expect(result.path).toBe('style/accents/[2]')
+    expect(result.themeIndex).toBe(0)
+  })
+
+  it('handles flattened accents object path (strips accents/ for properties)', () => {
+    // When accents is an object with properties, they get flattened into style
+    const result = normalizeColorPath('themes/[0]/style/accents/border.variant')
+    expect(result.path).toBe('style/border.variant')
     expect(result.themeIndex).toBe(0)
   })
 
