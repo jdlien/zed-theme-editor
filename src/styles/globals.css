@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/* Dark mode configuration - use class strategy */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme colors using CSS custom properties */
+:root {
+  /* Light theme */
+  --color-bg-primary: theme(colors.neutral.100);
+  --color-bg-secondary: theme(colors.neutral.50);
+  --color-bg-tertiary: theme(colors.white);
+  --color-border: theme(colors.neutral.300);
+  --color-text-primary: theme(colors.neutral.900);
+  --color-text-secondary: theme(colors.neutral.600);
+  --color-text-muted: theme(colors.neutral.500);
+}
+
+.dark {
+  /* Dark theme */
+  --color-bg-primary: theme(colors.neutral.950);
+  --color-bg-secondary: theme(colors.neutral.900);
+  --color-bg-tertiary: theme(colors.neutral.800);
+  --color-border: theme(colors.neutral.700);
+  --color-text-primary: theme(colors.white);
+  --color-text-secondary: theme(colors.neutral.300);
+  --color-text-muted: theme(colors.neutral.500);
+}

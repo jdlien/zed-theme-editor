@@ -121,8 +121,8 @@ function HexInput({
       onBlur={handleBlur}
       className={`w-full rounded border px-2 py-1 font-mono text-sm ${
         isValid
-          ? 'border-neutral-600 bg-neutral-800'
-          : 'border-red-500 bg-red-900/20'
+          ? 'border-neutral-300 bg-white dark:border-neutral-600 dark:bg-neutral-800'
+          : 'border-red-500 bg-red-100 dark:bg-red-900/20'
       } focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500`}
       placeholder="#RRGGBB"
       maxLength={9}
@@ -145,7 +145,7 @@ function RgbInputs({
   return (
     <div className="grid grid-cols-4 gap-2">
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">R</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">R</label>
         <NumberField
           value={values.r}
           onChange={(r) => onChange({ ...values, r })}
@@ -156,7 +156,7 @@ function RgbInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">G</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">G</label>
         <NumberField
           value={values.g}
           onChange={(g) => onChange({ ...values, g })}
@@ -167,7 +167,7 @@ function RgbInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">B</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">B</label>
         <NumberField
           value={values.b}
           onChange={(b) => onChange({ ...values, b })}
@@ -178,7 +178,7 @@ function RgbInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">A</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">A</label>
         <NumberField
           value={values.a}
           onChange={(a) => onChange({ ...values, a })}
@@ -204,7 +204,7 @@ function HslInputs({
   return (
     <div className="grid grid-cols-4 gap-2">
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">H</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">H</label>
         <NumberField
           value={values.h}
           onChange={(h) => onChange({ ...values, h })}
@@ -215,7 +215,7 @@ function HslInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">S</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">S</label>
         <NumberField
           value={values.s}
           onChange={(s) => onChange({ ...values, s })}
@@ -226,7 +226,7 @@ function HslInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">L</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">L</label>
         <NumberField
           value={values.l}
           onChange={(l) => onChange({ ...values, l })}
@@ -237,7 +237,7 @@ function HslInputs({
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">A</label>
+        <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">A</label>
         <NumberField
           value={values.a}
           onChange={(a) => onChange({ ...values, a })}
@@ -266,7 +266,7 @@ function OklchInputs({
     <div className="space-y-2">
       <div className="grid grid-cols-4 gap-2">
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">L</label>
+          <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">L</label>
           <NumberField
             value={values.l}
             onChange={(l) => onChange({ ...values, l })}
@@ -278,7 +278,7 @@ function OklchInputs({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">C</label>
+          <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">C</label>
           <NumberField
             value={values.c}
             onChange={(c) => onChange({ ...values, c })}
@@ -290,7 +290,7 @@ function OklchInputs({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">H</label>
+          <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">H</label>
           <NumberField
             value={values.h}
             onChange={(h) => onChange({ ...values, h })}
@@ -301,7 +301,7 @@ function OklchInputs({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">A</label>
+          <label className="mb-1 block text-xs text-neutral-600 dark:text-neutral-400">A</label>
           <NumberField
             value={values.a}
             onChange={(a) => onChange({ ...values, a })}
@@ -312,7 +312,7 @@ function OklchInputs({
         </div>
       </div>
       {showGamutWarning && (
-        <div className="flex items-center gap-2 rounded bg-yellow-900/30 px-2 py-1 text-xs text-yellow-400">
+        <div className="flex items-center gap-2 rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
           <FontAwesomeIcon icon={faTriangleExclamation} className="h-4 w-4" />
           <span>Color outside sRGB gamut - will be clamped</span>
         </div>
@@ -332,7 +332,7 @@ function ColorSwatch({
   original?: string
 }) {
   return (
-    <div className="flex overflow-hidden rounded border border-neutral-600">
+    <div className="flex overflow-hidden rounded border border-neutral-300 dark:border-neutral-600">
       {original && (
         <div
           className="h-10 w-1/2"
@@ -364,7 +364,7 @@ export function ColorEditorPanel({
   if (!color) {
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
-        <p className="text-neutral-500">Select a color to edit</p>
+        <p className="text-neutral-600 dark:text-neutral-500">Select a color to edit</p>
       </div>
     )
   }
@@ -425,8 +425,8 @@ export function ColorEditorPanel({
     <div className={`flex flex-col gap-4 p-4 ${className}`}>
       {/* Header with property path */}
       {colorPath && (
-        <div className="border-b border-neutral-700 pb-2">
-          <h3 className="font-mono text-sm text-neutral-300">{colorPath}</h3>
+        <div className="border-b border-neutral-300 pb-2 dark:border-neutral-700">
+          <h3 className="font-mono text-sm text-neutral-700 dark:text-neutral-300">{colorPath}</h3>
         </div>
       )}
 
@@ -438,33 +438,33 @@ export function ColorEditorPanel({
 
       {/* Hex input */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-400">HEX</label>
+        <label className="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">HEX</label>
         <HexInput value={color} onChange={onChange} />
       </div>
 
       {/* RGB inputs */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-400">RGB</label>
+        <label className="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">RGB</label>
         <RgbInputs values={rgb} onChange={handleRgbChange} />
       </div>
 
       {/* HSL inputs */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-400">HSL</label>
+        <label className="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">HSL</label>
         <HslInputs values={hsl} onChange={handleHslChange} />
       </div>
 
       {/* OKLCH inputs */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-400">OKLCH</label>
+        <label className="mb-1 block text-xs font-medium text-neutral-600 dark:text-neutral-400">OKLCH</label>
         <OklchInputs values={oklch} onChange={handleOklchChange} showGamutWarning={isOutOfGamut} />
       </div>
 
       {/* Parsed color info */}
       {parsed && (
-        <div className="rounded border border-neutral-700 bg-neutral-800/50 p-2 text-xs text-neutral-400">
+        <div className="rounded border border-neutral-300 bg-neutral-100 p-2 text-xs text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-400">
           <div className="flex items-center gap-2">
-            <span className={`flex items-center gap-1 ${parsed.isInGamut ? 'text-green-400' : 'text-yellow-400'}`}>
+            <span className={`flex items-center gap-1 ${parsed.isInGamut ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
               <FontAwesomeIcon icon={parsed.isInGamut ? faCheck : faTriangleExclamation} className="h-3 w-3" />
               {parsed.isInGamut ? 'In gamut' : 'Out of gamut'}
             </span>

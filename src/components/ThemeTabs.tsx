@@ -23,15 +23,15 @@ export function ThemeTabs({ themes, activeIndex, onSelect }: ThemeTabsProps) {
   }
 
   return (
-    <div className="flex gap-1 border-b border-neutral-700 bg-neutral-900 px-4">
+    <div className="flex gap-1 border-b border-neutral-300 bg-neutral-50 px-4 dark:border-neutral-700 dark:bg-neutral-900">
       {themes.map((theme, index) => (
         <button
           key={index}
           onClick={() => onSelect(index)}
           className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
             index === activeIndex
-              ? 'border-b-2 border-blue-500 text-white'
-              : 'text-neutral-400 hover:text-neutral-200'
+              ? 'border-b-2 border-blue-500 text-neutral-900 dark:text-white'
+              : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
         >
           <FontAwesomeIcon

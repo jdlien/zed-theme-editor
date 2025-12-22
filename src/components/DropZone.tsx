@@ -107,7 +107,7 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
               ? 'border-blue-400 bg-blue-500/10'
               : dragState === 'invalid'
                 ? 'border-red-400 bg-red-500/10'
-                : 'border-gray-600 hover:border-gray-500 hover:bg-gray-800/50'
+                : 'border-neutral-400 hover:border-neutral-500 hover:bg-neutral-200/50 dark:border-neutral-600 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/50'
           }
           ${isLoading ? 'pointer-events-none opacity-50' : ''}
         `}
@@ -115,25 +115,25 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
       >
         {isLoading ? (
           <>
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-gray-400 border-t-blue-500" />
-            <p className="text-lg text-gray-400">Loading file...</p>
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-neutral-400 border-t-blue-500" />
+            <p className="text-lg text-neutral-600 dark:text-neutral-400">Loading file...</p>
           </>
         ) : (
           <>
             <FontAwesomeIcon
               icon={faCloudArrowUp}
-              className="mb-4 h-12 w-12 text-gray-500"
+              className="mb-4 h-12 w-12 text-neutral-400 dark:text-neutral-500"
               aria-hidden="true"
             />
-            <p className="text-lg text-gray-300">
+            <p className="text-lg text-neutral-700 dark:text-neutral-300">
               {dragState === 'over'
                 ? 'Drop to open file'
                 : 'Drop a Zed theme file here'}
             </p>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-neutral-500">
               or click to browse
             </p>
-            <p className="mt-4 text-xs text-gray-600">
+            <p className="mt-4 text-xs text-neutral-500 dark:text-neutral-600">
               Supports .json and .json5 files
             </p>
             {!isSupported && (
