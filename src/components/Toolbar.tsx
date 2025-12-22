@@ -123,17 +123,40 @@ export function Toolbar({
             </select>
           </label>
         )}
-        <button
-          onClick={onToggleDarkMode}
-          className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        <div
+          className="inline-flex gap-0.5 rounded-full bg-neutral-200 px-0.5 dark:bg-neutral-700"
+          role="radiogroup"
+          aria-label="Color scheme"
         >
-          <FontAwesomeIcon
-            icon={isDarkMode ? faSun : faMoon}
-            className="h-4 w-4"
-          />
-          {isDarkMode ? 'Light' : 'Dark'}
-        </button>
+          <button
+            onClick={() => !isDarkMode || onToggleDarkMode()}
+            className={`rounded-full px-1 py-0.5 transition-all ${
+              !isDarkMode
+                ? 'bg-white text-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-600 dark:text-neutral-400 dark:ring-neutral-500'
+                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
+            }`}
+            role="radio"
+            aria-checked={!isDarkMode}
+            aria-label="Light mode"
+            title="Light mode"
+          >
+            <FontAwesomeIcon icon={faSun} className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => isDarkMode || onToggleDarkMode()}
+            className={`rounded-full px-1 py-0.5 transition-all ${
+              isDarkMode
+                ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-600 dark:text-neutral-100 dark:ring-neutral-500'
+                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
+            }`}
+            role="radio"
+            aria-checked={isDarkMode}
+            aria-label="Dark mode"
+            title="Dark mode"
+          >
+            <FontAwesomeIcon icon={faMoon} className="h-4 w-4" />
+          </button>
+        </div>
         {onSave && (
           <button
             onClick={onSave}

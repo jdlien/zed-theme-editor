@@ -29,9 +29,9 @@ describe('Toolbar', () => {
       expect(container.querySelector('svg')).toBeInTheDocument()
     })
 
-    it('renders dark mode toggle button', () => {
+    it('renders dark mode toggle', () => {
       render(<Toolbar {...defaultProps} />)
-      expect(screen.getByTitle('Switch to dark mode')).toBeInTheDocument()
+      expect(screen.getByRole('radiogroup', { name: 'Color scheme' })).toBeInTheDocument()
     })
   })
 
@@ -90,42 +90,49 @@ describe('Toolbar', () => {
   })
 
   describe('dark mode toggle', () => {
-    it('shows "Dark" text when in light mode', () => {
-      render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      expect(screen.getByText('Dark')).toBeInTheDocument()
-    })
-
-    it('shows "Light" text when in dark mode', () => {
-      render(<Toolbar {...defaultProps} isDarkMode={true} />)
-      expect(screen.getByText('Light')).toBeInTheDocument()
-    })
-
-    it('has correct title in light mode', () => {
-      render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      expect(screen.getByTitle('Switch to dark mode')).toBeInTheDocument()
-    })
-
-    it('has correct title in dark mode', () => {
-      render(<Toolbar {...defaultProps} isDarkMode={true} />)
-      expect(screen.getByTitle('Switch to light mode')).toBeInTheDocument()
-    })
-
-    it('calls onToggleDarkMode when clicked', () => {
+    it('renders as a radiogroup with two options', () => {
       render(<Toolbar {...defaultProps} />)
-      fireEvent.click(screen.getByTitle('Switch to dark mode'))
+      expect(screen.getByRole('radiogroup', { name: 'Color scheme' })).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: 'Light mode' })).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toBeInTheDocument()
+    })
+
+    it('marks light mode as checked when not in dark mode', () => {
+      render(<Toolbar {...defaultProps} isDarkMode={false} />)
+      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'false')
+    })
+
+    it('marks dark mode as checked when in dark mode', () => {
+      render(<Toolbar {...defaultProps} isDarkMode={true} />)
+      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'false')
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'true')
+    })
+
+    it('calls onToggleDarkMode when clicking dark mode button while in light mode', () => {
+      render(<Toolbar {...defaultProps} isDarkMode={false} />)
+      fireEvent.click(screen.getByRole('radio', { name: 'Dark mode' }))
       expect(mockOnToggleDarkMode).toHaveBeenCalledTimes(1)
     })
 
-    it('shows sun icon in dark mode', () => {
+    it('calls onToggleDarkMode when clicking light mode button while in dark mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={true} />)
-      const button = screen.getByTitle('Switch to light mode')
-      expect(button.querySelector('[data-icon="sun"]')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('radio', { name: 'Light mode' }))
+      expect(mockOnToggleDarkMode).toHaveBeenCalledTimes(1)
     })
 
-    it('shows moon icon in light mode', () => {
+    it('does not call onToggleDarkMode when clicking already selected mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      const button = screen.getByTitle('Switch to dark mode')
-      expect(button.querySelector('[data-icon="moon"]')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('radio', { name: 'Light mode' }))
+      expect(mockOnToggleDarkMode).not.toHaveBeenCalled()
+    })
+
+    it('shows sun and moon icons', () => {
+      render(<Toolbar {...defaultProps} />)
+      const lightButton = screen.getByRole('radio', { name: 'Light mode' })
+      const darkButton = screen.getByRole('radio', { name: 'Dark mode' })
+      expect(lightButton.querySelector('[data-icon="sun"]')).toBeInTheDocument()
+      expect(darkButton.querySelector('[data-icon="moon"]')).toBeInTheDocument()
     })
   })
 

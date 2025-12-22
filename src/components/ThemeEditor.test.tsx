@@ -135,12 +135,12 @@ describe('ThemeEditor', () => {
 
     it('renders drop zone when no file is loaded', () => {
       render(<ThemeEditor />)
-      expect(screen.getByText('Drop a Zed theme file here')).toBeInTheDocument()
+      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
     })
 
     it('renders dark mode toggle', () => {
       render(<ThemeEditor />)
-      expect(screen.getByTitle('Switch to dark mode')).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toBeInTheDocument()
     })
 
     it('shows error message when state has error', () => {
@@ -157,18 +157,18 @@ describe('ThemeEditor', () => {
   describe('dark mode toggle', () => {
     it('toggles dark mode when clicked', () => {
       render(<ThemeEditor />)
-      fireEvent.click(screen.getByTitle('Switch to dark mode'))
+      fireEvent.click(screen.getByRole('radio', { name: 'Dark mode' }))
       expect(mockSetDarkMode).toHaveBeenCalledWith(true)
     })
 
-    it('shows correct toggle text in dark mode', () => {
+    it('marks dark mode as selected when in dark mode', () => {
       mockUseThemeEditor.mockReturnValue(
         getBaseThemeEditorReturn({
           state: { ...defaultState, isDarkMode: true },
         })
       )
       render(<ThemeEditor />)
-      expect(screen.getByText('Light')).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'true')
     })
   })
 
@@ -1216,7 +1216,7 @@ describe('ThemeEditor', () => {
       })
 
       render(<ThemeEditor />)
-      fireEvent.click(screen.getByTitle('Switch to dark mode'))
+      fireEvent.click(screen.getByRole('radio', { name: 'Dark mode' }))
       expect(mockSetDarkMode).toHaveBeenCalledWith(true)
     })
   })
@@ -1244,7 +1244,7 @@ describe('ThemeEditor', () => {
 
       render(<ThemeEditor />)
       // In loaded state, dark mode toggle is in toolbar
-      fireEvent.click(screen.getByTitle('Switch to dark mode'))
+      fireEvent.click(screen.getByRole('radio', { name: 'Dark mode' }))
       expect(mockSetDarkMode).toHaveBeenCalledWith(true)
     })
 
@@ -1269,7 +1269,7 @@ describe('ThemeEditor', () => {
       })
 
       render(<ThemeEditor />)
-      fireEvent.click(screen.getByTitle('Switch to light mode'))
+      fireEvent.click(screen.getByRole('radio', { name: 'Light mode' }))
       expect(mockSetDarkMode).toHaveBeenCalledWith(false)
     })
   })

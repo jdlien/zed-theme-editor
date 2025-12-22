@@ -46,10 +46,10 @@ describe('DropZone', () => {
   describe('initial render', () => {
     it('renders drop zone with default message', () => {
       render(<DropZone onFileLoad={mockOnFileLoad} />)
-      expect(screen.getByText('Drop a Zed theme file here')).toBeInTheDocument()
+      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
       expect(screen.getByText('or click to browse')).toBeInTheDocument()
       expect(
-        screen.getByText('Supports .json and .json5 files')
+        screen.getByText('Your file stays on your device — nothing is uploaded.')
       ).toBeInTheDocument()
     })
 
@@ -93,7 +93,7 @@ describe('DropZone', () => {
       render(<DropZone onFileLoad={mockOnFileLoad} />)
       expect(screen.getByText('Loading file...')).toBeInTheDocument()
       expect(
-        screen.queryByText('Drop a Zed theme file here')
+        screen.queryByText('Drop a Zed theme .json file here')
       ).not.toBeInTheDocument()
     })
 
@@ -298,7 +298,7 @@ describe('DropZone', () => {
       // Leave
       const leaveEvent = createDragEvent('dragleave')
       fireEvent(dropZone, leaveEvent)
-      expect(screen.getByText('Drop a Zed theme file here')).toBeInTheDocument()
+      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
     })
 
     it('handles drop with valid JSON file', async () => {
@@ -431,7 +431,7 @@ describe('DropZone', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('Drop a Zed theme file here')
+          screen.getByText('Drop a Zed theme .json file here')
         ).toBeInTheDocument()
       })
     })

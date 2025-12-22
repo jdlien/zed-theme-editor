@@ -27,7 +27,7 @@ describe('App', () => {
 
   it('shows drop zone when no file is loaded', () => {
     render(<App />)
-    expect(screen.getByText(/drop a zed theme file/i)).toBeInTheDocument()
+    expect(screen.getByText(/drop a zed theme/i)).toBeInTheDocument()
   })
 
   describe('dark mode persistence', () => {
@@ -37,16 +37,16 @@ describe('App', () => {
 
       render(<App />)
 
-      // Should show "Dark" button (to switch TO dark) because we're in light mode
-      expect(screen.getByText('Dark')).toBeInTheDocument()
+      // Light mode should be selected because localStorage overrides system preference
+      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
     })
 
     it('uses system preference when no localStorage value exists', () => {
       // System prefers dark (mocked in beforeEach)
       render(<App />)
 
-      // Should show "Light" button (to switch TO light) because we're in dark mode
-      expect(screen.getByText('Light')).toBeInTheDocument()
+      // Dark mode should be selected based on system preference
+      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'true')
     })
 
     it('uses light mode when system prefers light and no localStorage', () => {
@@ -67,8 +67,8 @@ describe('App', () => {
 
       render(<App />)
 
-      // Should show "Dark" button because we're in light mode
-      expect(screen.getByText('Dark')).toBeInTheDocument()
+      // Light mode should be selected based on system preference
+      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
     })
   })
 })
