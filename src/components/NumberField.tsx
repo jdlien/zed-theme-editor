@@ -56,12 +56,20 @@ const DOMAIN_CONFIG: Record<NumberFieldDomain, { min: number; max: number; wraps
   chroma: { min: 0, max: 0.5, wraps: false },
 }
 
-/** Arrow key modifier increments */
+/** Arrow key modifier increments for standard range (0-100 or larger) */
 const MODIFIERS = {
   none: 1,
   alt: 0.1,
   shift: 10,
   altShift: 0.01,
+} as const
+
+/** Arrow key modifier increments for small range (0-1) */
+const SMALL_RANGE_MODIFIERS = {
+  none: 0.1,
+  alt: 0.01,
+  shift: 1,
+  altShift: 0.001,
 } as const
 
 // ============================================================================
@@ -123,21 +131,38 @@ export function parseNumber(str: string): number | null {
 }
 
 /**
- * Get the increment based on keyboard modifiers
+ * Determine if a range is considered "small" (needs scaled-down increments)
+ * Small ranges are those where the total span is <= 1
  */
-export function getIncrement(e: KeyboardEvent, baseStep: number, mode: NumberFieldMode): number {
+export function isSmallRange(min: number, max: number): boolean {
+  if (!isFinite(min) || !isFinite(max)) return false
+  return max - min <= 1
+}
+
+/**
+ * Get the increment based on keyboard modifiers
+ * Uses smaller increments for small-range values (like alpha 0-1)
+ */
+export function getIncrement(
+  e: KeyboardEvent,
+  baseStep: number,
+  mode: NumberFieldMode,
+  useSmallRange: boolean = false
+): number {
   const isUp = e.key === 'ArrowUp'
   const direction = isUp ? 1 : -1
 
+  const modifiers = useSmallRange ? SMALL_RANGE_MODIFIERS : MODIFIERS
+
   let multiplier: number
   if (e.altKey && e.shiftKey) {
-    multiplier = MODIFIERS.altShift
+    multiplier = modifiers.altShift
   } else if (e.shiftKey) {
-    multiplier = MODIFIERS.shift
+    multiplier = modifiers.shift
   } else if (e.altKey) {
-    multiplier = MODIFIERS.alt
+    multiplier = modifiers.alt
   } else {
-    multiplier = MODIFIERS.none
+    multiplier = modifiers.none
   }
 
   // For integer mode, minimum increment is 1
@@ -178,6 +203,7 @@ export function NumberField({
   const effectiveMin = min ?? domainConfig.min
   const effectiveMax = max ?? domainConfig.max
   const wraps = domain === 'hue'
+  const useSmallRangeIncrements = isSmallRange(effectiveMin, effectiveMax)
 
   // Sync rawInput with value when not focused
   useEffect(() => {
@@ -216,7 +242,7 @@ export function NumberField({
 
       e.preventDefault()
 
-      const increment = getIncrement(e, step, mode)
+      const increment = getIncrement(e, step, mode, useSmallRangeIncrements)
       let newValue = value + increment
 
       // Apply clamping/wrapping
@@ -226,7 +252,7 @@ export function NumberField({
       onChange(newValue)
       setRawInput(formatNumber(newValue, precision))
     },
-    [value, step, mode, effectiveMin, effectiveMax, wraps, precision, onChange]
+    [value, step, mode, effectiveMin, effectiveMax, wraps, precision, onChange, useSmallRangeIncrements]
   )
 
   // Handle focus - select all text for easy replacement
@@ -261,7 +287,8 @@ export function NumberField({
   // Base styles
   const baseStyles = `
     w-full px-2 py-1 text-sm font-mono text-right
-    bg-neutral-800 border border-neutral-600 rounded
+    bg-white border border-neutral-300 rounded
+    dark:bg-neutral-800 dark:border-neutral-600
     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
     disabled:opacity-50 disabled:cursor-not-allowed
     transition-colors duration-150
@@ -269,7 +296,7 @@ export function NumberField({
 
   return (
     <div className={`relative flex items-center ${className}`}>
-      {prefix && <span className="mr-1 text-sm text-neutral-400">{prefix}</span>}
+      {prefix && <span className="mr-1 text-sm text-neutral-600 dark:text-neutral-400">{prefix}</span>}
       <input
         ref={inputRef}
         id={id}
@@ -288,7 +315,7 @@ export function NumberField({
         aria-valuemax={effectiveMax === Infinity ? undefined : effectiveMax}
         role="spinbutton"
       />
-      {suffix && <span className="ml-1 text-sm text-neutral-400">{suffix}</span>}
+      {suffix && <span className="ml-1 text-sm text-neutral-600 dark:text-neutral-400">{suffix}</span>}
     </div>
   )
 }

@@ -9,6 +9,7 @@ import {
   isPartialNumber,
   parseNumber,
   getIncrement,
+  isSmallRange,
 } from './NumberField'
 
 // ============================================================================
@@ -133,6 +134,25 @@ describe('parseNumber', () => {
   })
 })
 
+describe('isSmallRange', () => {
+  it('returns true for range <= 1', () => {
+    expect(isSmallRange(0, 1)).toBe(true)
+    expect(isSmallRange(0, 0.5)).toBe(true)
+    expect(isSmallRange(0.5, 1)).toBe(true)
+  })
+
+  it('returns false for range > 1', () => {
+    expect(isSmallRange(0, 100)).toBe(false)
+    expect(isSmallRange(0, 360)).toBe(false)
+    expect(isSmallRange(0, 2)).toBe(false)
+  })
+
+  it('returns false for infinite ranges', () => {
+    expect(isSmallRange(-Infinity, Infinity)).toBe(false)
+    expect(isSmallRange(0, Infinity)).toBe(false)
+  })
+})
+
 describe('getIncrement', () => {
   const createKeyEvent = (key: string, alt = false, shift = false) =>
     ({
@@ -141,34 +161,58 @@ describe('getIncrement', () => {
       shiftKey: shift,
     }) as React.KeyboardEvent
 
-  it('returns base increment for no modifiers', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp'), 1, 'decimal')).toBe(1)
-    expect(getIncrement(createKeyEvent('ArrowDown'), 1, 'decimal')).toBe(-1)
+  describe('standard range', () => {
+    it('returns base increment for no modifiers', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp'), 1, 'decimal')).toBe(1)
+      expect(getIncrement(createKeyEvent('ArrowDown'), 1, 'decimal')).toBe(-1)
+    })
+
+    it('returns 0.1 increment with Alt', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', true, false), 1, 'decimal')).toBe(0.1)
+      expect(getIncrement(createKeyEvent('ArrowDown', true, false), 1, 'decimal')).toBe(-0.1)
+    })
+
+    it('returns 10 increment with Shift', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', false, true), 1, 'decimal')).toBe(10)
+      expect(getIncrement(createKeyEvent('ArrowDown', false, true), 1, 'decimal')).toBe(-10)
+    })
+
+    it('returns 0.01 increment with Alt+Shift', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', true, true), 1, 'decimal')).toBe(0.01)
+      expect(getIncrement(createKeyEvent('ArrowDown', true, true), 1, 'decimal')).toBe(-0.01)
+    })
+
+    it('respects custom step size', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp'), 5, 'decimal')).toBe(5)
+      expect(getIncrement(createKeyEvent('ArrowUp', true, false), 5, 'decimal')).toBe(0.5)
+    })
+
+    it('enforces minimum increment of 1 for integer mode', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', true, false), 1, 'integer')).toBe(1)
+      expect(getIncrement(createKeyEvent('ArrowUp', true, true), 1, 'integer')).toBe(1)
+    })
   })
 
-  it('returns 0.1 increment with Alt', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp', true, false), 1, 'decimal')).toBe(0.1)
-    expect(getIncrement(createKeyEvent('ArrowDown', true, false), 1, 'decimal')).toBe(-0.1)
-  })
+  describe('small range (e.g., alpha 0-1)', () => {
+    it('returns 0.1 increment for no modifiers', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp'), 1, 'decimal', true)).toBe(0.1)
+      expect(getIncrement(createKeyEvent('ArrowDown'), 1, 'decimal', true)).toBe(-0.1)
+    })
 
-  it('returns 10 increment with Shift', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp', false, true), 1, 'decimal')).toBe(10)
-    expect(getIncrement(createKeyEvent('ArrowDown', false, true), 1, 'decimal')).toBe(-10)
-  })
+    it('returns 0.01 increment with Alt', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', true, false), 1, 'decimal', true)).toBe(0.01)
+      expect(getIncrement(createKeyEvent('ArrowDown', true, false), 1, 'decimal', true)).toBe(-0.01)
+    })
 
-  it('returns 0.01 increment with Alt+Shift', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp', true, true), 1, 'decimal')).toBe(0.01)
-    expect(getIncrement(createKeyEvent('ArrowDown', true, true), 1, 'decimal')).toBe(-0.01)
-  })
+    it('returns 1 increment with Shift (full range)', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', false, true), 1, 'decimal', true)).toBe(1)
+      expect(getIncrement(createKeyEvent('ArrowDown', false, true), 1, 'decimal', true)).toBe(-1)
+    })
 
-  it('respects custom step size', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp'), 5, 'decimal')).toBe(5)
-    expect(getIncrement(createKeyEvent('ArrowUp', true, false), 5, 'decimal')).toBe(0.5)
-  })
-
-  it('enforces minimum increment of 1 for integer mode', () => {
-    expect(getIncrement(createKeyEvent('ArrowUp', true, false), 1, 'integer')).toBe(1)
-    expect(getIncrement(createKeyEvent('ArrowUp', true, true), 1, 'integer')).toBe(1)
+    it('returns 0.001 increment with Alt+Shift', () => {
+      expect(getIncrement(createKeyEvent('ArrowUp', true, true), 1, 'decimal', true)).toBe(0.001)
+      expect(getIncrement(createKeyEvent('ArrowDown', true, true), 1, 'decimal', true)).toBe(-0.001)
+    })
   })
 })
 
