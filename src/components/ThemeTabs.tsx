@@ -1,3 +1,11 @@
+/**
+ * ThemeTabs Component
+ * Displays tabs for switching between themes in a theme family
+ */
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+
 interface Theme {
   name: string
   appearance: 'dark' | 'light'
@@ -15,20 +23,26 @@ export function ThemeTabs({ themes, activeIndex, onSelect }: ThemeTabsProps) {
   }
 
   return (
-    <div className="flex gap-1 border-b border-gray-700 px-4">
+    <div className="flex gap-1 border-b border-neutral-700 bg-neutral-900 px-4">
       {themes.map((theme, index) => (
         <button
           key={index}
           onClick={() => onSelect(index)}
-          className={`px-3 py-2 text-sm ${
+          className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
             index === activeIndex
               ? 'border-b-2 border-blue-500 text-white'
-              : 'text-gray-400 hover:text-gray-200'
+              : 'text-neutral-400 hover:text-neutral-200'
           }`}
         >
-          {theme.appearance === 'dark' ? '🌙' : '☀️'} {theme.name}
+          <FontAwesomeIcon
+            icon={theme.appearance === 'dark' ? faMoon : faSun}
+            className="h-3 w-3"
+          />
+          {theme.name}
         </button>
       ))}
     </div>
   )
 }
+
+export default ThemeTabs
