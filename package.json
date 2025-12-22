@@ -3,7 +3,13 @@
   "version": "0.1.0",
   "description": "Visual theme editor for Zed IDE",
   "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

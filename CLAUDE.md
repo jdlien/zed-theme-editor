@@ -22,6 +22,7 @@ This tool allows theme creators to:
 - **JSON Parsing**: json5 package
 - **File Access**: File System Access API (Chrome/Edge)
 - **Testing**: Vitest + React Testing Library
+- **Package Manager**: pnpm
 
 ### Directory Structure
 ```
@@ -65,12 +66,12 @@ src/
 
 ### Commands
 ```bash
-npm run dev          # Start dev server
-npm run build        # TypeScript check + production build
-npm run preview      # Preview production build
-npm test             # Run tests in watch mode
-npm test -- --run    # Run tests once
-npm run test:coverage # Run tests with coverage
+pnpm dev          # Start dev server
+pnpm build        # TypeScript check + production build
+pnpm preview      # Preview production build
+pnpm test             # Run tests in watch mode
+pnpm test -- --run    # Run tests once
+pnpm test:coverage # Run tests with coverage
 ```
 
 ### Import Aliases
@@ -129,18 +130,39 @@ For each feature:
 
 ## Git Workflow
 
-### Commit Messages
-Use conventional commits:
-- `feat:` New features
-- `fix:` Bug fixes
-- `test:` Adding/updating tests
-- `refactor:` Code changes that don't add features or fix bugs
-- `docs:` Documentation changes
-- `chore:` Build/config changes
+Git commits should be done 'atomically' when possible: One commit per logical change to the codebase. This makes it easy to trace back and figure out what change may have broken something or affected some aspect of the application.
+
+Use the "Conventional Commits" style:
+
+type: subject
+
+Types:
+
+- feat: new feature
+- fix: bug fix
+- test: edits to tests
+- refactor: improvements to code quality
+- docs: documentation
+- style: style/whitespace/formatting
+- perf: improved performance
+- chore: configuration, dependencies, updates
+- ci: CD/CD pipeline changes
+- build: build system changes
+- revert: revert a prior commit
+
+Subject:
+
+- Concise description (< 52 characters)
+- Start with lowercase letter (except when using a proper noun or term that's normally capitalized)
+- NO period at end
+
+When non-trivial, add a few lines in the body in bullet point explaining the key changes made, and when non-obvious, what the rationale was.
+
+Important: When planning big new features or preparing to make large refactors, commit any uncommitted files, _especially_ if they are likely to be touched in the impending changes. That way if everything goes wrong, it's relatively easy to revert the changes.
 
 ### Before Committing
-1. Run `npm run build` - must pass
-2. Run `npm test -- --run` - all tests must pass
+1. Run `pnpm run build` - must pass
+2. Run `pnpm test -- --run` - all tests must pass
 3. No console.log statements in committed code
 
 ## Browser Support
