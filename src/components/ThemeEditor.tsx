@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
-import { extractColors } from '@/lib/jsonParsing'
+import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
@@ -40,6 +40,15 @@ export function ThemeEditor() {
     return extractColors(currentTheme.style)
   }, [currentTheme])
 
+  // Get original colors from initial load state (history[0])
+  const originalColors = useMemo(() => {
+    const originalTheme = state.history[0]
+    if (!originalTheme) return new Map<string, string>()
+    const originalStyle = originalTheme.themes[state.activeThemeIndex]?.style
+    if (!originalStyle) return new Map<string, string>()
+    return extractColorsAsMap(originalStyle)
+  }, [state.history, state.activeThemeIndex])
+
   // Get selected color info
   const selectedColor = useMemo(() => {
     if (!state.selectedColorPath || !colors.length) return null
@@ -58,7 +67,14 @@ export function ThemeEditor() {
     } catch (error) {
       console.error('Failed to save:', error)
     }
-  }, [state.themeFamily, state.hasUnsavedChanges, state.fileHandle, serializedTheme, saveFile, markSaved])
+  }, [
+    state.themeFamily,
+    state.hasUnsavedChanges,
+    state.fileHandle,
+    serializedTheme,
+    saveFile,
+    markSaved,
+  ])
 
   // Handle color click in editor
   const handleColorClick = useCallback(
@@ -115,7 +131,9 @@ export function ThemeEditor() {
   // Show drop zone if no file loaded
   if (!state.themeFamily) {
     return (
-      <div className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}>
+      <div
+        className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}
+      >
         <Toolbar
           isDarkMode={state.isDarkMode}
           onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
@@ -129,7 +147,7 @@ export function ThemeEditor() {
           />
         </div>
         {state.error && (
-          <div className="bg-red-300/50 text-red-900 dark:bg-red-900/50 px-4 py-2 text-center text-sm dark:text-red-200">
+          <div className="bg-red-300/50 px-4 py-2 text-center text-sm text-red-900 dark:bg-red-900/50 dark:text-red-200">
             {state.error}
           </div>
         )}
@@ -138,7 +156,9 @@ export function ThemeEditor() {
   }
 
   return (
-    <div className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}>
+    <div
+      className={`flex h-screen flex-col bg-neutral-100 text-neutral-900 dark:bg-neutral-950 dark:text-white ${state.isDarkMode ? 'dark' : ''}`}
+    >
       {/* Toolbar */}
       <Toolbar
         fileName={state.fileName || undefined}
@@ -161,8 +181,12 @@ export function ThemeEditor() {
         {/* Left panel: Color list */}
         <aside className="flex w-64 flex-col border-r border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
           <div className="border-b border-neutral-300 px-3 py-2 dark:border-neutral-700">
-            <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Colors</h2>
-            <p className="text-xs text-neutral-500">{colors.length} properties</p>
+            <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Colors
+            </h2>
+            <p className="text-xs text-neutral-500">
+              {colors.length} properties
+            </p>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {colors.map((color) => (
@@ -170,6 +194,7 @@ export function ThemeEditor() {
                 key={color.path}
                 label={color.key}
                 color={color.value}
+                originalColor={originalColors.get(color.path)}
                 isSelected={color.path === state.selectedColorPath}
                 onClick={() => selectColor(color.path)}
                 displayFormat={state.colorDisplayFormat}
@@ -180,12 +205,13 @@ export function ThemeEditor() {
 
         {/* Center: JSON Editor */}
         <main className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex-1 overflow-hidden p-4">
+          <div className="flex-1 overflow-hidden p-0">
             <JsonEditorPanel
               content={serializedTheme}
               onColorClick={handleColorClick}
               selectedColorPath={state.selectedColorPath}
               isDarkMode={state.isDarkMode}
+              originalColors={originalColors}
             />
           </div>
 
@@ -202,6 +228,9 @@ export function ThemeEditor() {
           <ColorEditorPanel
             color={selectedColor?.value || null}
             colorPath={selectedColor?.path || null}
+            originalColor={
+              selectedColor ? originalColors.get(selectedColor.path) : undefined
+            }
             onChange={handleColorChange}
           />
         </aside>
