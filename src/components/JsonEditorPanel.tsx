@@ -14,15 +14,13 @@ import {
   keymap,
 } from '@codemirror/view'
 import { json } from '@codemirror/lang-json'
-import { oneDark } from '@codemirror/theme-one-dark'
+import { editorThemes, getDefaultTheme, type EditorThemeName } from '@/lib/editorThemes'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import {
   foldGutter,
   indentOnInput,
   bracketMatching,
   foldKeymap,
-  syntaxHighlighting,
-  defaultHighlightStyle,
 } from '@codemirror/language'
 import {
   lineNumbers,
@@ -44,8 +42,10 @@ export interface JsonEditorPanelProps {
   onColorClick?: (path: string, color: string, position: number) => void
   /** Currently selected color path */
   selectedColorPath?: string | null
-  /** Whether to use dark theme */
+  /** Whether to use dark theme (used for default theme selection) */
   isDarkMode?: boolean
+  /** Editor color theme name */
+  editorTheme?: EditorThemeName
   /** Whether the editor is read-only (default: true to prevent data loss) */
   readOnly?: boolean
   /** Original colors map for before/after comparison */
@@ -447,10 +447,10 @@ const colorDecorationsField = StateField.define<DecorationSet>({
 })
 
 // ============================================================================
-// Theme
+// Base Editor Styles (layout, not colors)
 // ============================================================================
 
-const editorTheme = EditorView.theme({
+const baseEditorStyles = EditorView.theme({
   '&': {
     height: '100%',
     fontSize: '13px',
@@ -465,16 +465,6 @@ const editorTheme = EditorView.theme({
   },
   '.cm-line': {
     padding: '0 8px',
-  },
-  '.cm-gutters': {
-    backgroundColor: 'transparent',
-    borderRight: 'none',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  '.cm-activeLine': {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
   },
   '.cm-foldGutter .cm-gutterElement': {
     padding: '0 4px',
@@ -491,10 +481,14 @@ export function JsonEditorPanel({
   onColorClick,
   selectedColorPath,
   isDarkMode = true,
+  editorTheme,
   readOnly = true,
   originalColors,
   className = '',
 }: JsonEditorPanelProps) {
+  // Resolve the theme to use
+  const themeName = editorTheme ?? getDefaultTheme(isDarkMode)
+  const themeConfig = editorThemes[themeName]
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const onChangeRef = useRef(onChange)
@@ -549,15 +543,10 @@ export function JsonEditorPanel({
       json(),
       keymap.of([...foldKeymap]),
       updateListener,
-      editorTheme,
+      baseEditorStyles,
+      themeConfig.extension,
       // Read-only mode by default to prevent accidental edits
       EditorState.readOnly.of(readOnly),
-      ...(isDarkMode
-        ? [
-            oneDark,
-            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-          ]
-        : [syntaxHighlighting(defaultHighlightStyle)]),
       // Only include editing features if not read-only
       ...(!readOnly
         ? [
@@ -587,7 +576,7 @@ export function JsonEditorPanel({
       view.destroy()
       viewRef.current = null
     }
-  }, [isDarkMode, readOnly]) // Recreate on theme or readOnly change
+  }, [themeName, readOnly, updateDecorations]) // Recreate on theme or readOnly change
 
   // Update content when it changes externally
   useEffect(() => {
