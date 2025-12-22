@@ -52,7 +52,7 @@ export function Tooltip({
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    timeoutRef.current = setTimeout(() => setIsVisible(true), 400)
+    timeoutRef.current = setTimeout(() => setIsVisible(true), 50)
   }
 
   const handleMouseLeave = () => {
@@ -110,15 +110,18 @@ export function Tooltip({
       </div>
 
       {/* Tooltip - only rendered when anchor positioning is supported */}
-      {supportsAnchor && isVisible && (
+      {supportsAnchor && (
         <div
           role="tooltip"
-          className="
+          className={`
             pointer-events-none fixed z-[9999] max-w-xs
-            rounded-md bg-neutral-800 px-2.5 py-1.5
-            text-xs leading-relaxed text-neutral-100 shadow-lg
-            dark:bg-neutral-200 dark:text-neutral-900
-          "
+            rounded-md px-2.5 py-1.5 shadow-lg
+            text-xs leading-relaxed
+            bg-neutral-900 text-neutral-100 border border-neutral-700
+            dark:bg-neutral-100 dark:text-neutral-900 dark:border-neutral-300
+            transition-opacity duration-100 ease-out
+            ${isVisible ? 'opacity-100' : 'opacity-0'}
+          `}
           style={{
             position: 'fixed',
             ...getPositionStyles(),
