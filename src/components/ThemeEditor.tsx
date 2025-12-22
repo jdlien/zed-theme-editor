@@ -3,7 +3,7 @@
  * Main application layout integrating all editor components
  */
 
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
@@ -15,6 +15,7 @@ import { JsonEditorPanel, normalizeColorPath } from './JsonEditorPanel'
 import { ColorEditorPanel } from './ColorEditorPanel'
 import { ThemePreview } from './ThemePreview'
 import { ColorSwatchRow } from './ColorSwatch'
+import { SearchInput } from './SearchInput'
 
 export function ThemeEditor() {
   const {
@@ -35,11 +36,27 @@ export function ThemeEditor() {
 
   const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
 
+  // Color filter state
+  const [colorFilter, setColorFilter] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
   // Extract colors from current theme
   const colors = useMemo(() => {
     if (!currentTheme) return []
     return extractColors(currentTheme.style)
   }, [currentTheme])
+
+  // Filter colors based on search term
+  const filteredColors = useMemo(() => {
+    if (!colorFilter.trim()) return colors
+    const term = colorFilter.toLowerCase()
+    return colors.filter(
+      (color) =>
+        color.path.toLowerCase().includes(term) ||
+        color.key.toLowerCase().includes(term) ||
+        color.value.toLowerCase().includes(term)
+    )
+  }, [colors, colorFilter])
 
   // Get original colors from initial load state (history[0])
   const originalColors = useMemo(() => {
@@ -120,6 +137,9 @@ export function ThemeEditor() {
       } else if (isMod && e.key === 'y') {
         e.preventDefault()
         if (canRedo) redo()
+      } else if (isMod && e.key === 'f') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
       } else if (e.key === 'Escape') {
         selectColor(null)
       }
@@ -186,21 +206,37 @@ export function ThemeEditor() {
               Colors
             </h2>
             <p className="text-xs text-neutral-500">
-              {colors.length} properties
+              {colorFilter
+                ? `${filteredColors.length} of ${colors.length} properties`
+                : `${colors.length} properties`}
             </p>
           </div>
+          <div className="border-b border-neutral-300 px-2 py-2 dark:border-neutral-700">
+            <SearchInput
+              value={colorFilter}
+              onChange={setColorFilter}
+              placeholder="Filter colors..."
+              inputRef={searchInputRef}
+            />
+          </div>
           <div className="flex-1 overflow-y-auto p-2">
-            {colors.map((color) => (
-              <ColorSwatchRow
-                key={color.path}
-                label={color.key}
-                color={color.value}
-                originalColor={originalColors.get(color.path)}
-                isSelected={color.path === state.selectedColorPath}
-                onClick={() => selectColor(color.path)}
-                displayFormat={state.colorDisplayFormat}
-              />
-            ))}
+            {filteredColors.length === 0 && colorFilter ? (
+              <p className="px-2 py-4 text-center text-sm text-neutral-500">
+                No matching colors
+              </p>
+            ) : (
+              filteredColors.map((color) => (
+                <ColorSwatchRow
+                  key={color.path}
+                  label={color.key}
+                  color={color.value}
+                  originalColor={originalColors.get(color.path)}
+                  isSelected={color.path === state.selectedColorPath}
+                  onClick={() => selectColor(color.path)}
+                  displayFormat={state.colorDisplayFormat}
+                />
+              ))
+            )}
           </div>
         </aside>
 
