@@ -4,6 +4,7 @@ import {
   normalizeHex,
   extractAlphaFromHex,
   parseColor,
+  colorToHex,
   toRgb,
   toHsl,
   toOklch,
@@ -295,5 +296,62 @@ describe('Bidirectional conversion accuracy', () => {
     expect(back.h).toBe(original.h)
     expect(back.s).toBe(original.s)
     expect(back.l).toBe(original.l)
+  })
+})
+
+describe('colorToHex', () => {
+  it('converts opaque color to 6-digit hex', () => {
+    const parsed = parseColor('#FF5500')
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    expect(result).toBe('#FF5500')
+  })
+
+  it('converts color with alpha to 8-digit hex', () => {
+    const parsed = parseColor('#FF550080')
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    // Alpha 0.5 (128/255) should be represented as 80 hex
+    expect(result).toBe('#FF550080')
+  })
+
+  it('strips alpha channel when alpha is 1', () => {
+    const parsed = parseColor('#FF5500')
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    // Should not include FF alpha suffix
+    expect(result.length).toBe(7)
+    expect(result).not.toMatch(/FF$/i)
+  })
+
+  it('handles fully transparent color', () => {
+    const parsed = parseColor('#FF550000')
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    expect(result).toBe('#FF550000')
+  })
+
+  it('handles partially transparent color', () => {
+    const parsed = parseColor('#AABBCCCC') // ~80% opacity
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    expect(result).toMatch(/^#[0-9A-F]{8}$/i)
+    expect(result.length).toBe(9) // 8 digits + #
+  })
+
+  it('preserves original hex when no alpha', () => {
+    const parsed = parseColor('#123456')
+    expect(parsed).not.toBeNull()
+    const result = colorToHex(parsed!)
+    expect(result).toBe('#123456')
+  })
+
+  it('rounds alpha correctly', () => {
+    // Test that alpha is correctly rounded to hex
+    const parsed = parseColor('#FF5500FF') // Full opacity
+    expect(parsed).not.toBeNull()
+    // Should return just 6-digit hex when alpha is 1
+    const result = colorToHex(parsed!)
+    expect(result).toBe('#FF5500')
   })
 })

@@ -500,6 +500,103 @@ describe('useThemeEditor', () => {
     })
   })
 
+  describe('addColor', () => {
+    it('adds a new color to the theme', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      // Add a new color that doesn't exist
+      act(() => {
+        result.current.addColor('style/border', '#333333')
+      })
+
+      // Check the color was added
+      expect(result.current.currentTheme?.style['border']).toBe('#333333')
+      expect(result.current.state.hasUnsavedChanges).toBe(true)
+    })
+
+    it('selects the newly added color', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      act(() => {
+        result.current.addColor('style/border', '#333333')
+      })
+
+      expect(result.current.state.selectedColorPath).toBe('style/border')
+    })
+
+    it('adds entry to history', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      const initialHistoryLength = result.current.state.history.length
+
+      act(() => {
+        result.current.addColor('style/border', '#333333')
+      })
+
+      expect(result.current.state.history.length).toBe(initialHistoryLength + 1)
+    })
+
+    it('does nothing when no theme loaded', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.addColor('style/border', '#333333')
+      })
+
+      expect(result.current.state.themeFamily).toBeNull()
+    })
+
+    it('can be undone', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      act(() => {
+        result.current.addColor('style/border', '#333333')
+      })
+
+      expect(result.current.currentTheme?.style['border']).toBe('#333333')
+
+      act(() => {
+        result.current.undo()
+      })
+
+      expect(result.current.currentTheme?.style['border']).toBeUndefined()
+    })
+
+    it('limits history size when adding many colors', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      // Add 60 colors (exceeds MAX_HISTORY of 50)
+      for (let i = 0; i < 60; i++) {
+        act(() => {
+          result.current.addColor(`style/color${i}`, `#${i.toString(16).padStart(6, '0')}`)
+        })
+      }
+
+      // History should be capped
+      expect(result.current.state.history.length).toBeLessThanOrEqual(50)
+    })
+  })
+
   describe('debounced history', () => {
     beforeEach(() => {
       vi.useFakeTimers()

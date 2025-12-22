@@ -306,5 +306,366 @@ describe('useFileAccess', () => {
         expect.objectContaining({ suggestedName: 'new-theme.json' })
       )
     })
+
+    it('saveFileAs uses default name when none provided', async () => {
+      const mockWritable = {
+        write: vi.fn(),
+        close: vi.fn(),
+      }
+
+      const mockFileHandle = {
+        createWritable: vi.fn().mockResolvedValue(mockWritable),
+      }
+
+      mockShowSaveFilePicker.mockResolvedValue(mockFileHandle)
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        await result.current.saveFileAs('{"test": true}')
+      })
+
+      expect(mockShowSaveFilePicker).toHaveBeenCalledWith(
+        expect.objectContaining({ suggestedName: 'theme.json' })
+      )
+    })
+
+    it('saveFileAs handles user cancellation', async () => {
+      const abortError = new Error('User cancelled')
+      abortError.name = 'AbortError'
+      mockShowSaveFilePicker.mockRejectedValue(abortError)
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const handle = await result.current.saveFileAs('{"test": true}')
+        expect(handle).toBeNull()
+      })
+
+      expect(result.current.error).toBeNull() // Cancellation is not an error
+    })
+
+    it('saveFileAs sets error on failure', async () => {
+      mockShowSaveFilePicker.mockRejectedValue(new Error('Save failed'))
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const handle = await result.current.saveFileAs('{"test": true}')
+        expect(handle).toBeNull()
+      })
+
+      expect(result.current.error).toBe('Save failed')
+    })
+
+    it('saveFile returns false when handle is null', async () => {
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const success = await result.current.saveFile('{"test": true}', null)
+        expect(success).toBe(false)
+      })
+
+      expect(result.current.error).toBe('No file handle available')
+    })
+
+    it('saveFile sets error on write failure', async () => {
+      const mockFileHandle = {
+        queryPermission: vi.fn().mockResolvedValue('granted'),
+        createWritable: vi.fn().mockRejectedValue(new Error('Write error')),
+      }
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const success = await result.current.saveFile(
+          '{"test": true}',
+          mockFileHandle as unknown as FileSystemFileHandle
+        )
+        expect(success).toBe(false)
+      })
+
+      expect(result.current.error).toBe('Write error')
+    })
+
+    it('openFile handles non-Error exceptions', async () => {
+      mockShowOpenFilePicker.mockRejectedValue('string error')
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const fileData = await result.current.openFile()
+        expect(fileData).toBeNull()
+      })
+
+      expect(result.current.error).toBe('Failed to open file')
+    })
+
+    it('saveFile handles non-Error exceptions', async () => {
+      const mockFileHandle = {
+        queryPermission: vi.fn().mockResolvedValue('granted'),
+        createWritable: vi.fn().mockRejectedValue('string error'),
+      }
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const success = await result.current.saveFile(
+          '{"test": true}',
+          mockFileHandle as unknown as FileSystemFileHandle
+        )
+        expect(success).toBe(false)
+      })
+
+      expect(result.current.error).toBe('Failed to save file')
+    })
+
+    it('saveFileAs handles non-Error exceptions', async () => {
+      mockShowSaveFilePicker.mockRejectedValue('string error')
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const handle = await result.current.saveFileAs('{"test": true}')
+        expect(handle).toBeNull()
+      })
+
+      expect(result.current.error).toBe('Failed to save file')
+    })
+  })
+
+  describe('without File System Access API', () => {
+    beforeEach(() => {
+      // Remove the API
+      const win = window as unknown as Record<string, unknown>
+      delete win.showOpenFilePicker
+      delete win.showSaveFilePicker
+    })
+
+    it('saveFile returns false when API not supported', async () => {
+      const mockFileHandle = {} as FileSystemFileHandle
+
+      const { result } = renderHook(() => useFileAccess())
+
+      await act(async () => {
+        const success = await result.current.saveFile('{"test": true}', mockFileHandle)
+        expect(success).toBe(false)
+      })
+
+      expect(result.current.error).toBe('Save in place not supported in this browser')
+    })
+
+    it('saveFileAs falls back to download', async () => {
+      // Render hook first before mocking createElement
+      const { result } = renderHook(() => useFileAccess())
+
+      // Mock DOM methods for download AFTER hook is rendered
+      const mockLink = {
+        href: '',
+        download: '',
+        click: vi.fn(),
+      }
+
+      const originalCreateElement = document.createElement.bind(document)
+      const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'a') {
+          return mockLink as unknown as HTMLAnchorElement
+        }
+        return originalCreateElement(tagName)
+      })
+      const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node)
+      const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => node)
+      const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test')
+      const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+      await act(async () => {
+        const handle = await result.current.saveFileAs('{"test": true}', 'theme.json')
+        expect(handle).toBeNull() // Returns null in fallback mode
+      })
+
+      expect(mockLink.click).toHaveBeenCalled()
+
+      // Cleanup
+      createElementSpy.mockRestore()
+      appendChildSpy.mockRestore()
+      removeChildSpy.mockRestore()
+      createObjectURLSpy.mockRestore()
+      revokeObjectURLSpy.mockRestore()
+    })
+
+    it('openFile uses fallback input when API not supported', async () => {
+      // Render hook first before mocking createElement
+      const { result } = renderHook(() => useFileAccess())
+
+      // Create a mock file input
+      const mockInput = {
+        type: '',
+        accept: '',
+        onchange: null as ((e: Event) => void) | null,
+        oncancel: null as (() => void) | null,
+        click: vi.fn(),
+        files: null as FileList | null,
+      }
+
+      const originalCreateElement = document.createElement.bind(document)
+      const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'input') {
+          return mockInput as unknown as HTMLInputElement
+        }
+        return originalCreateElement(tagName)
+      })
+
+      // Start the open file operation
+      let openPromise: Promise<unknown>
+      act(() => {
+        openPromise = result.current.openFile()
+      })
+
+      // Simulate user selecting a file
+      const mockFile = {
+        text: vi.fn().mockResolvedValue('{"name": "test"}'),
+        name: 'theme.json',
+      }
+      mockInput.files = [mockFile] as unknown as FileList
+
+      // Trigger the onchange callback
+      await act(async () => {
+        if (mockInput.onchange) {
+          await mockInput.onchange(new Event('change'))
+        }
+      })
+
+      const fileData = await openPromise!
+      expect(fileData).toEqual({
+        content: '{"name": "test"}',
+        name: 'theme.json',
+        handle: null,
+      })
+
+      createElementSpy.mockRestore()
+    })
+
+    it('openFile fallback returns null when no file selected', async () => {
+      // Render hook first before mocking createElement
+      const { result } = renderHook(() => useFileAccess())
+
+      const mockInput = {
+        type: '',
+        accept: '',
+        onchange: null as ((e: Event) => void) | null,
+        oncancel: null as (() => void) | null,
+        click: vi.fn(),
+        files: [] as unknown as FileList,
+      }
+
+      const originalCreateElement = document.createElement.bind(document)
+      const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'input') {
+          return mockInput as unknown as HTMLInputElement
+        }
+        return originalCreateElement(tagName)
+      })
+
+      let openPromise: Promise<unknown>
+      act(() => {
+        openPromise = result.current.openFile()
+      })
+
+      // Simulate empty file list
+      await act(async () => {
+        if (mockInput.onchange) {
+          await mockInput.onchange(new Event('change'))
+        }
+      })
+
+      const fileData = await openPromise!
+      expect(fileData).toBeNull()
+
+      createElementSpy.mockRestore()
+    })
+
+    it('openFile fallback returns null on file read error', async () => {
+      // Render hook first before mocking createElement
+      const { result } = renderHook(() => useFileAccess())
+
+      const mockInput = {
+        type: '',
+        accept: '',
+        onchange: null as ((e: Event) => void) | null,
+        oncancel: null as (() => void) | null,
+        click: vi.fn(),
+        files: null as FileList | null,
+      }
+
+      const originalCreateElement = document.createElement.bind(document)
+      const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'input') {
+          return mockInput as unknown as HTMLInputElement
+        }
+        return originalCreateElement(tagName)
+      })
+
+      let openPromise: Promise<unknown>
+      act(() => {
+        openPromise = result.current.openFile()
+      })
+
+      // Simulate file that fails to read
+      const mockFile = {
+        text: vi.fn().mockRejectedValue(new Error('Read failed')),
+        name: 'theme.json',
+      }
+      mockInput.files = [mockFile] as unknown as FileList
+
+      await act(async () => {
+        if (mockInput.onchange) {
+          await mockInput.onchange(new Event('change'))
+        }
+      })
+
+      const fileData = await openPromise!
+      expect(fileData).toBeNull()
+
+      createElementSpy.mockRestore()
+    })
+
+    it('openFile fallback handles user cancel', async () => {
+      // Render hook first before mocking createElement
+      const { result } = renderHook(() => useFileAccess())
+
+      const mockInput = {
+        type: '',
+        accept: '',
+        onchange: null as ((e: Event) => void) | null,
+        oncancel: null as (() => void) | null,
+        click: vi.fn(),
+        files: null as FileList | null,
+      }
+
+      const originalCreateElement = document.createElement.bind(document)
+      const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+        if (tagName === 'input') {
+          return mockInput as unknown as HTMLInputElement
+        }
+        return originalCreateElement(tagName)
+      })
+
+      let openPromise: Promise<unknown>
+      act(() => {
+        openPromise = result.current.openFile()
+      })
+
+      // Simulate user cancelling
+      await act(async () => {
+        if (mockInput.oncancel) {
+          mockInput.oncancel()
+        }
+      })
+
+      const fileData = await openPromise!
+      expect(fileData).toBeNull()
+
+      createElementSpy.mockRestore()
+    })
   })
 })

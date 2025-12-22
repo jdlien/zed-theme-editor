@@ -379,6 +379,52 @@ describe('updateColorAtPath', () => {
     expect((result.themes[0].style as Record<string, string>)['editor.background']).toBe('#000000')
     expect((result.themes[0].style as Record<string, string>)['editor.foreground']).toBe('#FFFFFF')
   })
+
+  it('updates color in array by index', () => {
+    const themeWithArray = {
+      name: 'Test',
+      author: 'Tester',
+      themes: [
+        {
+          name: 'Dark',
+          appearance: 'dark' as const,
+          style: {
+            accents: ['#FF0000', '#00FF00', '#0000FF'],
+          },
+        },
+      ],
+    }
+
+    const result = updateColorAtPath(themeWithArray, 0, 'style/accents/[1]', '#FFFF00')
+    expect((result.themes[0].style as { accents: string[] }).accents[1]).toBe('#FFFF00')
+    // Other values unchanged
+    expect((result.themes[0].style as { accents: string[] }).accents[0]).toBe('#FF0000')
+    expect((result.themes[0].style as { accents: string[] }).accents[2]).toBe('#0000FF')
+  })
+
+  it('updates color in nested array structure', () => {
+    const themeWithNestedArray = {
+      name: 'Test',
+      author: 'Tester',
+      themes: [
+        {
+          name: 'Dark',
+          appearance: 'dark' as const,
+          style: {
+            players: [
+              { cursor: '#FF0000', selection: '#FF000033' },
+              { cursor: '#00FF00', selection: '#00FF0033' },
+            ],
+          },
+        },
+      ],
+    }
+
+    const result = updateColorAtPath(themeWithNestedArray, 0, 'style/players/[0]/cursor', '#FFFFFF')
+    expect((result.themes[0].style as { players: Array<{ cursor: string }> }).players[0].cursor).toBe('#FFFFFF')
+    // Other values unchanged
+    expect((result.themes[0].style as { players: Array<{ cursor: string }> }).players[1].cursor).toBe('#00FF00')
+  })
 })
 
 describe('serializeTheme', () => {
