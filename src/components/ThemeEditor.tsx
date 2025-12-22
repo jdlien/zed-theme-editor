@@ -9,7 +9,7 @@ import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
 import { formatShortcut } from '@/lib/keyboard'
-import { getDefaultTheme, type EditorThemeName } from '@/lib/editorThemes'
+import type { EditorThemeName } from '@/lib/editorThemes'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
@@ -38,11 +38,19 @@ export function ThemeEditor() {
 
   const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
 
-  // Editor theme state (persisted to localStorage)
-  const [editorTheme, setEditorTheme] = useLocalStorage<EditorThemeName>(
-    'editorTheme',
-    getDefaultTheme(state.isDarkMode)
+  // Editor theme state - separate preferences for dark and light modes
+  const [darkEditorTheme, setDarkEditorTheme] = useLocalStorage<EditorThemeName>(
+    'editorThemeDark',
+    'neutral-dark'
   )
+  const [lightEditorTheme, setLightEditorTheme] = useLocalStorage<EditorThemeName>(
+    'editorThemeLight',
+    'neutral-light'
+  )
+
+  // Use the appropriate theme based on current mode
+  const editorTheme = state.isDarkMode ? darkEditorTheme : lightEditorTheme
+  const setEditorTheme = state.isDarkMode ? setDarkEditorTheme : setLightEditorTheme
 
   // Color filter state
   const [colorFilter, setColorFilter] = useState('')
