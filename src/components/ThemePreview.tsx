@@ -710,13 +710,12 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
                   />
                   main
                 </span>
-                <span>TypeScript</span>
                 <span style={{ color: warningColor as string }}>⚠ 2</span>
                 <span style={{ color: errorColor as string }}>✕ 0</span>
               </div>
               <div className="flex items-center gap-3">
-                <span>Ln 3, Col 42</span>
-                <span>UTF-8</span>
+                <span>3:42</span>
+                <span>TypeScript</span>
               </div>
             </div>
           </div>
