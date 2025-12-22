@@ -181,65 +181,72 @@ function findColors(content: string): ColorMatch[] {
 /**
  * Build full JSON path for a position in the document
  * Returns path like "style/editor.background" or "style/syntax/keyword/color"
+ * Includes array indices like "[0]" for items in arrays
  */
 function buildJsonPath(content: string, position: number): string {
   const segments: string[] = []
-  let depth = 0
   let inString = false
   let currentKey = ''
   let keyStart = -1
-  const arrayIndices: number[] = []
+  // Stack to track context: each entry is either -1 (object) or array index (>=0)
+  const contextStack: number[] = []
 
   for (let i = 0; i < position && i < content.length; i++) {
     const char = content[i]
-    const prevChar = i > 0 ? content[i - 1] : ''
 
-    if (char === '"' && prevChar !== '\\') {
-      if (!inString) {
-        inString = true
-        keyStart = i + 1
-      } else {
+    // Handle escaped characters in strings
+    if (inString) {
+      if (char === '\\' && i + 1 < content.length) {
+        // Skip the next character (escaped)
+        i++
+        continue
+      }
+      if (char === '"') {
         inString = false
         // Check if this is a key (followed by :)
         const rest = content.slice(i + 1).trimStart()
         if (rest.startsWith(':')) {
-          currentKey = content.slice(keyStart, i)
+          currentKey = parseJsonString(content.slice(keyStart, i))
         }
       }
-    } else if (!inString) {
-      if (char === '{') {
-        if (currentKey) {
-          segments.push(currentKey)
-          currentKey = ''
-        }
-        depth++
-        arrayIndices.push(-1) // Not in an array at this level
-      } else if (char === '[') {
-        if (currentKey) {
-          segments.push(currentKey)
-          currentKey = ''
-        }
-        depth++
-        arrayIndices.push(0)
-      } else if (char === '}') {
-        depth--
-        arrayIndices.pop()
-        if (segments.length > depth) {
-          segments.length = Math.max(0, depth)
-        }
-      } else if (char === ']') {
-        depth--
-        arrayIndices.pop()
-        if (segments.length > depth) {
-          segments.length = Math.max(0, depth)
-        }
-      } else if (char === ',') {
-        const lastArrayIndex = arrayIndices[arrayIndices.length - 1]
-        if (lastArrayIndex >= 0) {
-          arrayIndices[arrayIndices.length - 1] = lastArrayIndex + 1
-        }
+      continue
+    }
+
+    // Not in string
+    if (char === '"') {
+      inString = true
+      keyStart = i + 1
+    } else if (char === '{') {
+      if (currentKey) {
+        segments.push(currentKey)
         currentKey = ''
       }
+      contextStack.push(-1) // Object context
+    } else if (char === '[') {
+      if (currentKey) {
+        segments.push(currentKey)
+        currentKey = ''
+      }
+      contextStack.push(0) // Array context, starting at index 0
+    } else if (char === '}') {
+      contextStack.pop()
+      // Pop segments to match current depth
+      while (segments.length > contextStack.length) {
+        segments.pop()
+      }
+    } else if (char === ']') {
+      contextStack.pop()
+      // Pop segments to match current depth
+      while (segments.length > contextStack.length) {
+        segments.pop()
+      }
+    } else if (char === ',') {
+      // Increment array index if we're in an array
+      const lastContext = contextStack[contextStack.length - 1]
+      if (lastContext !== undefined && lastContext >= 0) {
+        contextStack[contextStack.length - 1] = lastContext + 1
+      }
+      currentKey = ''
     }
   }
 
@@ -247,7 +254,40 @@ function buildJsonPath(content: string, position: number): string {
     segments.push(currentKey)
   }
 
-  return segments.join('/')
+  // Build the final path with array indices where appropriate
+  const result: string[] = []
+  let segmentIdx = 0
+  for (let i = 0; i < contextStack.length && segmentIdx < segments.length; i++) {
+    const ctx = contextStack[i]
+    if (ctx >= 0) {
+      // This was an array - include the index
+      result.push(`[${ctx}]`)
+    }
+    if (segmentIdx < segments.length) {
+      result.push(segments[segmentIdx])
+      segmentIdx++
+    }
+  }
+  // Add remaining segments
+  while (segmentIdx < segments.length) {
+    result.push(segments[segmentIdx])
+    segmentIdx++
+  }
+
+  return result.join('/')
+}
+
+/**
+ * Parse a JSON string value, handling escape sequences
+ */
+function parseJsonString(str: string): string {
+  try {
+    // Use JSON.parse to properly handle escape sequences
+    return JSON.parse(`"${str}"`)
+  } catch {
+    // If parsing fails, return as-is
+    return str
+  }
 }
 
 // ============================================================================
