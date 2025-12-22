@@ -1,0 +1,228 @@
+/**
+ * ThemeEditor Component
+ * Main application layout integrating all editor components
+ */
+
+import { useCallback, useEffect, useMemo } from 'react'
+import { useThemeEditor } from '@/hooks/useThemeEditor'
+import { useFileAccess } from '@/hooks/useFileAccess'
+import { extractColors } from '@/lib/jsonParsing'
+import { DropZone } from './DropZone'
+import { Toolbar } from './Toolbar'
+import { ThemeTabs } from './ThemeTabs'
+import { JsonEditorPanel } from './JsonEditorPanel'
+import { ColorEditorPanel } from './ColorEditorPanel'
+import { ThemePreview } from './ThemePreview'
+import { ColorSwatchRow } from './ColorSwatch'
+
+export function ThemeEditor() {
+  const {
+    state,
+    loadFile,
+    setActiveTheme,
+    selectColor,
+    updateColor,
+    setDarkMode,
+    markSaved,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+    currentTheme,
+    serializedTheme,
+  } = useThemeEditor()
+
+  const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
+
+  // Extract colors from current theme
+  const colors = useMemo(() => {
+    if (!currentTheme) return []
+    return extractColors(currentTheme.style)
+  }, [currentTheme])
+
+  // Get selected color info
+  const selectedColor = useMemo(() => {
+    if (!state.selectedColorPath || !colors.length) return null
+    return colors.find((c) => c.path === state.selectedColorPath) || null
+  }, [colors, state.selectedColorPath])
+
+  // Handle save
+  const handleSave = useCallback(async () => {
+    if (!state.themeFamily || !state.hasUnsavedChanges) return
+
+    try {
+      const success = await saveFile(serializedTheme, state.fileHandle)
+      if (success) {
+        markSaved(state.fileHandle || undefined)
+      }
+    } catch (error) {
+      console.error('Failed to save:', error)
+    }
+  }, [state.themeFamily, state.hasUnsavedChanges, state.fileHandle, serializedTheme, saveFile, markSaved])
+
+  // Handle color click in editor
+  const handleColorClick = useCallback(
+    (path: string, _color: string, _position: number) => {
+      selectColor(path)
+    },
+    [selectColor]
+  )
+
+  // Handle color update from panel
+  const handleColorChange = useCallback(
+    (newColor: string) => {
+      if (state.selectedColorPath) {
+        updateColor(state.selectedColorPath, newColor)
+      }
+    },
+    [state.selectedColorPath, updateColor]
+  )
+
+  // Handle JSON content change from editor
+  const handleContentChange = useCallback(
+    (_newContent: string) => {
+      // For now, we don't update state on every keystroke
+      // This will be refined when we make CodeMirror the source of truth
+      // The JsonEditorPanel handles its own state internally
+    },
+    []
+  )
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey
+
+      if (isMod && e.key === 's') {
+        e.preventDefault()
+        handleSave()
+      } else if (isMod && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        if (canUndo) undo()
+      } else if (isMod && e.key === 'z' && e.shiftKey) {
+        e.preventDefault()
+        if (canRedo) redo()
+      } else if (isMod && e.key === 'y') {
+        e.preventDefault()
+        if (canRedo) redo()
+      } else if (e.key === 'Escape') {
+        selectColor(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleSave, undo, redo, canUndo, canRedo, selectColor])
+
+  // Show drop zone if no file loaded
+  if (!state.themeFamily) {
+    return (
+      <div className="flex h-screen flex-col bg-neutral-950 text-white">
+        <Toolbar
+          isDarkMode={state.isDarkMode}
+          onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+        />
+        <div className="flex flex-1 items-center justify-center p-8">
+          <DropZone
+            onFileLoad={(content, fileName, handle) => {
+              loadFile({ content, name: fileName, handle })
+            }}
+            onError={(error) => console.error('File load error:', error)}
+          />
+        </div>
+        {state.error && (
+          <div className="bg-red-900/50 px-4 py-2 text-center text-sm text-red-200">
+            {state.error}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-screen flex-col bg-neutral-950 text-white">
+      {/* Toolbar */}
+      <Toolbar
+        fileName={state.fileName || undefined}
+        hasUnsavedChanges={state.hasUnsavedChanges}
+        onSave={handleSave}
+        canSave={canSaveInPlace}
+        isDarkMode={state.isDarkMode}
+        onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+      />
+
+      {/* Theme tabs */}
+      <ThemeTabs
+        themes={state.themeFamily.themes}
+        activeIndex={state.activeThemeIndex}
+        onSelect={setActiveTheme}
+      />
+
+      {/* Main content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left panel: Color list */}
+        <aside className="flex w-64 flex-col border-r border-neutral-700 bg-neutral-900">
+          <div className="border-b border-neutral-700 px-3 py-2">
+            <h2 className="text-sm font-medium text-neutral-300">Colors</h2>
+            <p className="text-xs text-neutral-500">{colors.length} properties</p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            {colors.map((color) => (
+              <ColorSwatchRow
+                key={color.path}
+                label={color.key}
+                color={color.value}
+                isSelected={color.path === state.selectedColorPath}
+                onClick={() => selectColor(color.path)}
+                displayFormat={state.colorDisplayFormat}
+              />
+            ))}
+          </div>
+        </aside>
+
+        {/* Center: JSON Editor */}
+        <main className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-hidden p-4">
+            <JsonEditorPanel
+              content={serializedTheme}
+              onChange={handleContentChange}
+              onColorClick={handleColorClick}
+              selectedColorPath={state.selectedColorPath}
+              isDarkMode={state.isDarkMode}
+            />
+          </div>
+
+          {/* Theme Preview */}
+          {currentTheme && (
+            <div className="border-t border-neutral-700 p-4">
+              <ThemePreview style={currentTheme.style} />
+            </div>
+          )}
+        </main>
+
+        {/* Right panel: Color Editor */}
+        <aside className="w-80 overflow-y-auto border-l border-neutral-700 bg-neutral-900">
+          <ColorEditorPanel
+            color={selectedColor?.value || null}
+            colorPath={selectedColor?.path || null}
+            onChange={handleColorChange}
+          />
+        </aside>
+      </div>
+
+      {/* Status bar */}
+      <footer className="flex items-center justify-between border-t border-neutral-700 bg-neutral-900 px-4 py-1 text-xs text-neutral-500">
+        <div>
+          {state.themeFamily.name} by {state.themeFamily.author}
+        </div>
+        <div className="flex items-center gap-4">
+          {canUndo && <span>Ctrl+Z to undo</span>}
+          {canRedo && <span>Ctrl+Shift+Z to redo</span>}
+          {state.hasUnsavedChanges && <span>Ctrl+S to save</span>}
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+export default ThemeEditor
