@@ -3,7 +3,7 @@
  * CodeMirror 6 editor with JSON syntax highlighting and inline color swatches
  */
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react'
 import { EditorState, StateEffect, StateField } from '@codemirror/state'
 import {
   EditorView,
@@ -52,6 +52,11 @@ export interface JsonEditorPanelProps {
   originalColors?: Map<string, string>
   /** Additional CSS classes */
   className?: string
+}
+
+export interface JsonEditorPanelHandle {
+  /** Scroll the editor to show the color at the given path */
+  scrollToColorPath: (path: string) => void
 }
 
 interface ColorMatch {
@@ -475,17 +480,21 @@ const baseEditorStyles = EditorView.theme({
 // Main Component
 // ============================================================================
 
-export function JsonEditorPanel({
-  content,
-  onChange,
-  onColorClick,
-  selectedColorPath,
-  isDarkMode = true,
-  editorTheme,
-  readOnly = true,
-  originalColors,
-  className = '',
-}: JsonEditorPanelProps) {
+export const JsonEditorPanel = forwardRef<JsonEditorPanelHandle, JsonEditorPanelProps>(
+  function JsonEditorPanel(
+    {
+      content,
+      onChange,
+      onColorClick,
+      selectedColorPath,
+      isDarkMode = true,
+      editorTheme,
+      readOnly = true,
+      originalColors,
+      className = '',
+    },
+    ref
+  ) {
   // Resolve the theme to use
   const themeName = editorTheme ?? getDefaultTheme(isDarkMode)
   const themeConfig = editorThemes[themeName]
@@ -499,6 +508,30 @@ export function JsonEditorPanel({
   onChangeRef.current = onChange
   onColorClickRef.current = onColorClick
   originalColorsRef.current = originalColors
+
+  // Expose scroll method via ref
+  useImperativeHandle(ref, () => ({
+    scrollToColorPath: (path: string) => {
+      const view = viewRef.current
+      if (!view) return
+
+      const docContent = view.state.doc.toString()
+      const colors = findColors(docContent)
+
+      // Find the color that matches this path
+      for (const color of colors) {
+        const fullPath = buildJsonPath(docContent, color.from)
+        const { path: normalizedPath } = normalizeColorPath(fullPath)
+
+        if (normalizedPath === path) {
+          view.dispatch({
+            effects: EditorView.scrollIntoView(color.from, { y: 'center' }),
+          })
+          break
+        }
+      }
+    },
+  }), [])
 
   // Update color decorations
   const updateDecorations = useCallback(
@@ -519,8 +552,25 @@ export function JsonEditorPanel({
   )
 
   // Initialize CodeMirror
+  // Note: updateDecorations is intentionally excluded from deps to avoid recreating
+  // the editor on every selection change. Decoration updates are handled separately.
   useEffect(() => {
     if (!containerRef.current) return
+
+    // Create a local update function that doesn't depend on selectedColorPath
+    const updateDecorationsLocal = (view: EditorView) => {
+      const docContent = view.state.doc.toString()
+      const colors = findColors(docContent)
+      view.dispatch({
+        effects: setColorDecorations.of({
+          colors,
+          selectedPath: null, // Initial state, will be updated by separate effect
+          onClick: onColorClickRef.current,
+          docContent,
+          originalColors: originalColorsRef.current,
+        }),
+      })
+    }
 
     const updateListener = EditorView.updateListener.of(
       (update: ViewUpdate) => {
@@ -528,7 +578,7 @@ export function JsonEditorPanel({
           const newContent = update.state.doc.toString()
           onChangeRef.current(newContent)
           // Update decorations after content change
-          updateDecorations(update.view)
+          updateDecorationsLocal(update.view)
         }
       }
     )
@@ -570,13 +620,13 @@ export function JsonEditorPanel({
     viewRef.current = view
 
     // Initial decoration update
-    updateDecorations(view)
+    updateDecorationsLocal(view)
 
     return () => {
       view.destroy()
       viewRef.current = null
     }
-  }, [themeName, readOnly, updateDecorations]) // Recreate on theme or readOnly change
+  }, [themeName, readOnly]) // Recreate only on theme or readOnly change
 
   // Update content when it changes externally
   useEffect(() => {
@@ -623,6 +673,6 @@ export function JsonEditorPanel({
       data-testid="json-editor-panel"
     />
   )
-}
+})
 
 export default JsonEditorPanel

@@ -13,7 +13,7 @@ import type { EditorThemeName } from '@/lib/editorThemes'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
-import { JsonEditorPanel, normalizeColorPath } from './JsonEditorPanel'
+import { JsonEditorPanel, normalizeColorPath, type JsonEditorPanelHandle } from './JsonEditorPanel'
 import { ColorEditorPanel } from './ColorEditorPanel'
 import { ThemePreview } from './ThemePreview'
 import { ColorSwatchRow } from './ColorSwatch'
@@ -41,22 +41,22 @@ export function ThemeEditor() {
   const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
 
   // Editor theme state - separate preferences for dark and light modes
-  const [darkEditorTheme, setDarkEditorTheme] = useLocalStorage<EditorThemeName>(
-    'editorThemeDark',
-    'neutral-dark'
-  )
-  const [lightEditorTheme, setLightEditorTheme] = useLocalStorage<EditorThemeName>(
-    'editorThemeLight',
-    'neutral-light'
-  )
+  const [darkEditorTheme, setDarkEditorTheme] =
+    useLocalStorage<EditorThemeName>('editorThemeDark', 'neutral-dark')
+  const [lightEditorTheme, setLightEditorTheme] =
+    useLocalStorage<EditorThemeName>('editorThemeLight', 'neutral-light')
 
   // Use the appropriate theme based on current mode
   const editorTheme = state.isDarkMode ? darkEditorTheme : lightEditorTheme
-  const setEditorTheme = state.isDarkMode ? setDarkEditorTheme : setLightEditorTheme
+  const setEditorTheme = state.isDarkMode
+    ? setDarkEditorTheme
+    : setLightEditorTheme
 
   // Color filter state
   const [colorFilter, setColorFilter] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const colorListRef = useRef<HTMLDivElement>(null)
+  const jsonEditorRef = useRef<JsonEditorPanelHandle>(null)
 
   // Extract colors from current theme
   const colors = useMemo(() => {
@@ -130,7 +130,29 @@ export function ThemeEditor() {
     [hasPendingHistory, commitPendingHistory, selectColor]
   )
 
-  // Handle color click in editor
+  // Scroll sidebar to show a color path
+  const scrollSidebarToPath = useCallback((path: string) => {
+    const container = colorListRef.current
+    if (!container) return
+
+    requestAnimationFrame(() => {
+      const selectedElement = container.querySelector(
+        `[data-color-path="${CSS.escape(path)}"]`
+      ) as HTMLElement | null
+
+      if (selectedElement) {
+        const containerRect = container.getBoundingClientRect()
+        const elementRect = selectedElement.getBoundingClientRect()
+
+        // Only scroll if element is outside visible area
+        if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
+          selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        }
+      }
+    })
+  }, [])
+
+  // Handle color click in JSON editor - scroll sidebar to show the color
   const handleColorClick = useCallback(
     (path: string, _color: string, _position: number) => {
       // Normalize path from full document format to theme-relative format
@@ -143,8 +165,22 @@ export function ThemeEditor() {
 
       // handleSelectColor will commit pending history
       handleSelectColor(normalizedPath)
+
+      // Scroll sidebar to show this color
+      scrollSidebarToPath(normalizedPath)
     },
-    [handleSelectColor, setActiveTheme, state.activeThemeIndex]
+    [handleSelectColor, setActiveTheme, state.activeThemeIndex, scrollSidebarToPath]
+  )
+
+  // Handle color click in sidebar - scroll JSON editor to show the color
+  const handleSidebarColorClick = useCallback(
+    (path: string) => {
+      handleSelectColor(path)
+
+      // Scroll JSON editor to show this color
+      jsonEditorRef.current?.scrollToColorPath(path)
+    },
+    [handleSelectColor]
   )
 
   // Handle color update from panel (uses debounced history)
@@ -277,22 +313,23 @@ export function ThemeEditor() {
               inputRef={searchInputRef}
             />
           </div>
-          <div className="flex-1 overflow-y-auto p-2">
+          <div ref={colorListRef} className="flex-1 overflow-y-auto p-2">
             {filteredColors.length === 0 && colorFilter ? (
               <p className="px-2 py-4 text-center text-sm text-neutral-500">
                 No matching colors
               </p>
             ) : (
               filteredColors.map((color) => (
-                <ColorSwatchRow
-                  key={color.path}
-                  label={color.key}
-                  color={color.value}
-                  originalColor={originalColors.get(color.path)}
-                  isSelected={color.path === state.selectedColorPath}
-                  onClick={() => handleSelectColor(color.path)}
-                  displayFormat={state.colorDisplayFormat}
-                />
+                <div key={color.path} data-color-path={color.path}>
+                  <ColorSwatchRow
+                    label={color.key}
+                    color={color.value}
+                    originalColor={originalColors.get(color.path)}
+                    isSelected={color.path === state.selectedColorPath}
+                    onClick={() => handleSidebarColorClick(color.path)}
+                    displayFormat={state.colorDisplayFormat}
+                  />
+                </div>
               ))
             )}
           </div>
@@ -302,6 +339,7 @@ export function ThemeEditor() {
         <main className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-hidden p-0">
             <JsonEditorPanel
+              ref={jsonEditorRef}
               content={serializedTheme}
               onColorClick={handleColorClick}
               selectedColorPath={state.selectedColorPath}
@@ -313,7 +351,7 @@ export function ThemeEditor() {
 
           {/* Theme Preview */}
           {currentTheme && (
-            <div className="border-t border-neutral-300 p-4 dark:border-neutral-700">
+            <div className="border-t border-neutral-300 bg-neutral-200 dark:border-neutral-700 dark:bg-neutral-800">
               <ThemePreview style={currentTheme.style} />
             </div>
           )}
@@ -340,7 +378,9 @@ export function ThemeEditor() {
         <div className="flex items-center gap-4">
           {canUndo && <span>{formatShortcut('Z')} to undo</span>}
           {canRedo && <span>{formatShortcut('Z', true)} to redo</span>}
-          {state.hasUnsavedChanges && <span>{formatShortcut('S')} to save</span>}
+          {state.hasUnsavedChanges && (
+            <span>{formatShortcut('S')} to save</span>
+          )}
         </div>
       </footer>
     </div>

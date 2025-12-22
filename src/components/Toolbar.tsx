@@ -4,7 +4,7 @@
  */
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSun, faMoon, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'
 import { formatShortcut } from '@/lib/keyboard'
 import { editorThemes, type EditorThemeName } from '@/lib/editorThemes'
 import { ZedLogo } from './ZedLogo'
@@ -35,13 +35,18 @@ export function Toolbar({
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <ZedLogo size={28} className="animate-hue-cycle text-[#084CCF]" />
-          <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">Zed Theme Editor</h1>
+          <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
+            Zed Theme Editor
+          </h1>
         </div>
         {fileName && (
           <span className="text-sm text-neutral-600 dark:text-neutral-400">
             {fileName}
             {hasUnsavedChanges && (
-              <span className="ml-1 text-yellow-600 dark:text-yellow-500" title="Unsaved changes">
+              <span
+                className="ml-1 text-yellow-600 dark:text-yellow-500"
+                title="Unsaved changes"
+              >
                 *
               </span>
             )}
@@ -52,7 +57,9 @@ export function Toolbar({
         {onEditorThemeChange && (
           <select
             value={editorTheme}
-            onChange={(e) => onEditorThemeChange(e.target.value as EditorThemeName)}
+            onChange={(e) =>
+              onEditorThemeChange(e.target.value as EditorThemeName)
+            }
             className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
             title="Editor theme"
           >
@@ -70,7 +77,10 @@ export function Toolbar({
           className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
           title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          <FontAwesomeIcon icon={isDarkMode ? faSun : faMoon} className="h-4 w-4" />
+          <FontAwesomeIcon
+            icon={isDarkMode ? faSun : faMoon}
+            className="h-4 w-4"
+          />
           {isDarkMode ? 'Light' : 'Dark'}
         </button>
         {onSave && (
@@ -80,7 +90,6 @@ export function Toolbar({
             className="flex items-center gap-2 rounded bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             title={`Save (${formatShortcut('S')})`}
           >
-            <FontAwesomeIcon icon={faFloppyDisk} className="h-4 w-4" />
             Save
           </button>
         )}

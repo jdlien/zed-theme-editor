@@ -16,7 +16,8 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const editorFg = style['editor.foreground'] || style.text || '#d4d4d4'
   const lineNumber = style['editor.line_number'] || '#858585'
   const activeLineNumber = style['editor.active_line_number'] || '#c6c6c6'
-  const activeLine = style['editor.active_line.background'] || 'rgba(255,255,255,0.05)'
+  const activeLine =
+    style['editor.active_line.background'] || 'rgba(255,255,255,0.05)'
   const selection = style['players']?.[0]?.selection || 'rgba(38,79,120,0.5)'
 
   const terminalBg = style['terminal.background'] || '#000000'
@@ -33,8 +34,10 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
   const comment = style.syntax?.comment?.color || '#6a9955'
 
   return (
-    <div className={`rounded-lg border border-neutral-700 bg-neutral-800 p-3 ${className}`}>
-      <h3 className="mb-2 text-xs font-medium text-neutral-400">Preview</h3>
+    <div className={`p-2 pt-1 ${className}`}>
+      <h3 className="mt-0 mb-1 ml-0.5 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+        Preview
+      </h3>
 
       <div className="flex gap-2">
         {/* Editor preview */}
@@ -46,7 +49,7 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
           <div className="flex">
             {/* Line numbers */}
             <div
-              className="select-none px-2 py-1 text-right"
+              className="px-2 py-1 text-right select-none"
               style={{ color: lineNumber as string }}
             >
               <div>1</div>
@@ -63,7 +66,9 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
                 <span style={{ color: keyword as string }}>const</span>{' '}
                 <span style={{ color: variable as string }}>theme</span>{' '}
                 <span style={{ color: editorFg as string }}>=</span>{' '}
-                <span style={{ color: string as string }}>"dracula"</span>
+                <span style={{ color: string as string }}>
+                  "My Awesome Theme"
+                </span>
               </div>
               <div>
                 <span style={{ color: keyword as string }}>function</span>{' '}
@@ -91,10 +96,14 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
         {/* Terminal preview */}
         <div
           className="w-32 overflow-hidden rounded p-2 font-mono text-xs"
-          style={{ backgroundColor: terminalBg as string, color: terminalFg as string }}
+          style={{
+            backgroundColor: terminalBg as string,
+            color: terminalFg as string,
+          }}
         >
           <div>
-            <span style={{ color: terminalGreen as string }}>$</span> npm run build
+            <span style={{ color: terminalGreen as string }}>$</span> npm run
+            build
           </div>
           <div style={{ color: terminalYellow as string }}>Building...</div>
           <div style={{ color: terminalBlue as string }}>Done in 1.2s</div>
