@@ -3,7 +3,7 @@
  * Central state management for the theme editor
  */
 
-import { createContext, useContext, useReducer, useCallback, useMemo, ReactNode } from 'react'
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect, ReactNode } from 'react'
 import type { ThemeFamily, ColorFormat } from '@/types/theme'
 import { parseThemeFile, serializeTheme, updateColorAtPath } from '@/lib/jsonParsing'
 import type { FileData } from './useFileAccess'
@@ -35,6 +35,8 @@ export interface EditorState {
   historyIndex: number
   /** The history index that was last saved (for tracking unsaved changes) */
   savedHistoryIndex: number
+  /** Pending history commit for debounced updates (stores state before rapid changes) */
+  pendingHistoryCommit: ThemeFamily | null
 }
 
 const initialState: EditorState = {
@@ -55,6 +57,7 @@ const initialState: EditorState = {
   history: [],
   historyIndex: -1,
   savedHistoryIndex: -1,
+  pendingHistoryCommit: null,
 }
 
 // ============================================================================
@@ -69,6 +72,8 @@ export type EditorAction =
   | { type: 'SET_ACTIVE_THEME'; payload: number }
   | { type: 'SELECT_COLOR'; payload: string | null }
   | { type: 'UPDATE_COLOR'; payload: { path: string; value: string } }
+  | { type: 'UPDATE_COLOR_LIVE'; payload: { path: string; value: string } }
+  | { type: 'COMMIT_PENDING_HISTORY' }
   | { type: 'SET_COLOR_FORMAT'; payload: ColorFormat }
   | { type: 'SET_DARK_MODE'; payload: boolean }
   | { type: 'MARK_SAVED'; payload: { handle?: FileSystemFileHandle } }
@@ -107,6 +112,7 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         history: [themeFamily],
         historyIndex: 0,
         savedHistoryIndex: 0,
+        pendingHistoryCommit: null,
       }
     }
 
@@ -158,6 +164,46 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         hasUnsavedChanges: true,
         history: newHistory,
         historyIndex: newHistory.length - 1,
+        pendingHistoryCommit: null, // Clear pending on direct update
+      }
+    }
+
+    case 'UPDATE_COLOR_LIVE': {
+      // Live update: changes theme immediately but defers history commit
+      if (!state.themeFamily) return state
+
+      const { path, value } = action.payload
+      const updated = updateColorAtPath(state.themeFamily, state.activeThemeIndex, path, value)
+
+      return {
+        ...state,
+        themeFamily: updated,
+        hasUnsavedChanges: true,
+        // Only capture pending state on first change in a rapid sequence
+        pendingHistoryCommit: state.pendingHistoryCommit ?? state.themeFamily,
+      }
+    }
+
+    case 'COMMIT_PENDING_HISTORY': {
+      // Commit pending changes to history
+      if (!state.pendingHistoryCommit || !state.themeFamily) {
+        return { ...state, pendingHistoryCommit: null }
+      }
+
+      // Trim history if we're not at the end
+      const newHistory = state.history.slice(0, state.historyIndex + 1)
+      newHistory.push(state.themeFamily)
+
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY) {
+        newHistory.shift()
+      }
+
+      return {
+        ...state,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+        pendingHistoryCommit: null,
       }
     }
 
@@ -231,6 +277,8 @@ interface ThemeEditorContextValue {
   setActiveTheme: (index: number) => void
   selectColor: (path: string | null) => void
   updateColor: (path: string, value: string) => void
+  updateColorLive: (path: string, value: string) => void
+  commitPendingHistory: () => void
   setColorFormat: (format: ColorFormat) => void
   setDarkMode: (isDark: boolean) => void
   markSaved: (handle?: FileSystemFileHandle) => void
@@ -241,6 +289,7 @@ interface ThemeEditorContextValue {
   // Computed values
   canUndo: boolean
   canRedo: boolean
+  hasPendingHistory: boolean
   currentTheme: ThemeFamily['themes'][number] | null
   serializedTheme: string
 }
@@ -307,6 +356,14 @@ export function ThemeEditorProvider({
     dispatch({ type: 'UPDATE_COLOR', payload: { path, value } })
   }, [])
 
+  const updateColorLive = useCallback((path: string, value: string) => {
+    dispatch({ type: 'UPDATE_COLOR_LIVE', payload: { path, value } })
+  }, [])
+
+  const commitPendingHistory = useCallback(() => {
+    dispatch({ type: 'COMMIT_PENDING_HISTORY' })
+  }, [])
+
   const setColorFormat = useCallback((format: ColorFormat) => {
     dispatch({ type: 'SET_COLOR_FORMAT', payload: format })
   }, [])
@@ -331,9 +388,23 @@ export function ThemeEditorProvider({
     dispatch({ type: 'CLEAR_ERROR' })
   }, [])
 
+  // Debounce timer for auto-committing history after 800ms of inactivity
+  const HISTORY_DEBOUNCE_MS = 800
+
+  useEffect(() => {
+    if (!state.pendingHistoryCommit) return
+
+    const timer = setTimeout(() => {
+      dispatch({ type: 'COMMIT_PENDING_HISTORY' })
+    }, HISTORY_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [state.themeFamily, state.pendingHistoryCommit])
+
   // Computed values
-  const canUndo = state.historyIndex > 0
+  const canUndo = state.historyIndex > 0 || state.pendingHistoryCommit !== null
   const canRedo = state.historyIndex < state.history.length - 1
+  const hasPendingHistory = state.pendingHistoryCommit !== null
   const currentTheme = state.themeFamily?.themes[state.activeThemeIndex] ?? null
   const serializedTheme = useMemo(
     () => (state.themeFamily ? serializeTheme(state.themeFamily) : ''),
@@ -349,6 +420,8 @@ export function ThemeEditorProvider({
       setActiveTheme,
       selectColor,
       updateColor,
+      updateColorLive,
+      commitPendingHistory,
       setColorFormat,
       setDarkMode,
       markSaved,
@@ -357,6 +430,7 @@ export function ThemeEditorProvider({
       clearError,
       canUndo,
       canRedo,
+      hasPendingHistory,
       currentTheme,
       serializedTheme,
     }),
@@ -367,6 +441,8 @@ export function ThemeEditorProvider({
       setActiveTheme,
       selectColor,
       updateColor,
+      updateColorLive,
+      commitPendingHistory,
       setColorFormat,
       setDarkMode,
       markSaved,
@@ -375,6 +451,7 @@ export function ThemeEditorProvider({
       clearError,
       canUndo,
       canRedo,
+      hasPendingHistory,
       currentTheme,
       serializedTheme,
     ]

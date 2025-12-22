@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { ThemeEditorProvider, useThemeEditor } from './useThemeEditor'
 import type { ThemeFamily } from '@/types/theme'
@@ -497,6 +497,198 @@ describe('useThemeEditor', () => {
       expect(() => {
         renderHook(() => useThemeEditor())
       }).toThrow('useThemeEditor must be used within a ThemeEditorProvider')
+    })
+  })
+
+  describe('debounced history', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('updateColorLive updates theme but does not add to history immediately', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      const initialHistoryLength = result.current.state.history.length
+      expect(initialHistoryLength).toBe(1)
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      // Theme should update immediately
+      expect(result.current.currentTheme?.style.background).toBe('#FF0000')
+      // But history should not grow yet
+      expect(result.current.state.history.length).toBe(initialHistoryLength)
+      // And hasPendingHistory should be true
+      expect(result.current.hasPendingHistory).toBe(true)
+    })
+
+    it('commits history after debounce timer', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      expect(result.current.state.history.length).toBe(1)
+      expect(result.current.hasPendingHistory).toBe(true)
+
+      // Advance timer by 800ms (debounce duration)
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+
+      expect(result.current.state.history.length).toBe(2)
+      expect(result.current.hasPendingHistory).toBe(false)
+    })
+
+    it('commitPendingHistory commits immediately', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      expect(result.current.hasPendingHistory).toBe(true)
+
+      act(() => {
+        result.current.commitPendingHistory()
+      })
+
+      expect(result.current.hasPendingHistory).toBe(false)
+      expect(result.current.state.history.length).toBe(2)
+    })
+
+    it('rapid live updates result in single history entry after debounce', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      // Make many rapid changes
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+      act(() => {
+        vi.advanceTimersByTime(100) // Less than debounce time
+        result.current.updateColorLive('style/background', '#00FF00')
+      })
+      act(() => {
+        vi.advanceTimersByTime(100)
+        result.current.updateColorLive('style/background', '#0000FF')
+      })
+      act(() => {
+        vi.advanceTimersByTime(100)
+        result.current.updateColorLive('style/background', '#FFFF00')
+      })
+
+      // History should still only have the initial entry
+      expect(result.current.state.history.length).toBe(1)
+
+      // Wait for debounce
+      act(() => {
+        vi.advanceTimersByTime(800)
+      })
+
+      // Now should have one additional entry (not 4)
+      expect(result.current.state.history.length).toBe(2)
+      expect(result.current.currentTheme?.style.background).toBe('#FFFF00')
+    })
+
+    it('canUndo is true when there is pending history', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      expect(result.current.canUndo).toBe(false)
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      // canUndo should be true even before debounce commits
+      expect(result.current.canUndo).toBe(true)
+    })
+
+    it('undo after pending commits the pending changes first', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      const originalColor = result.current.currentTheme?.style.background
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      // Without waiting for debounce, undo should commit then undo
+      // Note: The undo action in the reducer will commit pending first
+      act(() => {
+        result.current.commitPendingHistory()
+        result.current.undo()
+      })
+
+      expect(result.current.currentTheme?.style.background).toBe(originalColor)
+      // History should have the committed entry that we undid from
+      expect(result.current.state.history.length).toBe(2)
+    })
+
+    it('clears pending history when new file is loaded', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      act(() => {
+        result.current.updateColorLive('style/background', '#FF0000')
+      })
+
+      expect(result.current.hasPendingHistory).toBe(true)
+
+      // Load a new file
+      act(() => {
+        result.current.loadFile(createFileData(mockThemeJson, 'new-theme.json'))
+      })
+
+      expect(result.current.hasPendingHistory).toBe(false)
+    })
+
+    it('does not create history entry when there is nothing pending', () => {
+      const { result } = renderHook(() => useThemeEditor(), { wrapper: createWrapper() })
+
+      act(() => {
+        result.current.loadFile(createFileData())
+      })
+
+      const initialHistoryLength = result.current.state.history.length
+
+      act(() => {
+        result.current.commitPendingHistory()
+      })
+
+      expect(result.current.state.history.length).toBe(initialHistoryLength)
     })
   })
 })

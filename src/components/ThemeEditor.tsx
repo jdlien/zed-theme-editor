@@ -25,13 +25,15 @@ export function ThemeEditor() {
     loadFile,
     setActiveTheme,
     selectColor,
-    updateColor,
+    updateColorLive,
+    commitPendingHistory,
     setDarkMode,
     markSaved,
     undo,
     redo,
     canUndo,
     canRedo,
+    hasPendingHistory,
     currentTheme,
     serializedTheme,
   } = useThemeEditor()
@@ -93,6 +95,11 @@ export function ThemeEditor() {
   const handleSave = useCallback(async () => {
     if (!state.themeFamily || !state.hasUnsavedChanges) return
 
+    // Commit any pending history before saving
+    if (hasPendingHistory) {
+      commitPendingHistory()
+    }
+
     try {
       const success = await saveFile(serializedTheme, state.fileHandle)
       if (success) {
@@ -108,7 +115,20 @@ export function ThemeEditor() {
     serializedTheme,
     saveFile,
     markSaved,
+    hasPendingHistory,
+    commitPendingHistory,
   ])
+
+  // Handle color selection with pending history commit
+  const handleSelectColor = useCallback(
+    (path: string | null) => {
+      if (hasPendingHistory) {
+        commitPendingHistory()
+      }
+      selectColor(path)
+    },
+    [hasPendingHistory, commitPendingHistory, selectColor]
+  )
 
   // Handle color click in editor
   const handleColorClick = useCallback(
@@ -121,20 +141,38 @@ export function ThemeEditor() {
         setActiveTheme(themeIndex)
       }
 
-      selectColor(normalizedPath)
+      // handleSelectColor will commit pending history
+      handleSelectColor(normalizedPath)
     },
-    [selectColor, setActiveTheme, state.activeThemeIndex]
+    [handleSelectColor, setActiveTheme, state.activeThemeIndex]
   )
 
-  // Handle color update from panel
+  // Handle color update from panel (uses debounced history)
   const handleColorChange = useCallback(
     (newColor: string) => {
       if (state.selectedColorPath) {
-        updateColor(state.selectedColorPath, newColor)
+        updateColorLive(state.selectedColorPath, newColor)
       }
     },
-    [state.selectedColorPath, updateColor]
+    [state.selectedColorPath, updateColorLive]
   )
+
+  // Handle undo with pending history commit
+  const handleUndo = useCallback(() => {
+    // Commit pending changes first so they become undoable
+    if (hasPendingHistory) {
+      commitPendingHistory()
+    }
+    undo()
+  }, [hasPendingHistory, commitPendingHistory, undo])
+
+  // Handle redo with pending history commit
+  const handleRedo = useCallback(() => {
+    if (hasPendingHistory) {
+      commitPendingHistory()
+    }
+    redo()
+  }, [hasPendingHistory, commitPendingHistory, redo])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -146,24 +184,24 @@ export function ThemeEditor() {
         handleSave()
       } else if (isMod && e.key === 'z' && !e.shiftKey) {
         e.preventDefault()
-        if (canUndo) undo()
+        if (canUndo) handleUndo()
       } else if (isMod && e.key === 'z' && e.shiftKey) {
         e.preventDefault()
-        if (canRedo) redo()
+        if (canRedo) handleRedo()
       } else if (isMod && e.key === 'y') {
         e.preventDefault()
-        if (canRedo) redo()
+        if (canRedo) handleRedo()
       } else if (isMod && e.key === 'f') {
         e.preventDefault()
         searchInputRef.current?.focus()
       } else if (e.key === 'Escape') {
-        selectColor(null)
+        handleSelectColor(null)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleSave, undo, redo, canUndo, canRedo, selectColor])
+  }, [handleSave, handleUndo, handleRedo, canUndo, canRedo, handleSelectColor])
 
   // Show drop zone if no file loaded
   if (!state.themeFamily) {
@@ -252,7 +290,7 @@ export function ThemeEditor() {
                   color={color.value}
                   originalColor={originalColors.get(color.path)}
                   isSelected={color.path === state.selectedColorPath}
-                  onClick={() => selectColor(color.path)}
+                  onClick={() => handleSelectColor(color.path)}
                   displayFormat={state.colorDisplayFormat}
                 />
               ))
