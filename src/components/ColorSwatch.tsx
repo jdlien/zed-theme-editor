@@ -62,52 +62,66 @@ export function ColorSwatch({
 }: ColorSwatchProps) {
   const hasChanged = originalColor && originalColor !== color
 
+  const swatchStyles = `
+    ${sizeClasses[size]}
+    relative overflow-hidden rounded border
+    ${isSelected ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-white dark:ring-offset-neutral-900' : ''}
+    ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-offset-1 hover:ring-offset-white dark:hover:ring-offset-neutral-900' : ''}
+    border-neutral-400 dark:border-neutral-600 transition-shadow
+  `
+
+  const swatchContent = (
+    <>
+      {/* Checkerboard background for transparency */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(45deg, #333 25%, transparent 25%),
+            linear-gradient(-45deg, #333 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #333 75%),
+            linear-gradient(-45deg, transparent 75%, #333 75%)
+          `,
+          backgroundSize: '8px 8px',
+          backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
+        }}
+      />
+
+      {/* Color display */}
+      {hasChanged ? (
+        // Split view: original on left, current on right
+        <div className="pointer-events-none relative flex h-full w-full">
+          <div className="h-full w-1/2" style={{ backgroundColor: originalColor }} />
+          <div className="h-full w-1/2" style={{ backgroundColor: color }} />
+        </div>
+      ) : (
+        // Single color
+        <div className="pointer-events-none relative h-full w-full" style={{ backgroundColor: color }} />
+      )}
+    </>
+  )
+
   return (
     <div className={`inline-flex items-center gap-2 ${className}`}>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`
-          ${sizeClasses[size]}
-          relative overflow-hidden rounded border
-          ${isSelected ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-neutral-900' : ''}
-          ${onClick ? 'cursor-pointer hover:ring-2 hover:ring-blue-400 hover:ring-offset-1 hover:ring-offset-neutral-900' : 'cursor-default'}
-          border-neutral-600 transition-shadow
-        `}
-        aria-label={`Color: ${color}`}
-        disabled={!onClick}
-      >
-        {/* Checkerboard background for transparency */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(45deg, #333 25%, transparent 25%),
-              linear-gradient(-45deg, #333 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #333 75%),
-              linear-gradient(-45deg, transparent 75%, #333 75%)
-            `,
-            backgroundSize: '8px 8px',
-            backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
-          }}
-        />
-
-        {/* Color display */}
-        {hasChanged ? (
-          // Split view: original on left, current on right
-          <div className="relative flex h-full w-full">
-            <div className="h-full w-1/2" style={{ backgroundColor: originalColor }} />
-            <div className="h-full w-1/2" style={{ backgroundColor: color }} />
-          </div>
-        ) : (
-          // Single color
-          <div className="relative h-full w-full" style={{ backgroundColor: color }} />
-        )}
-      </button>
+      {/* Render as button only when interactive, otherwise as span to avoid nested buttons */}
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          className={swatchStyles}
+          aria-label={`Color: ${color}`}
+        >
+          {swatchContent}
+        </button>
+      ) : (
+        <span className={swatchStyles} aria-label={`Color: ${color}`}>
+          {swatchContent}
+        </span>
+      )}
 
       {/* Color value text */}
       {showValue && displayFormat && (
-        <span className="font-mono text-xs text-neutral-400">
+        <span className="font-mono text-xs text-neutral-600 dark:text-neutral-400">
           {formatColorValue(color, displayFormat)}
         </span>
       )}
@@ -148,7 +162,7 @@ export function ColorSwatchRow({
       onClick={onClick}
       className={`
         flex w-full items-center gap-3 rounded px-2 py-1.5 text-left transition-colors
-        ${isSelected ? 'bg-blue-900/30' : 'hover:bg-neutral-800'}
+        ${isSelected ? 'bg-blue-500/20 dark:bg-blue-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}
       `}
     >
       <ColorSwatch
@@ -157,7 +171,7 @@ export function ColorSwatchRow({
         size="sm"
         isSelected={isSelected}
       />
-      <span className="flex-1 truncate text-sm text-neutral-300">{label}</span>
+      <span className="flex-1 truncate text-sm text-neutral-700 dark:text-neutral-300">{label}</span>
       <span className="font-mono text-xs text-neutral-500">
         {formatColorValue(color, displayFormat)}
       </span>
