@@ -127,7 +127,7 @@ function HexInput({
         isValid
           ? 'border-neutral-300 bg-white dark:border-neutral-600 dark:bg-neutral-800'
           : 'border-red-500 bg-red-100 dark:bg-red-900/20'
-      } focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+      } focus:border-transparent focus:ring-2 focus:ring-indigo-500 focus:outline-none`}
       placeholder="#RRGGBB"
       maxLength={9}
       aria-label="Hex color"

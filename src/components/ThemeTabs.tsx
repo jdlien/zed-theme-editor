@@ -30,7 +30,7 @@ export function ThemeTabs({ themes, activeIndex, onSelect }: ThemeTabsProps) {
           onClick={() => onSelect(index)}
           className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
             index === activeIndex
-              ? 'border-b-2 border-blue-500 text-neutral-900 dark:text-white'
+              ? 'border-b-2 border-indigo-500 text-neutral-900 dark:text-white'
               : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
           }`}
         >

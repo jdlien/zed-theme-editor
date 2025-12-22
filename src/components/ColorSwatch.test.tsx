@@ -59,7 +59,7 @@ describe('ColorSwatch', () => {
       render(<ColorSwatch color="#FF0000" isSelected />)
       const swatch = screen.getByLabelText('Color: #FF0000')
       expect(swatch.className).toContain('ring-2')
-      expect(swatch.className).toContain('ring-blue-500')
+      expect(swatch.className).toContain('ring-indigo-500')
     })
   })
 
@@ -67,7 +67,9 @@ describe('ColorSwatch', () => {
     it('shows single color when no originalColor', () => {
       const { container } = render(<ColorSwatch color="#FF0000" />)
       // Should have only one color div (not split)
-      const colorDivs = container.querySelectorAll('[style*="background-color"]')
+      const colorDivs = container.querySelectorAll(
+        '[style*="background-color"]'
+      )
       // One for the color, ignore the checkerboard background
       expect(colorDivs).toHaveLength(1)
     })
@@ -76,7 +78,9 @@ describe('ColorSwatch', () => {
       const { container } = render(
         <ColorSwatch color="#FF0000" originalColor="#FF0000" />
       )
-      const colorDivs = container.querySelectorAll('[style*="background-color"]')
+      const colorDivs = container.querySelectorAll(
+        '[style*="background-color"]'
+      )
       expect(colorDivs).toHaveLength(1)
     })
 
@@ -85,7 +89,9 @@ describe('ColorSwatch', () => {
         <ColorSwatch color="#00FF00" originalColor="#FF0000" />
       )
       // Should have two color divs in split view
-      const colorDivs = container.querySelectorAll('[style*="background-color"]')
+      const colorDivs = container.querySelectorAll(
+        '[style*="background-color"]'
+      )
       expect(colorDivs).toHaveLength(2)
     })
   })
@@ -113,7 +119,9 @@ describe('ColorSwatch', () => {
 
     it('shows raw value when color cannot be parsed', () => {
       // Using an invalid color string that can't be parsed
-      render(<ColorSwatch color="invalid-color" showValue displayFormat="hex" />)
+      render(
+        <ColorSwatch color="invalid-color" showValue displayFormat="hex" />
+      )
       // Should fall back to showing the raw color string
       expect(screen.getByText('invalid-color')).toBeInTheDocument()
     })
@@ -188,14 +196,14 @@ describe('ColorSwatchRow', () => {
     it('has selection background when selected', () => {
       renderWithTooltip(<ColorSwatchRow {...defaultProps} isSelected />)
       const button = screen.getByRole('button')
-      expect(button.className).toContain('bg-blue-500/20')
+      expect(button.className).toContain('bg-indigo-500/20')
     })
 
     it('has hover styles when not selected', () => {
       renderWithTooltip(<ColorSwatchRow {...defaultProps} isSelected={false} />)
       const button = screen.getByRole('button')
       expect(button.className).toContain('hover:bg-neutral-200')
-      expect(button.className).not.toContain('bg-blue-500/20')
+      expect(button.className).not.toContain('bg-indigo-500/20')
     })
   })
 
@@ -232,13 +240,12 @@ describe('ColorSwatchRow', () => {
   describe('color comparison', () => {
     it('passes originalColor to inner ColorSwatch', () => {
       const { container } = renderWithTooltip(
-        <ColorSwatchRow
-          {...defaultProps}
-          originalColor="#0000FF"
-        />
+        <ColorSwatchRow {...defaultProps} originalColor="#0000FF" />
       )
       // Split view should have two background colors
-      const colorDivs = container.querySelectorAll('[style*="background-color"]')
+      const colorDivs = container.querySelectorAll(
+        '[style*="background-color"]'
+      )
       expect(colorDivs).toHaveLength(2)
     })
   })

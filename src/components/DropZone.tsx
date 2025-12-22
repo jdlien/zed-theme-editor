@@ -109,7 +109,7 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
         onDrop={handleDrop}
         className={`flex min-h-64 w-full max-w-xl cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center transition-all ${
           dragState === 'over'
-            ? 'border-blue-400 bg-blue-500/10'
+            ? 'border-indigo-400 bg-indigo-500/10'
             : dragState === 'invalid'
               ? 'border-red-400 bg-red-500/10'
               : 'border-neutral-400 hover:border-neutral-500 hover:bg-neutral-200/50 dark:border-neutral-600 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/50'
@@ -118,7 +118,7 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
       >
         {isLoading ? (
           <>
-            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-neutral-400 border-t-blue-500" />
+            <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-neutral-400 border-t-indigo-500" />
             <p className="text-lg text-neutral-600 dark:text-neutral-400">
               Loading file...
             </p>

@@ -3,14 +3,27 @@
  * Custom number input with arrow key modifiers and domain-specific validation
  */
 
-import { useState, useCallback, useRef, useEffect, type KeyboardEvent, type ChangeEvent, type FocusEvent } from 'react'
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  type KeyboardEvent,
+  type ChangeEvent,
+  type FocusEvent,
+} from 'react'
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export type NumberFieldMode = 'integer' | 'decimal'
-export type NumberFieldDomain = 'default' | 'hue' | 'percentage' | 'alpha' | 'chroma'
+export type NumberFieldDomain =
+  | 'default'
+  | 'hue'
+  | 'percentage'
+  | 'alpha'
+  | 'chroma'
 
 export interface NumberFieldProps {
   /** Current value */
@@ -48,7 +61,10 @@ export interface NumberFieldProps {
 // ============================================================================
 
 /** Domain configurations with min, max, and wrapping behavior */
-const DOMAIN_CONFIG: Record<NumberFieldDomain, { min: number; max: number; wraps: boolean }> = {
+const DOMAIN_CONFIG: Record<
+  NumberFieldDomain,
+  { min: number; max: number; wraps: boolean }
+> = {
   default: { min: -Infinity, max: Infinity, wraps: false },
   hue: { min: 0, max: 360, wraps: true },
   percentage: { min: 0, max: 100, wraps: false },
@@ -87,7 +103,12 @@ export function roundToPrecision(value: number, precision: number): number {
 /**
  * Clamp a value to min/max bounds, with optional wrapping for hue
  */
-export function clampValue(value: number, min: number, max: number, wraps: boolean): number {
+export function clampValue(
+  value: number,
+  min: number,
+  max: number,
+  wraps: boolean
+): number {
   if (wraps) {
     const range = max - min
     let result = value
@@ -195,7 +216,9 @@ export function NumberField({
   id,
 }: NumberFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [rawInput, setRawInput] = useState<string>(() => formatNumber(value, precision))
+  const [rawInput, setRawInput] = useState<string>(() =>
+    formatNumber(value, precision)
+  )
   const [isFocused, setIsFocused] = useState(false)
 
   // Get domain config, allow prop overrides
@@ -252,7 +275,17 @@ export function NumberField({
       onChange(newValue)
       setRawInput(formatNumber(newValue, precision))
     },
-    [value, step, mode, effectiveMin, effectiveMax, wraps, precision, onChange, useSmallRangeIncrements]
+    [
+      value,
+      step,
+      mode,
+      effectiveMin,
+      effectiveMax,
+      wraps,
+      precision,
+      onChange,
+      useSmallRangeIncrements,
+    ]
   )
 
   // Handle focus - select all text for easy replacement
@@ -276,27 +309,43 @@ export function NumberField({
     }
 
     const clamped = clampValue(finalValue, effectiveMin, effectiveMax, wraps)
-    const rounded = roundToPrecision(clamped, mode === 'integer' ? 0 : precision)
+    const rounded = roundToPrecision(
+      clamped,
+      mode === 'integer' ? 0 : precision
+    )
 
     if (rounded !== value) {
       onChange(rounded)
     }
     setRawInput(formatNumber(rounded, mode === 'integer' ? 0 : precision))
-  }, [rawInput, value, effectiveMin, effectiveMax, wraps, precision, mode, onChange])
+  }, [
+    rawInput,
+    value,
+    effectiveMin,
+    effectiveMax,
+    wraps,
+    precision,
+    mode,
+    onChange,
+  ])
 
   // Base styles
   const baseStyles = `
     w-full px-2 py-1 text-sm font-mono text-right
     bg-white border border-neutral-300 rounded
     dark:bg-neutral-800 dark:border-neutral-600
-    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
     disabled:opacity-50 disabled:cursor-not-allowed
     transition-colors duration-150
   `
 
   return (
     <div className={`relative flex items-center ${className}`}>
-      {prefix && <span className="mr-1 text-sm text-neutral-600 dark:text-neutral-400">{prefix}</span>}
+      {prefix && (
+        <span className="mr-1 text-sm text-neutral-600 dark:text-neutral-400">
+          {prefix}
+        </span>
+      )}
       <input
         ref={inputRef}
         id={id}
@@ -315,7 +364,11 @@ export function NumberField({
         aria-valuemax={effectiveMax === Infinity ? undefined : effectiveMax}
         role="spinbutton"
       />
-      {suffix && <span className="ml-1 text-sm text-neutral-600 dark:text-neutral-400">{suffix}</span>}
+      {suffix && (
+        <span className="ml-1 text-sm text-neutral-600 dark:text-neutral-400">
+          {suffix}
+        </span>
+      )}
     </div>
   )
 }

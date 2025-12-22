@@ -22,7 +22,11 @@ describe('ThemeTabs', () => {
 
     it('returns null when there is only one theme', () => {
       const { container } = render(
-        <ThemeTabs themes={[darkTheme]} activeIndex={0} onSelect={mockOnSelect} />
+        <ThemeTabs
+          themes={[darkTheme]}
+          activeIndex={0}
+          onSelect={mockOnSelect}
+        />
       )
       expect(container.firstChild).toBeNull()
     })
@@ -35,8 +39,12 @@ describe('ThemeTabs', () => {
           onSelect={mockOnSelect}
         />
       )
-      expect(screen.getByRole('button', { name: /Dark Theme/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /Light Theme/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Dark Theme/i })
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Light Theme/i })
+      ).toBeInTheDocument()
     })
 
     it('renders correct number of tabs', () => {
@@ -89,7 +97,7 @@ describe('ThemeTabs', () => {
         />
       )
       const activeButton = screen.getByRole('button', { name: /Dark Theme/i })
-      expect(activeButton.className).toContain('border-blue-500')
+      expect(activeButton.className).toContain('border-indigo-500')
     })
 
     it('applies inactive styling to non-selected tabs', () => {
@@ -100,9 +108,11 @@ describe('ThemeTabs', () => {
           onSelect={mockOnSelect}
         />
       )
-      const inactiveButton = screen.getByRole('button', { name: /Light Theme/i })
+      const inactiveButton = screen.getByRole('button', {
+        name: /Light Theme/i,
+      })
       expect(inactiveButton.className).toContain('text-neutral-500')
-      expect(inactiveButton.className).not.toContain('border-blue-500')
+      expect(inactiveButton.className).not.toContain('border-indigo-500')
     })
 
     it('updates active styling when activeIndex changes', () => {
@@ -117,7 +127,7 @@ describe('ThemeTabs', () => {
       // Initially first tab is active
       expect(
         screen.getByRole('button', { name: /Dark Theme/i }).className
-      ).toContain('border-blue-500')
+      ).toContain('border-indigo-500')
 
       // Rerender with second tab active
       rerender(
@@ -130,10 +140,10 @@ describe('ThemeTabs', () => {
 
       expect(
         screen.getByRole('button', { name: /Dark Theme/i }).className
-      ).not.toContain('border-blue-500')
+      ).not.toContain('border-indigo-500')
       expect(
         screen.getByRole('button', { name: /Light Theme/i }).className
-      ).toContain('border-blue-500')
+      ).toContain('border-indigo-500')
     })
   })
 

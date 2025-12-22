@@ -50,17 +50,17 @@ export function Toolbar({
         <div className="flex items-center gap-2">
           <ZedLogo size={28} className="animate-hue-cycle text-[#084CCF]" />
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
-            Zed Theme Editor
+            <span className="hidden md:inline">Zed Theme Editor</span>
           </h1>
         </div>
         {onOpenFile && (
           <button
             onClick={onOpenFile}
-            className="flex items-center gap-2 rounded px-2 py-1 text-sm text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+            className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
             title="Open file"
           >
             <FontAwesomeIcon icon={faFolderOpen} className="h-4 w-4" />
-            {fileName && (
+            {fileName ? (
               <span>
                 {fileName}
                 {hasUnsavedChanges && (
@@ -72,46 +72,60 @@ export function Toolbar({
                   </span>
                 )}
               </span>
+            ) : (
+              <span className="text-neutral-500 dark:text-neutral-500">
+                Open File
+              </span>
             )}
           </button>
         )}
       </div>
       <div className="flex items-center gap-2">
         {onColorFormatChange && (
-          <select
-            value={colorFormat}
-            onChange={(e) => onColorFormatChange(e.target.value as ColorFormat)}
-            className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-            title="Color format for JSON display"
-          >
-            {colorFormatOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        )}
-        {onEditorThemeChange && (
-          <select
-            value={editorTheme}
-            onChange={(e) =>
-              onEditorThemeChange(e.target.value as EditorThemeName)
-            }
-            className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
-            title="Editor theme"
-          >
-            {Object.values(editorThemeMeta)
-              .filter((theme) => theme.isDark === isDarkMode)
-              .map((theme) => (
-                <option key={theme.name} value={theme.name}>
-                  {theme.label}
+          <label className="flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
+            <span className="hidden font-semibold lg:inline">Color</span>
+            <span className="hidden font-semibold sm:inline">Format</span>
+            <select
+              value={colorFormat}
+              onChange={(e) =>
+                onColorFormatChange(e.target.value as ColorFormat)
+              }
+              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-indigo-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+              title="Color format for JSON display"
+            >
+              {colorFormatOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
-          </select>
+            </select>
+          </label>
+        )}
+        {onEditorThemeChange && (
+          <label className="ml-2 flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
+            <span className="hidden font-semibold lg:inline">Editor</span>
+            <span className="hidden font-semibold sm:inline">Theme</span>
+            <select
+              value={editorTheme}
+              onChange={(e) =>
+                onEditorThemeChange(e.target.value as EditorThemeName)
+              }
+              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+              title="Editor theme"
+            >
+              {Object.values(editorThemeMeta)
+                .filter((theme) => theme.isDark === isDarkMode)
+                .map((theme) => (
+                  <option key={theme.name} value={theme.name}>
+                    {theme.label}
+                  </option>
+                ))}
+            </select>
+          </label>
         )}
         <button
           onClick={onToggleDarkMode}
-          className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
           title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           <FontAwesomeIcon
@@ -124,7 +138,7 @@ export function Toolbar({
           <button
             onClick={onSave}
             disabled={!canSave || !hasUnsavedChanges}
-            className="flex items-center gap-2 rounded bg-blue-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded border-indigo-500 bg-indigo-600 bg-linear-to-b from-indigo-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors hover:to-indigo-500 enabled:hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             title={`Save (${formatShortcut('S')})`}
           >
             Save

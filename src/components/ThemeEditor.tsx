@@ -3,11 +3,25 @@
  * Main application layout integrating all editor components
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  lazy,
+  Suspense,
+} from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { getAllThemeColors, extractColorsAsMap, transformColorsInJson, normalizeColorPath, type AllColorsEntry } from '@/lib/jsonParsing'
+import {
+  getAllThemeColors,
+  extractColorsAsMap,
+  transformColorsInJson,
+  normalizeColorPath,
+  type AllColorsEntry,
+} from '@/lib/jsonParsing'
 import type { ColorFormat } from '@/types/theme'
 import { formatShortcut } from '@/lib/keyboard'
 import type { EditorThemeName } from '@/lib/editorThemeMeta'
@@ -50,7 +64,11 @@ export function ThemeEditor() {
   const handleOpenFile = useCallback(async () => {
     const result = await openFile()
     if (result) {
-      loadFile({ content: result.content, name: result.name, handle: result.handle })
+      loadFile({
+        content: result.content,
+        name: result.name,
+        handle: result.handle,
+      })
     }
   }, [openFile, loadFile])
 
@@ -207,8 +225,14 @@ export function ThemeEditor() {
         const elementRect = selectedElement.getBoundingClientRect()
 
         // Only scroll if element is outside visible area
-        if (elementRect.top < containerRect.top || elementRect.bottom > containerRect.bottom) {
-          selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+        if (
+          elementRect.top < containerRect.top ||
+          elementRect.bottom > containerRect.bottom
+        ) {
+          selectedElement.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth',
+          })
         }
       }
     })
@@ -233,7 +257,12 @@ export function ThemeEditor() {
       // Scroll sidebar to show this color
       scrollSidebarToPath(normalizedPath)
     },
-    [handleSelectColor, setActiveTheme, state.activeThemeIndex, scrollSidebarToPath]
+    [
+      handleSelectColor,
+      setActiveTheme,
+      state.activeThemeIndex,
+      scrollSidebarToPath,
+    ]
   )
   /* v8 ignore stop */
 
@@ -388,7 +417,7 @@ export function ThemeEditor() {
         >
           {/* Resize handle */}
           <div
-            className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 active:bg-blue-500 z-10"
+            className="absolute top-0 right-0 z-10 h-full w-1 cursor-col-resize bg-transparent hover:bg-indigo-500/50 active:bg-indigo-500"
             onMouseDown={handleSidebarResizeStart}
             title="Drag to resize"
           />
@@ -425,7 +454,13 @@ export function ThemeEditor() {
                     isSelected={color.path === state.selectedColorPath}
                     defined={color.defined}
                     description={color.description}
-                    onClick={() => handleSidebarColorClick(color.path, color.defined, color.value)}
+                    onClick={() =>
+                      handleSidebarColorClick(
+                        color.path,
+                        color.defined,
+                        color.value
+                      )
+                    }
                     displayFormat={state.colorDisplayFormat}
                   />
                 </div>

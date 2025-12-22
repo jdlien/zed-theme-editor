@@ -11,8 +11,8 @@ vi.mock('@/hooks/useFileAccess', () => ({
     isSupported: true,
   })),
   readDroppedFile: vi.fn(),
-  isValidThemeFile: vi.fn((name: string) =>
-    name.endsWith('.json') || name.endsWith('.json5')
+  isValidThemeFile: vi.fn(
+    (name: string) => name.endsWith('.json') || name.endsWith('.json5')
   ),
 }))
 
@@ -234,7 +234,7 @@ describe('DropZone', () => {
           items:
             items.length > 0
               ? items
-              : files.map(() => ({ kind: 'file' } as DataTransferItem)),
+              : files.map(() => ({ kind: 'file' }) as DataTransferItem),
         },
       })
       Object.defineProperty(event, 'preventDefault', { value: vi.fn() })
@@ -246,7 +246,11 @@ describe('DropZone', () => {
       render(<DropZone onFileLoad={mockOnFileLoad} />)
       const dropZone = screen.getByRole('button')
 
-      const dragEvent = createDragEvent('dragenter', [], [{ kind: 'file' } as DataTransferItem])
+      const dragEvent = createDragEvent(
+        'dragenter',
+        [],
+        [{ kind: 'file' } as DataTransferItem]
+      )
       fireEvent(dropZone, dragEvent)
 
       expect(screen.getByText('Drop to open file')).toBeInTheDocument()
@@ -267,11 +271,15 @@ describe('DropZone', () => {
       render(<DropZone onFileLoad={mockOnFileLoad} />)
       const dropZone = screen.getByRole('button')
 
-      const dragEvent = createDragEvent('dragenter', [], [{ kind: 'file' } as DataTransferItem])
+      const dragEvent = createDragEvent(
+        'dragenter',
+        [],
+        [{ kind: 'file' } as DataTransferItem]
+      )
       fireEvent(dropZone, dragEvent)
 
-      expect(dropZone.className).toContain('border-blue-400')
-      expect(dropZone.className).toContain('bg-blue-500/10')
+      expect(dropZone.className).toContain('border-indigo-400')
+      expect(dropZone.className).toContain('bg-indigo-500/10')
     })
 
     it('returns to idle state on drag leave', () => {
@@ -279,7 +287,11 @@ describe('DropZone', () => {
       const dropZone = screen.getByRole('button')
 
       // Enter
-      const enterEvent = createDragEvent('dragenter', [], [{ kind: 'file' } as DataTransferItem])
+      const enterEvent = createDragEvent(
+        'dragenter',
+        [],
+        [{ kind: 'file' } as DataTransferItem]
+      )
       fireEvent(dropZone, enterEvent)
       expect(screen.getByText('Drop to open file')).toBeInTheDocument()
 
@@ -405,7 +417,11 @@ describe('DropZone', () => {
       const dropZone = screen.getByRole('button')
 
       // First enter to set over state
-      const enterEvent = createDragEvent('dragenter', [], [{ kind: 'file' } as DataTransferItem])
+      const enterEvent = createDragEvent(
+        'dragenter',
+        [],
+        [{ kind: 'file' } as DataTransferItem]
+      )
       fireEvent(dropZone, enterEvent)
       expect(screen.getByText('Drop to open file')).toBeInTheDocument()
 
@@ -414,7 +430,9 @@ describe('DropZone', () => {
       fireEvent(dropZone, dropEvent)
 
       await waitFor(() => {
-        expect(screen.getByText('Drop a Zed theme file here')).toBeInTheDocument()
+        expect(
+          screen.getByText('Drop a Zed theme file here')
+        ).toBeInTheDocument()
       })
     })
   })
