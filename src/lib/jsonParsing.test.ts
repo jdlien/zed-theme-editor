@@ -256,7 +256,8 @@ describe('extractColors', () => {
 
     const colors = extractColors(style as Parameters<typeof extractColors>[0])
     expect(colors).toHaveLength(2)
-    expect(colors.find((c) => c.path.includes('keyword.color'))).toBeDefined()
+    // Path uses / separator now
+    expect(colors.find((c) => c.path.includes('keyword/color'))).toBeDefined()
   })
 
   it('ignores null and non-color values', () => {
@@ -281,6 +282,33 @@ describe('extractColors', () => {
     const colors = extractColors(style)
     expect(colors).toHaveLength(3)
   })
+
+  it('handles accents array', () => {
+    const style = {
+      accents: ['#FF0000', '#00FF00', '#0000FF'],
+    }
+
+    const colors = extractColors(style)
+    expect(colors).toHaveLength(3)
+    expect(colors[0].path).toBe('style/accents/[0]')
+    expect(colors[0].key).toBe('accents[0]')
+    expect(colors[0].value).toBe('#FF0000')
+  })
+
+  it('extracts dotted keys with correct segments', () => {
+    const style = {
+      'editor.background': '#000000',
+      'comment.doc': '#888888',
+    }
+
+    const colors = extractColors(style)
+    expect(colors).toHaveLength(2)
+
+    const editorBg = colors.find((c) => c.key === 'editor.background')
+    expect(editorBg).toBeDefined()
+    expect(editorBg?.segments).toEqual(['style', 'editor.background'])
+    expect(editorBg?.path).toBe('style/editor.background')
+  })
 })
 
 describe('updateColorAtPath', () => {
@@ -303,7 +331,7 @@ describe('updateColorAtPath', () => {
   }
 
   it('updates top-level color', () => {
-    const result = updateColorAtPath(baseTheme, 0, 'style.background', '#000000')
+    const result = updateColorAtPath(baseTheme, 0, 'style/background', '#000000')
     expect(result.themes[0].style.background).toBe('#000000')
     // Original unchanged
     expect(baseTheme.themes[0].style.background).toBe('#121212')
@@ -313,15 +341,43 @@ describe('updateColorAtPath', () => {
     const result = updateColorAtPath(
       baseTheme,
       0,
-      'style.syntax.keyword.color',
+      'style/syntax/keyword/color',
       '#00FF00'
     )
     expect(result.themes[0].style.syntax?.keyword.color).toBe('#00FF00')
   })
 
   it('returns unchanged theme for invalid path', () => {
-    const result = updateColorAtPath(baseTheme, 0, 'style.nonexistent.path', '#000')
+    const result = updateColorAtPath(baseTheme, 0, 'style/nonexistent/path', '#000')
     expect(result).toEqual(baseTheme)
+  })
+
+  it('updates dotted keys like editor.background', () => {
+    const themeWithDottedKeys = {
+      name: 'Test',
+      author: 'Tester',
+      themes: [
+        {
+          name: 'Dark',
+          appearance: 'dark' as const,
+          style: {
+            'editor.background': '#121212',
+            'editor.foreground': '#FFFFFF',
+          },
+        },
+      ],
+    }
+
+    // Use segments array to handle dotted key
+    const result = updateColorAtPath(
+      themeWithDottedKeys,
+      0,
+      ['style', 'editor.background'],
+      '#000000'
+    )
+
+    expect((result.themes[0].style as Record<string, string>)['editor.background']).toBe('#000000')
+    expect((result.themes[0].style as Record<string, string>)['editor.foreground']).toBe('#FFFFFF')
   })
 })
 
