@@ -117,8 +117,8 @@ export function Tooltip({
             pointer-events-none fixed z-[9999] max-w-xs
             rounded-md px-2.5 py-1.5 shadow-lg
             text-xs leading-relaxed
-            bg-neutral-900 text-neutral-100 border border-neutral-700
-            dark:bg-neutral-100 dark:text-neutral-900 dark:border-neutral-300
+            bg-neutral-800 text-neutral-100 border border-neutral-600
+            dark:bg-neutral-700 dark:border-neutral-500
             transition-opacity duration-100 ease-out
             ${isVisible ? 'opacity-100' : 'opacity-0'}
           `}
