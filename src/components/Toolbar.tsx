@@ -110,7 +110,7 @@ export function Toolbar({
               onChange={(e) =>
                 onEditorThemeChange(e.target.value as EditorThemeName)
               }
-              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-indigo-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
               title="Editor theme"
             >
               {Object.values(editorThemeMeta)
@@ -124,16 +124,16 @@ export function Toolbar({
           </label>
         )}
         <div
-          className="inline-flex gap-0.5 rounded-full bg-neutral-200 px-0.5 dark:bg-neutral-700"
+          className="inline-flex gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
           role="radiogroup"
           aria-label="Color scheme"
         >
           <button
             onClick={() => !isDarkMode || onToggleDarkMode()}
-            className={`rounded-full px-1 py-0.5 transition-all ${
+            className={`size-8 rounded-full transition-all ${
               !isDarkMode
-                ? 'bg-white text-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-600 dark:text-neutral-400 dark:ring-neutral-500'
-                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
+                ? 'bg-white text-neutral-900 shadow-md dark:bg-neutral-600 dark:text-neutral-400'
+                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
             }`}
             role="radio"
             aria-checked={!isDarkMode}
@@ -144,10 +144,10 @@ export function Toolbar({
           </button>
           <button
             onClick={() => isDarkMode || onToggleDarkMode()}
-            className={`rounded-full px-1 py-0.5 transition-all ${
+            className={`size-8 rounded-full transition-all ${
               isDarkMode
-                ? 'bg-white text-indigo-500 shadow-sm ring-1 ring-neutral-200 dark:bg-neutral-600 dark:text-neutral-100 dark:ring-neutral-500'
-                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
+                ? 'bg-white shadow-md dark:bg-neutral-600 dark:text-neutral-100'
+                : 'text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
             }`}
             role="radio"
             aria-checked={isDarkMode}
