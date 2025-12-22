@@ -12,6 +12,8 @@ export interface TooltipProps {
   children: React.ReactNode
   /** Position preference */
   position?: 'top' | 'bottom' | 'left' | 'right'
+  /** Use muted/subdued text styling */
+  muted?: boolean
   /** Additional class for the wrapper */
   className?: string
 }
@@ -30,6 +32,7 @@ export function Tooltip({
   content,
   children,
   position = 'right',
+  muted = false,
   className = '',
 }: TooltipProps) {
   const id = useId()
@@ -117,9 +120,10 @@ export function Tooltip({
             pointer-events-none fixed z-[9999] max-w-xs
             rounded-md px-2.5 py-1.5 shadow-lg
             text-xs leading-relaxed
-            bg-neutral-800 text-neutral-100 border border-neutral-600
+            bg-neutral-800 border border-neutral-600
             dark:bg-neutral-700 dark:border-neutral-500
             transition-opacity duration-100 ease-out
+            ${muted ? 'text-neutral-400 italic' : 'text-neutral-100'}
             ${isVisible ? 'opacity-100' : 'opacity-0'}
           `}
           style={{

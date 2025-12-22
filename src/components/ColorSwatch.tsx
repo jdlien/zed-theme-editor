@@ -164,7 +164,11 @@ export function ColorSwatchRow({
   displayFormat = 'hex',
 }: ColorSwatchRowProps) {
   return (
-    <Tooltip content={description} position="right">
+    <Tooltip
+      content={description || 'No description'}
+      position="right"
+      muted={!description}
+    >
       <button
         type="button"
         onClick={onClick}
