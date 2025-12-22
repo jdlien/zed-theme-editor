@@ -34,7 +34,7 @@ export function Toolbar({
     <header className="flex items-center justify-between border-b border-neutral-300 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <ZedLogo size={28} className="text-[#084CCF]" />
+          <ZedLogo size={28} className="animate-hue-cycle text-[#084CCF]" />
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">Zed Theme Editor</h1>
         </div>
         {fileName && (
