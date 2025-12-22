@@ -95,7 +95,8 @@ class ColorSwatchWidget extends WidgetType {
   toDOM(): HTMLElement {
     const wrapper = document.createElement('span')
     wrapper.className = 'cm-color-swatch-wrapper'
-    wrapper.style.cssText = 'display: inline-flex; margin-left: 4px;'
+    wrapper.style.cssText =
+      'display: inline-flex; margin-left: 4px; vertical-align: -2px;'
 
     const hasChanged = this.originalColor && this.originalColor !== this.color
     const swatchWidth = hasChanged ? 28 : 14
@@ -104,11 +105,11 @@ class ColorSwatchWidget extends WidgetType {
     swatch.className = `cm-color-swatch ${this.isSelected ? 'cm-color-swatch-selected' : ''}`
     swatch.style.cssText = `
       display: inline-flex;
+      box-sizing: border-box;
       width: ${swatchWidth}px;
       height: 14px;
       border-radius: 3px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.3);
       cursor: pointer;
       vertical-align: middle;
       box-shadow: ${this.isSelected ? '0 0 0 2px #3b82f6' : 'none'};
@@ -119,21 +120,8 @@ class ColorSwatchWidget extends WidgetType {
     `
 
     if (hasChanged) {
-      // Split view: original on left, current on right
-      const originalHalf = document.createElement('span')
-      originalHalf.style.cssText = `
-        width: 50%;
-        height: 100%;
-        background-color: ${this.originalColor};
-      `
-      const currentHalf = document.createElement('span')
-      currentHalf.style.cssText = `
-        width: 50%;
-        height: 100%;
-        background-color: ${this.color};
-      `
-      swatch.appendChild(originalHalf)
-      swatch.appendChild(currentHalf)
+      // Split view: original on left, current on right using gradient
+      swatch.style.background = `linear-gradient(to right, ${this.originalColor} 50%, ${this.color} 50%)`
       swatch.title = `${this.path}: ${this.originalColor} → ${this.color}`
     } else {
       // Single color
