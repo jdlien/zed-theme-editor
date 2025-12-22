@@ -1,0 +1,388 @@
+# Zed Theme Editor - Product Requirements Document
+
+## Overview
+
+A browser-based visual theme editor for Zed IDE themes. The editor allows users to open JSON5 theme files, view and edit colors using multiple color models (hex, RGB, HSL, OKLCH), and save changes back to the original file in hex format. The editor provides real-time color swatches, a visual color picker, and a preview panel for immediate visual feedback. For MVP, lossy JSON5 save (comments/formatting) is acceptable.
+
+## Goals
+
+1. Make theme color editing intuitive by supporting human-friendly color models (especially OKLCH)
+2. Provide immediate visual feedback with inline color swatches and live preview
+3. Maintain full compatibility with Zed's theme format (save as hex)
+4. Enable fast iteration with keyboard shortcuts and modifier-aware number inputs
+5. Support the full range of Zed theme properties with schema awareness
+
+## Target Users
+
+- Theme creators for Zed IDE
+- Developers customizing their Zed environment
+- Users who want to tweak existing themes without manually editing hex codes
+
+## Technical Stack
+
+- **Framework**: Vite + React 19 + TypeScript
+- **Styling**: TailwindCSS 4
+- **Color Library**: Culori (excellent OKLCH support, gamut mapping)
+- **Code Editor**: CodeMirror 6 (syntax highlighting, inline widgets)
+- **JSON Parsing**: json5 package
+- **File Access**: File System Access API (Chrome/Edge)
+- **Testing**: Vitest + React Testing Library
+- **State Management**: React Context + useReducer (CodeMirror history for undo/redo)
+
+## Core Features
+
+### 1. File Handling
+
+#### 1.1 File Opening
+- Drop zone UI on startup (click to open file picker OR drag-and-drop)
+- Support for .json and .json5 files
+- Parse with json5 library to handle trailing commas, comments, etc.
+- Normalize all color values to hex on load and reserialize to JSON for editing (lossy but acceptable for MVP)
+- Store file handle for later saving (File System Access API)
+
+#### 1.2 File Saving
+- Keyboard shortcut: Ctrl+S / Cmd+S
+- Save button in toolbar
+- Convert all colors to hex format (6-digit or 8-digit for alpha) on load and keep editor text in hex
+- Save writes the current editor text directly to the original file using the stored file handle
+- Show save confirmation (brief toast notification)
+- Optional: store original file text for a "revert to original" action (future enhancement)
+
+### 2. Main Layout
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Toolbar: [Theme Tabs] [Dark/Light Toggle] [Save] [Settings]    │
+├────────────────────────────────────┬────────────────────────────┤
+│                                    │                            │
+│  JSON Editor Panel                 │  Color Editor Panel        │
+│  - Syntax highlighted JSON5        │  - Visual color picker     │
+│  - Inline color swatches           │  - Hex input               │
+│  - Original → New swatch pairs     │  - RGB inputs (R, G, B)    │
+│  - Click swatch to select          │  - HSL inputs (H, S, L)    │
+│                                    │  - OKLCH inputs (L, C, H)  │
+│                                    │  - Alpha slider            │
+│                                    │  - Gamut warning           │
+│                                    ├────────────────────────────┤
+│                                    │  Theme Preview             │
+│                                    │  - Editor mockup           │
+│                                    │  - Terminal mockup         │
+└────────────────────────────────────┴────────────────────────────┘
+```
+
+#### 2.1 Theme Tabs
+- Display tabs for each theme in the file's `themes` array
+- Show theme name and appearance (dark/light icon)
+- Click to switch between themes
+- Active theme highlighted
+
+#### 2.2 Dark/Light Mode Toggle
+- Toggle the editor's own dark/light mode
+- Helps see colors in context of both modes
+- Persisted to localStorage
+- Allow separate background color preferences for dark and light modes (small, safe theming control)
+
+### 3. JSON Editor Panel (Left Side)
+
+#### 3.1 CodeMirror Integration
+- Syntax highlighting for JSON (JSON5 supported on load)
+- Custom theme that works in both dark and light modes
+- Line numbers
+- Code folding for nested objects (nice-to-have)
+
+#### 3.2 Inline Color Swatches
+- For each color value, display inline widget with:
+  - Original color swatch (from file)
+  - Arrow or separator
+  - New color swatch (current edited value)
+- Swatches are clickable to select that color for editing
+- Selected color highlighted with border/outline
+- Colors displayed in user-selected format (dropdown to change: hex, RGB, HSL, OKLCH) without changing the JSON text
+- Format preference stored in localStorage
+
+#### 3.3 Non-Color Value Editing
+- For non-color properties (font_style, font_weight, null, strings like "opaque")
+- Show as plain text, editable inline
+- No swatch widgets for these
+
+#### 3.4 Color Parsing Rules
+- Treat only `#RGB`, `#RGBA`, `#RRGGBB`, and `#RRGGBBAA` as editable colors
+- Zed supports hex/hexa only; other formats remain display-only and are not written back
+- All other strings are treated as non-color values for MVP
+
+### 4. Color Editor Panel (Right Side)
+
+#### 4.1 Visual Color Picker
+- Gradient square (saturation × lightness or similar)
+- Hue slider
+- Alpha slider (separate)
+- Click/drag to select colors
+- Updates all numeric inputs in real-time
+
+#### 4.2 Multi-Format Numeric Inputs
+All formats shown simultaneously, editing any updates all others:
+
+**Hex Input**
+- Single text field for #RRGGBB or #RRGGBBAA
+- Validate on blur, show error for invalid hex
+
+**RGB Inputs**
+- R: 0-255 (integer)
+- G: 0-255 (integer)
+- B: 0-255 (integer)
+
+**HSL Inputs**
+- H: 0-360 (integer, wrapping)
+- S: 0-100% (integer)
+- L: 0-100% (integer)
+
+**OKLCH Inputs** (primary/default)
+- L: 0-1 (3 decimal precision)
+- C: 0-0.4+ (3 decimal precision, warn if high)
+- H: 0-360 (1 decimal precision, wrapping)
+
+**Alpha**
+- A: 0-1 (2 decimal precision)
+- Shared across all formats
+
+#### 4.3 NumberField Component
+Custom input component with:
+- Accepts integers or decimals based on field type
+- Arrow key modifiers:
+  - ArrowUp/Down: ±1
+  - Alt+Arrow: ±0.1
+  - Shift+Arrow: ±10
+  - Alt+Shift+Arrow: ±0.01 (ultra-fine, useful for OKLCH chroma)
+- Domain clamping per field (with wrapping for hue)
+- Preserves reasonable decimal precision (3-4 decimals max)
+- Allows partial input (-, .) during editing
+- Visual focus states
+
+#### 4.4 Gamut Handling
+- Detect when OKLCH color is outside sRGB gamut
+- Visual indicator (warning icon/border)
+- Options:
+  - Clamp to nearest in-gamut color (default, fast)
+  - Gamut-map using Culori's toGamut (if not too complex)
+- Show both original OKLCH and clamped hex when out of gamut
+
+### 5. Theme Preview Panel (Bottom Right)
+
+Minimal preview showing theme colors in context:
+
+#### 5.1 Editor Preview
+- Background using `editor.background`
+- Line numbers using `editor.line_number` / `editor.active_line_number`
+- Gutter using `editor.gutter.background`
+- Sample code with syntax highlighting colors
+- Selection highlight using relevant colors
+- Text using `editor.foreground`
+
+#### 5.2 Terminal Preview
+- Small block showing terminal colors
+- Background using `terminal.background`
+- Sample text in ANSI colors (red, green, blue, etc.)
+- Foreground using `terminal.foreground`
+
+### 6. State Management & Undo/Redo
+
+CodeMirror's document is the canonical source of truth. Parsed theme data is derived from the editor text for swatches and previews and regenerated as needed.
+
+#### 6.1 State Structure
+```typescript
+interface EditorState {
+  originalThemeText: string;         // Original file text (optional, for revert/diff)
+  editorText: string;                // Canonical source of truth (CodeMirror doc)
+  activeThemeIndex: number;          // Which theme in themes[] is active
+  selectedColorPath: string | null;  // JSON path to selected color (e.g., "themes[0].style.background")
+  colorDisplayFormat: ColorFormat;   // User preference for swatch display
+  isDarkMode: boolean;               // Editor UI dark/light mode
+  darkBackground: string;            // Editor UI background for dark mode
+  lightBackground: string;           // Editor UI background for light mode
+  fileHandle: FileSystemFileHandle | null;
+  hasUnsavedChanges: boolean;
+}
+```
+
+#### 6.2 Undo/Redo
+- Use CodeMirror's built-in history for text changes
+- Keyboard shortcuts: Ctrl+Z / Cmd+Z (undo), Ctrl+Shift+Z / Cmd+Shift+Z (redo)
+- UI-only state (selected color, display format) does not participate in undo/redo unless tied to a text change
+- Batch rapid changes (debounce ~300ms) to avoid flooding history
+
+### 7. Schema Awareness
+
+#### 7.1 Zed Theme Schema Integration
+- Bundle a local snapshot of the schema and allow manual refresh from https://zed.dev/schema/themes/v0.2.0.json
+- Use schema for:
+  - Auto-complete when adding new properties (future enhancement)
+  - Validation of unknown keys (show warnings)
+  - Tooltips/descriptions for known properties
+  - Grouping properties by prefix in UI (editor.*, terminal.*, etc.)
+
+#### 7.2 Add New Property (Future Enhancement)
+- Button or keyboard shortcut to add a new color property
+- Show available properties from schema
+- Filter by category or search
+- Insert at appropriate location in JSON
+
+### 8. Self-Theming (Future Enhancement)
+
+**Deferred to post-v1** - Risk of unusable UI if colors conflict (e.g., same background and text color).
+
+The preview panel provides sufficient context for seeing colors in use. For MVP, only allow configurable editor background colors for dark/light modes. If full self-theming is implemented later:
+- Main background from `background` or `editor.background`
+- Text color from `text` or `editor.foreground`
+- Border colors from `border`
+- Must have toggle to disable (and auto-disable if contrast too low)
+
+### 9. Persistence (localStorage)
+
+Store user preferences:
+- `colorDisplayFormat`: 'hex' | 'rgb' | 'hsl' | 'oklch'
+- `isDarkMode`: boolean
+- `darkBackground`: string (hex)
+- `lightBackground`: string (hex)
+- `lastOpenedPath`: string (informational only, can't auto-reopen)
+
+## Non-Functional Requirements
+
+### Performance
+- Smooth color picker interaction (60fps)
+- Debounced updates to preview/swatches when dragging color picker
+- Lazy parsing of large theme files
+
+### Accessibility
+- Keyboard navigation for all controls
+- Focus indicators
+- ARIA labels for color inputs
+- Screen reader announcements for color changes
+
+### Browser Support
+- Chrome/Edge (required for File System Access API)
+- Firefox/Safari: Graceful degradation (download file instead of save-in-place)
+
+## File Structure (Proposed)
+
+```
+zed-theme-editor/
+├── .taskmaster/
+│   └── docs/
+│       └── prd.txt
+├── themes/                    # Sample theme files
+│   ├── jdracula-zed.json
+│   └── _default.json
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── components/
+│   │   ├── DropZone.tsx
+│   │   ├── Toolbar.tsx
+│   │   ├── ThemeTabs.tsx
+│   │   ├── JsonEditorPanel.tsx
+│   │   ├── ColorEditorPanel.tsx
+│   │   ├── ColorPicker.tsx
+│   │   ├── NumberField.tsx
+│   │   ├── ColorSwatch.tsx
+│   │   └── ThemePreview.tsx
+│   ├── hooks/
+│   │   ├── useThemeEditor.ts      # Main state management
+│   │   ├── useEditorHistory.ts    # CodeMirror history shortcuts
+│   │   ├── useFileAccess.ts
+│   │   └── useLocalStorage.ts
+│   ├── lib/
+│   │   ├── colorConversion.ts     # Culori wrappers
+│   │   ├── jsonParsing.ts         # json5 helpers
+│   │   ├── themeSchema.ts         # Schema types and validation
+│   │   └── utils.ts
+│   ├── types/
+│   │   └── theme.ts               # TypeScript types for Zed themes
+│   └── styles/
+│       └── globals.css            # Tailwind imports + custom styles
+├── public/
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.ts
+└── vitest.config.ts
+```
+
+## Testing Strategy
+
+### Unit Tests (Vitest)
+- Color conversion functions (hex ↔ RGB ↔ HSL ↔ OKLCH)
+- NumberField logic (arrow key handling, clamping, precision)
+- JSON parsing and serialization
+- CodeMirror history integration
+- Gamut detection and clamping
+
+### Component Tests (React Testing Library)
+- NumberField interactions
+- ColorSwatch click handling
+- File drop zone
+- Keyboard shortcuts
+
+### Integration Tests
+- Full flow: open file → edit color → save
+- Undo/redo through multiple changes
+- Theme switching
+
+## Milestones
+
+### Phase 1: Foundation
+- Project setup (Vite, React, TypeScript, Tailwind, Vitest)
+- Basic file opening with drop zone
+- JSON5 parsing and display (plain text initially)
+- Color conversion utilities with tests
+
+### Phase 2: Core Color Editing
+- NumberField component with full modifier support
+- Color editor panel with all format inputs
+- Two-way binding between formats
+- Basic color picker (hue + saturation/lightness)
+
+### Phase 3: JSON Integration
+- CodeMirror 6 integration
+- Inline color swatch widgets
+- Click-to-select color functionality
+- Original → New swatch display
+
+### Phase 4: File Operations & State
+- Save functionality (File System Access API)
+- Undo/redo system
+- Unsaved changes warning
+- localStorage preferences
+
+### Phase 5: Polish
+- Theme tabs for multi-theme files
+- Dark/light mode toggle
+- Theme preview panel
+- Gamut warnings and handling
+- Schema integration (validation, tooltips)
+
+### Phase 6: Refinement
+- Performance optimization
+- Accessibility audit
+- Edge case handling
+- Documentation
+
+## Open Questions
+
+1. Should we support creating new themes from scratch, or only editing existing files?
+2. Should there be an "export" option that downloads a copy vs. "save" that overwrites?
+3. How should we handle properties with `null` values - show as deletable, editable to a color, or read-only?
+4. Should code folding in the JSON view preserve collapsed state across edits?
+5. Should we add an explicit "revert to original" action using stored original text?
+
+## Success Criteria
+
+1. User can open a Zed theme JSON5 file via drag-and-drop or file picker
+2. All colors in the file are displayed with swatches
+3. Clicking a swatch opens it for editing in the color panel
+4. Colors can be edited using hex, RGB, HSL, or OKLCH inputs
+5. Changes are reflected in real-time in the JSON view
+6. Ctrl/Cmd+S saves the file with all colors converted to hex
+7. Undo/redo works for all color changes
+8. The editor is usable in both dark and light modes
+9. User can set editor background colors separately for dark and light modes
