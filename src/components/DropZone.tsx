@@ -145,6 +145,9 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
                 Note: Save-in-place not supported in this browser
               </p>
             )}
+            <p className="mt-4 text-xs text-neutral-400 dark:text-neutral-600">
+              Your file stays on your device — nothing is uploaded.
+            </p>
           </>
         )}
       </div>
