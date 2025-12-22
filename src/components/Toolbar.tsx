@@ -6,6 +6,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSun, faMoon, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import { formatShortcut } from '@/lib/keyboard'
+import { editorThemes, type EditorThemeName } from '@/lib/editorThemes'
 
 interface ToolbarProps {
   fileName?: string
@@ -14,6 +15,8 @@ interface ToolbarProps {
   canSave?: boolean
   isDarkMode: boolean
   onToggleDarkMode: () => void
+  editorTheme?: EditorThemeName
+  onEditorThemeChange?: (theme: EditorThemeName) => void
 }
 
 export function Toolbar({
@@ -23,6 +26,8 @@ export function Toolbar({
   canSave = true,
   isDarkMode,
   onToggleDarkMode,
+  editorTheme,
+  onEditorThemeChange,
 }: ToolbarProps) {
   return (
     <header className="flex items-center justify-between border-b border-neutral-300 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
@@ -40,6 +45,20 @@ export function Toolbar({
         )}
       </div>
       <div className="flex items-center gap-2">
+        {onEditorThemeChange && (
+          <select
+            value={editorTheme}
+            onChange={(e) => onEditorThemeChange(e.target.value as EditorThemeName)}
+            className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-100 focus:border-blue-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            title="Editor theme"
+          >
+            {Object.values(editorThemes).map((theme) => (
+              <option key={theme.name} value={theme.name}>
+                {theme.label}
+              </option>
+            ))}
+          </select>
+        )}
         <button
           onClick={onToggleDarkMode}
           className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"

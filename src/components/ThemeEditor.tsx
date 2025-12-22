@@ -6,8 +6,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { extractColors, extractColorsAsMap } from '@/lib/jsonParsing'
 import { formatShortcut } from '@/lib/keyboard'
+import { getDefaultTheme, type EditorThemeName } from '@/lib/editorThemes'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
 import { ThemeTabs } from './ThemeTabs'
@@ -35,6 +37,12 @@ export function ThemeEditor() {
   } = useThemeEditor()
 
   const { saveFile, isSupported: canSaveInPlace } = useFileAccess()
+
+  // Editor theme state (persisted to localStorage)
+  const [editorTheme, setEditorTheme] = useLocalStorage<EditorThemeName>(
+    'editorTheme',
+    getDefaultTheme(state.isDarkMode)
+  )
 
   // Color filter state
   const [colorFilter, setColorFilter] = useState('')
@@ -158,6 +166,8 @@ export function ThemeEditor() {
         <Toolbar
           isDarkMode={state.isDarkMode}
           onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+          editorTheme={editorTheme}
+          onEditorThemeChange={setEditorTheme}
         />
         <div className="flex flex-1 items-center justify-center p-8">
           <DropZone
@@ -188,6 +198,8 @@ export function ThemeEditor() {
         canSave={canSaveInPlace}
         isDarkMode={state.isDarkMode}
         onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+        editorTheme={editorTheme}
+        onEditorThemeChange={setEditorTheme}
       />
 
       {/* Theme tabs */}
@@ -248,6 +260,7 @@ export function ThemeEditor() {
               onColorClick={handleColorClick}
               selectedColorPath={state.selectedColorPath}
               isDarkMode={state.isDarkMode}
+              editorTheme={editorTheme}
               originalColors={originalColors}
             />
           </div>
