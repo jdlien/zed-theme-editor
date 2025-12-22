@@ -79,6 +79,39 @@ export function ThemeEditor() {
   const colorListRef = useRef<HTMLDivElement>(null)
   const jsonEditorRef = useRef<JsonEditorPanelHandle>(null)
 
+  // Sidebar resize state
+  const [sidebarWidth, setSidebarWidth] = useLocalStorage<number>(
+    'zed-theme-editor-sidebar-width',
+    256 // 16rem = 256px (w-64)
+  )
+  const isResizingSidebar = useRef(false)
+
+  const handleSidebarResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      isResizingSidebar.current = true
+      const startX = e.clientX
+      const startWidth = sidebarWidth
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!isResizingSidebar.current) return
+        const delta = e.clientX - startX
+        const newWidth = Math.min(500, Math.max(180, startWidth + delta))
+        setSidebarWidth(newWidth)
+      }
+
+      const handleMouseUp = () => {
+        isResizingSidebar.current = false
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    },
+    [sidebarWidth, setSidebarWidth]
+  )
+
   // Extract colors from current theme
   const colors = useMemo(() => {
     if (!currentTheme) return []
@@ -321,7 +354,16 @@ export function ThemeEditor() {
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: Color list */}
-        <aside className="flex w-64 flex-col border-r border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900">
+        <aside
+          className="relative flex flex-col border-r border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900"
+          style={{ width: `${sidebarWidth}px` }}
+        >
+          {/* Resize handle */}
+          <div
+            className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 active:bg-blue-500 z-10"
+            onMouseDown={handleSidebarResizeStart}
+            title="Drag to resize"
+          />
           <div className="border-b border-neutral-300 px-3 py-2 dark:border-neutral-700">
             <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
               Colors
