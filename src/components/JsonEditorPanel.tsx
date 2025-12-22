@@ -24,7 +24,11 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle,
 } from '@codemirror/language'
-import { lineNumbers, highlightActiveLineGutter, highlightActiveLine } from '@codemirror/view'
+import {
+  lineNumbers,
+  highlightActiveLineGutter,
+  highlightActiveLine,
+} from '@codemirror/view'
 import { isValidHex } from '@/lib/colorConversion'
 
 // ============================================================================
@@ -44,6 +48,8 @@ export interface JsonEditorPanelProps {
   isDarkMode?: boolean
   /** Whether the editor is read-only (default: true to prevent data loss) */
   readOnly?: boolean
+  /** Original colors map for before/after comparison */
+  originalColors?: Map<string, string>
   /** Additional CSS classes */
   className?: string
 }
@@ -65,7 +71,8 @@ class ColorSwatchWidget extends WidgetType {
     readonly path: string,
     readonly onClick?: (path: string, color: string, position: number) => void,
     readonly position: number = 0,
-    readonly isSelected: boolean = false
+    readonly isSelected: boolean = false,
+    readonly originalColor?: string
   ) {
     super()
   }
@@ -73,16 +80,20 @@ class ColorSwatchWidget extends WidgetType {
   toDOM(): HTMLElement {
     const wrapper = document.createElement('span')
     wrapper.className = 'cm-color-swatch-wrapper'
-    wrapper.style.cssText = 'display: inline-flex; align-items: center; margin-left: 4px;'
+    wrapper.style.cssText =
+      'display: inline-flex; align-items: center; margin-left: 4px;'
+
+    const hasChanged = this.originalColor && this.originalColor !== this.color
+    const swatchWidth = hasChanged ? 28 : 14
 
     const swatch = document.createElement('span')
     swatch.className = `cm-color-swatch ${this.isSelected ? 'cm-color-swatch-selected' : ''}`
     swatch.style.cssText = `
-      display: inline-block;
-      width: 14px;
+      display: inline-flex;
+      width: ${swatchWidth}px;
       height: 14px;
       border-radius: 3px;
-      background-color: ${this.color};
+      overflow: hidden;
       border: 1px solid rgba(255, 255, 255, 0.3);
       cursor: pointer;
       vertical-align: middle;
@@ -92,7 +103,29 @@ class ColorSwatchWidget extends WidgetType {
       position: relative;
       z-index: 1;
     `
-    swatch.title = `${this.path}: ${this.color}`
+
+    if (hasChanged) {
+      // Split view: original on left, current on right
+      const originalHalf = document.createElement('span')
+      originalHalf.style.cssText = `
+        width: 50%;
+        height: 100%;
+        background-color: ${this.originalColor};
+      `
+      const currentHalf = document.createElement('span')
+      currentHalf.style.cssText = `
+        width: 50%;
+        height: 100%;
+        background-color: ${this.color};
+      `
+      swatch.appendChild(originalHalf)
+      swatch.appendChild(currentHalf)
+      swatch.title = `${this.path}: ${this.originalColor} → ${this.color}`
+    } else {
+      // Single color
+      swatch.style.backgroundColor = this.color
+      swatch.title = `${this.path}: ${this.color}`
+    }
 
     if (this.onClick) {
       const onClickHandler = this.onClick
@@ -113,14 +146,19 @@ class ColorSwatchWidget extends WidgetType {
       other.color === this.color &&
       other.path === this.path &&
       other.isSelected === this.isSelected &&
-      other.onClick === this.onClick
+      other.onClick === this.onClick &&
+      other.originalColor === this.originalColor
     )
   }
 
   ignoreEvent(event: Event): boolean {
     // Return true for mouse events to let our widget handle them, not CodeMirror
     const eventType = event.type
-    return eventType === 'mousedown' || eventType === 'mouseup' || eventType === 'click'
+    return (
+      eventType === 'mousedown' ||
+      eventType === 'mouseup' ||
+      eventType === 'click'
+    )
   }
 }
 
@@ -196,8 +234,7 @@ function findColors(content: string): ColorMatch[] {
 function buildJsonPath(content: string, position: number): string {
   const segments: string[] = []
   const contextStack: Array<
-    | { type: 'object'; expectingKey: boolean }
-    | { type: 'array'; index: number }
+    { type: 'object'; expectingKey: boolean } | { type: 'array'; index: number }
   > = []
   const valueStack: number[] = []
 
@@ -367,6 +404,7 @@ interface DecorationConfig {
   selectedPath: string | null
   onClick?: (path: string, color: string, position: number) => void
   docContent: string
+  originalColors?: Map<string, string>
 }
 
 const setColorDecorations = StateEffect.define<DecorationConfig>()
@@ -378,14 +416,25 @@ const colorDecorationsField = StateField.define<DecorationSet>({
   update(decorations, tr) {
     for (const effect of tr.effects) {
       if (effect.is(setColorDecorations)) {
-        const { colors, selectedPath, onClick, docContent } = effect.value
+        const { colors, selectedPath, onClick, docContent, originalColors } =
+          effect.value
         const widgets = colors.map((c) => {
           const fullPath = buildJsonPath(docContent, c.from)
           // Normalize the path for comparison (selectedPath is already normalized)
           const { path: normalizedPath } = normalizeColorPath(fullPath)
-          const isSelected = normalizedPath === selectedPath || c.key === selectedPath
+          const isSelected =
+            normalizedPath === selectedPath || c.key === selectedPath
+          // Look up original color for this path
+          const originalColor = originalColors?.get(normalizedPath)
           return Decoration.widget({
-            widget: new ColorSwatchWidget(c.color, fullPath, onClick, c.from, isSelected),
+            widget: new ColorSwatchWidget(
+              c.color,
+              fullPath,
+              onClick,
+              c.from,
+              isSelected,
+              originalColor
+            ),
             side: 1,
           }).range(c.to)
         })
@@ -407,7 +456,8 @@ const editorTheme = EditorView.theme({
     fontSize: '13px',
   },
   '.cm-scroller': {
-    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
+    fontFamily:
+      'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
     overflow: 'auto',
   },
   '.cm-content': {
@@ -442,16 +492,19 @@ export function JsonEditorPanel({
   selectedColorPath,
   isDarkMode = true,
   readOnly = true,
+  originalColors,
   className = '',
 }: JsonEditorPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const onChangeRef = useRef(onChange)
   const onColorClickRef = useRef(onColorClick)
+  const originalColorsRef = useRef(originalColors)
 
   // Keep refs updated
   onChangeRef.current = onChange
   onColorClickRef.current = onColorClick
+  originalColorsRef.current = originalColors
 
   // Update color decorations
   const updateDecorations = useCallback(
@@ -464,6 +517,7 @@ export function JsonEditorPanel({
           selectedPath: selectedColorPath || null,
           onClick: onColorClickRef.current,
           docContent,
+          originalColors: originalColorsRef.current,
         }),
       })
     },
@@ -474,14 +528,16 @@ export function JsonEditorPanel({
   useEffect(() => {
     if (!containerRef.current) return
 
-    const updateListener = EditorView.updateListener.of((update: ViewUpdate) => {
-      if (update.docChanged && onChangeRef.current) {
-        const newContent = update.state.doc.toString()
-        onChangeRef.current(newContent)
-        // Update decorations after content change
-        updateDecorations(update.view)
+    const updateListener = EditorView.updateListener.of(
+      (update: ViewUpdate) => {
+        if (update.docChanged && onChangeRef.current) {
+          const newContent = update.state.doc.toString()
+          onChangeRef.current(newContent)
+          // Update decorations after content change
+          updateDecorations(update.view)
+        }
       }
-    })
+    )
 
     const extensions = [
       lineNumbers(),
@@ -497,11 +553,18 @@ export function JsonEditorPanel({
       // Read-only mode by default to prevent accidental edits
       EditorState.readOnly.of(readOnly),
       ...(isDarkMode
-        ? [oneDark, syntaxHighlighting(defaultHighlightStyle, { fallback: true })]
+        ? [
+            oneDark,
+            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+          ]
         : [syntaxHighlighting(defaultHighlightStyle)]),
       // Only include editing features if not read-only
       ...(!readOnly
-        ? [history(), indentOnInput(), keymap.of([...defaultKeymap, ...historyKeymap])]
+        ? [
+            history(),
+            indentOnInput(),
+            keymap.of([...defaultKeymap, ...historyKeymap]),
+          ]
         : []),
     ]
 
@@ -567,7 +630,7 @@ export function JsonEditorPanel({
   return (
     <div
       ref={containerRef}
-      className={`h-full overflow-hidden rounded-lg border border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900 ${className}`}
+      className={`h-full overflow-hidden border-0 border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900 ${className}`}
       data-testid="json-editor-panel"
     />
   )
