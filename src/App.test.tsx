@@ -37,16 +37,17 @@ describe('App', () => {
 
       render(<App />)
 
-      // Light mode should be selected because localStorage overrides system preference
-      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
+      // Light mode should be active because localStorage overrides system preference
+      // Switch aria-checked=false means light mode (not dark)
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'false')
     })
 
     it('uses system preference when no localStorage value exists', () => {
       // System prefers dark (mocked in beforeEach)
       render(<App />)
 
-      // Dark mode should be selected based on system preference
-      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'true')
+      // Dark mode should be active based on system preference
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'true')
     })
 
     it('uses light mode when system prefers light and no localStorage', () => {
@@ -67,8 +68,8 @@ describe('App', () => {
 
       render(<App />)
 
-      // Light mode should be selected based on system preference
-      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
+      // Light mode should be active based on system preference
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'false')
     })
   })
 })

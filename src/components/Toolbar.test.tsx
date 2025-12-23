@@ -31,7 +31,7 @@ describe('Toolbar', () => {
 
     it('renders dark mode toggle', () => {
       render(<Toolbar {...defaultProps} />)
-      expect(screen.getByRole('radiogroup', { name: 'Color scheme' })).toBeInTheDocument()
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toBeInTheDocument()
     })
   })
 
@@ -90,49 +90,38 @@ describe('Toolbar', () => {
   })
 
   describe('dark mode toggle', () => {
-    it('renders as a radiogroup with two options', () => {
+    it('renders as a switch', () => {
       render(<Toolbar {...defaultProps} />)
-      expect(screen.getByRole('radiogroup', { name: 'Color scheme' })).toBeInTheDocument()
-      expect(screen.getByRole('radio', { name: 'Light mode' })).toBeInTheDocument()
-      expect(screen.getByRole('radio', { name: 'Dark mode' })).toBeInTheDocument()
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toBeInTheDocument()
     })
 
-    it('marks light mode as checked when not in dark mode', () => {
+    it('marks switch as unchecked when not in dark mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'true')
-      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'false')
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'false')
     })
 
-    it('marks dark mode as checked when in dark mode', () => {
+    it('marks switch as checked when in dark mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={true} />)
-      expect(screen.getByRole('radio', { name: 'Light mode' })).toHaveAttribute('aria-checked', 'false')
-      expect(screen.getByRole('radio', { name: 'Dark mode' })).toHaveAttribute('aria-checked', 'true')
+      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'true')
     })
 
-    it('calls onToggleDarkMode when clicking dark mode button while in light mode', () => {
+    it('calls onToggleDarkMode when clicking toggle while in light mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      fireEvent.click(screen.getByRole('radio', { name: 'Dark mode' }))
+      fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
       expect(mockOnToggleDarkMode).toHaveBeenCalledTimes(1)
     })
 
-    it('calls onToggleDarkMode when clicking light mode button while in dark mode', () => {
+    it('calls onToggleDarkMode when clicking toggle while in dark mode', () => {
       render(<Toolbar {...defaultProps} isDarkMode={true} />)
-      fireEvent.click(screen.getByRole('radio', { name: 'Light mode' }))
+      fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
       expect(mockOnToggleDarkMode).toHaveBeenCalledTimes(1)
-    })
-
-    it('does not call onToggleDarkMode when clicking already selected mode', () => {
-      render(<Toolbar {...defaultProps} isDarkMode={false} />)
-      fireEvent.click(screen.getByRole('radio', { name: 'Light mode' }))
-      expect(mockOnToggleDarkMode).not.toHaveBeenCalled()
     })
 
     it('shows sun and moon icons', () => {
       render(<Toolbar {...defaultProps} />)
-      const lightButton = screen.getByRole('radio', { name: 'Light mode' })
-      const darkButton = screen.getByRole('radio', { name: 'Dark mode' })
-      expect(lightButton.querySelector('[data-icon="sun"]')).toBeInTheDocument()
-      expect(darkButton.querySelector('[data-icon="moon"]')).toBeInTheDocument()
+      const toggle = screen.getByRole('switch', { name: 'Toggle dark mode' })
+      expect(toggle.querySelector('[data-icon="sun"]')).toBeInTheDocument()
+      expect(toggle.querySelector('[data-icon="moon"]')).toBeInTheDocument()
     })
   })
 

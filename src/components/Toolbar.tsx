@@ -123,40 +123,35 @@ export function Toolbar({
             </select>
           </label>
         )}
-        <div
-          className="ml-2 inline-flex gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
-          role="radiogroup"
-          aria-label="Color scheme"
+        <button
+          onClick={onToggleDarkMode}
+          className="ml-2 inline-flex cursor-pointer gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
+          role="switch"
+          aria-checked={isDarkMode}
+          aria-label="Toggle dark mode"
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          <button
-            onClick={() => !isDarkMode || onToggleDarkMode()}
-            className={`size-8 rounded-full transition-all ${
+          <span
+            className={`flex size-8 items-center justify-center rounded-full transition-all ${
               !isDarkMode
-                ? 'bg-white text-neutral-900 shadow-md dark:bg-neutral-600 dark:text-neutral-400'
+                ? 'bg-white text-neutral-800 shadow-md hover:text-black dark:bg-neutral-600 dark:text-neutral-400'
                 : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
             }`}
-            role="radio"
-            aria-checked={!isDarkMode}
-            aria-label="Light mode"
-            title="Light mode"
+            aria-hidden="true"
           >
             <FontAwesomeIcon icon={faSun} className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => isDarkMode || onToggleDarkMode()}
-            className={`size-8 rounded-full transition-all ${
+          </span>
+          <span
+            className={`flex size-8 items-center justify-center rounded-full transition-all ${
               isDarkMode
-                ? 'bg-white shadow-md dark:bg-neutral-600 dark:text-neutral-100'
+                ? 'bg-white shadow-md dark:bg-neutral-600 dark:text-neutral-200 dark:hover:text-white'
                 : 'text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
             }`}
-            role="radio"
-            aria-checked={isDarkMode}
-            aria-label="Dark mode"
-            title="Dark mode"
+            aria-hidden="true"
           >
             <FontAwesomeIcon icon={faMoon} className="h-4 w-4" />
-          </button>
-        </div>
+          </span>
+        </button>
         {onSave && (
           <button
             onClick={onSave}
