@@ -17,6 +17,7 @@ export interface UseFileAccessReturn {
   isLoading: boolean
   error: string | null
   openFile: () => Promise<FileData | null>
+  openFileFromHandle: (handle: FileSystemFileHandle) => Promise<FileData | null>
   saveFile: (content: string, handle: FileSystemFileHandle | null) => Promise<boolean>
   saveFileAs: (content: string, suggestedName?: string) => Promise<FileSystemFileHandle | null>
   downloadFile: (content: string, fileName: string) => void
@@ -91,6 +92,51 @@ export function useFileAccess(): UseFileAccessReturn {
       setIsLoading(false)
     }
   }, [isSupported])
+
+  /**
+   * Open a file from a stored FileSystemFileHandle (e.g., from recent files)
+   * May prompt user for permission if not already granted
+   */
+  const openFileFromHandle = useCallback(
+    async (handle: FileSystemFileHandle): Promise<FileData | null> => {
+      setError(null)
+      setIsLoading(true)
+
+      try {
+        // Request read permission if needed
+        const permission = await handle.queryPermission({ mode: 'read' })
+        if (permission !== 'granted') {
+          const requested = await handle.requestPermission({ mode: 'read' })
+          if (requested !== 'granted') {
+            setError('Permission denied to read file')
+            return null
+          }
+        }
+
+        const file = await handle.getFile()
+        const content = await file.text()
+
+        return {
+          content,
+          name: file.name,
+          handle,
+        }
+      } catch (err) {
+        // Handle stale handles (file was deleted/moved)
+        if (err instanceof Error && err.name === 'NotFoundError') {
+          setError('File no longer exists')
+          return null
+        }
+
+        const message = err instanceof Error ? err.message : 'Failed to open file'
+        setError(message)
+        return null
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    []
+  )
 
   /**
    * Save content to an existing file handle
@@ -199,6 +245,7 @@ export function useFileAccess(): UseFileAccessReturn {
     isLoading,
     error,
     openFile,
+    openFileFromHandle,
     saveFile,
     saveFileAs,
     downloadFile,

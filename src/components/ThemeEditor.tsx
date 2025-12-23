@@ -15,6 +15,8 @@ import {
 import { useThemeEditor } from '@/hooks/useThemeEditor'
 import { useFileAccess } from '@/hooks/useFileAccess'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useRecentFiles } from '@/hooks/useRecentFiles'
+import type { RecentFile } from '@/lib/recentFiles'
 import {
   getAllThemeColors,
   extractColorsAsMap,
@@ -58,7 +60,14 @@ export function ThemeEditor() {
     serializedTheme,
   } = useThemeEditor()
 
-  const { openFile, saveFile, isSupported: canSaveInPlace } = useFileAccess()
+  const {
+    openFile,
+    openFileFromHandle,
+    saveFile,
+    isSupported: canSaveInPlace,
+  } = useFileAccess()
+  const { recentFiles, addFile: addRecentFile, removeFile: removeRecentFile } =
+    useRecentFiles()
 
   // Handle opening a new file
   const handleOpenFile = useCallback(async () => {
@@ -69,8 +78,34 @@ export function ThemeEditor() {
         name: result.name,
         handle: result.handle,
       })
+      // Add to recent files if we have a handle
+      if (result.handle) {
+        addRecentFile(result.handle)
+      }
     }
-  }, [openFile, loadFile])
+  }, [openFile, loadFile, addRecentFile])
+
+  // Handle opening a recent file
+  const handleRecentFileClick = useCallback(
+    async (file: RecentFile) => {
+      const result = await openFileFromHandle(file.handle)
+      if (result) {
+        loadFile({
+          content: result.content,
+          name: result.name,
+          handle: result.handle,
+        })
+        // Update recency timestamp (handle is always set when using openFileFromHandle)
+        if (result.handle) {
+          addRecentFile(result.handle)
+        }
+      } else {
+        // File no longer exists - remove from recent files
+        removeRecentFile(file.id)
+      }
+    },
+    [openFileFromHandle, loadFile, addRecentFile, removeRecentFile]
+  )
 
   // Editor theme state - separate preferences for dark and light modes
   const [darkEditorTheme, setDarkEditorTheme] =
@@ -386,8 +421,15 @@ export function ThemeEditor() {
           <DropZone
             onFileLoad={(content, fileName, handle) => {
               loadFile({ content, name: fileName, handle })
+              // Add to recent files if we have a handle
+              if (handle) {
+                addRecentFile(handle)
+              }
             }}
             onError={(error) => console.error('File load error:', error)}
+            recentFiles={recentFiles}
+            onRecentFileClick={handleRecentFileClick}
+            onRecentFileRemove={removeRecentFile}
           />
           {/* v8 ignore stop */}
         </div>

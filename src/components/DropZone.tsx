@@ -1,11 +1,16 @@
 import { useState, useCallback, useRef, type DragEvent } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileImport } from '@fortawesome/free-solid-svg-icons'
+import {
+  faFileImport,
+  faFile,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons'
 import {
   useFileAccess,
   readDroppedFile,
   isValidThemeFile,
 } from '@/hooks/useFileAccess'
+import type { RecentFile } from '@/lib/recentFiles'
 
 interface DropZoneProps {
   onFileLoad: (
@@ -14,11 +19,23 @@ interface DropZoneProps {
     handle: FileSystemFileHandle | null
   ) => void
   onError?: (error: string) => void
+  /** Recent files to display below the drop zone */
+  recentFiles?: RecentFile[]
+  /** Callback when a recent file is clicked */
+  onRecentFileClick?: (file: RecentFile) => void
+  /** Callback to remove a recent file from the list */
+  onRecentFileRemove?: (id: string) => void
 }
 
 type DragState = 'idle' | 'over' | 'invalid'
 
-export function DropZone({ onFileLoad, onError }: DropZoneProps) {
+export function DropZone({
+  onFileLoad,
+  onError,
+  recentFiles = [],
+  onRecentFileClick,
+  onRecentFileRemove,
+}: DropZoneProps) {
   const [dragState, setDragState] = useState<DragState>('idle')
   const dragCounter = useRef(0)
   const { openFile, isLoading, error, isSupported } = useFileAccess()
@@ -97,7 +114,7 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
   )
 
   return (
-    <div className="flex flex-1 items-center justify-center py-4">
+    <div className="flex flex-1 flex-col items-center justify-center py-4">
       <div
         role="button"
         tabIndex={0}
@@ -137,9 +154,6 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
                 : 'Drop a Zed theme .json file here'}
             </p>
             <p className="mt-2 text-sm text-neutral-500">or click to browse</p>
-            {/*<p className="mt-4 text-xs text-neutral-500 dark:text-neutral-600">
-              Supports .json and .json5 files
-            </p>*/}
             {!isSupported && (
               <p className="mt-2 text-xs text-yellow-600">
                 Note: Save-in-place not supported in this browser
@@ -151,6 +165,45 @@ export function DropZone({ onFileLoad, onError }: DropZoneProps) {
           </>
         )}
       </div>
+
+      {/* Recent Files */}
+      {recentFiles.length > 0 && onRecentFileClick && (
+        <div className="mt-6 w-full max-w-xl">
+          <h3 className="mb-2 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+            Recent Files
+          </h3>
+          <ul className="space-y-1">
+            {recentFiles.map((file) => (
+              <li key={file.id} className="group flex items-center">
+                <button
+                  onClick={() => onRecentFileClick(file)}
+                  className="flex flex-1 items-center gap-2 rounded px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                  <FontAwesomeIcon
+                    icon={faFile}
+                    className="h-4 w-4 text-neutral-400 dark:text-neutral-500"
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{file.name}</span>
+                </button>
+                {onRecentFileRemove && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRecentFileRemove(file.id)
+                    }}
+                    className="ml-1 rounded p-1.5 text-neutral-400 opacity-0 transition-opacity hover:bg-neutral-300 hover:text-neutral-600 group-hover:opacity-100 dark:hover:bg-neutral-600 dark:hover:text-neutral-300"
+                    aria-label={`Remove ${file.name} from recent files`}
+                    title="Remove from recent files"
+                  >
+                    <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
