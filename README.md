@@ -37,3 +37,7 @@ pnpm test       # Run tests
 ## Tech Stack
 
 Vite, React 19, TypeScript, TailwindCSS 4, CodeMirror 6, Culori
+
+## Notes
+
+This project is not associated with Zed Industries.
