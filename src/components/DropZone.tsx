@@ -166,22 +166,24 @@ export function DropZone({
         )}
       </div>
 
-      {/* Recent Files */}
-      {recentFiles.length > 0 && onRecentFileClick && (
-        <div className="mt-6 w-full max-w-xl">
-          <h3 className="mb-2 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-            Recent Files
-          </h3>
+      {/* Recent Files - always present to avoid layout shift */}
+      {onRecentFileClick && (
+        <div className="mt-6 min-h-60 w-full max-w-xl">
+          {recentFiles.length > 0 && (
+            <h3 className="mb-2 border-b border-neutral-200 px-0.5 pb-1.5 font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
+              Recent Files
+            </h3>
+          )}
           <ul className="space-y-1">
             {recentFiles.map((file) => (
               <li key={file.id} className="group flex items-center">
                 <button
                   onClick={() => onRecentFileClick(file)}
-                  className="flex flex-1 items-center gap-2 rounded px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  className="flex flex-1 items-center gap-2 rounded px-3 py-2 text-left text-sm text-neutral-600 transition-colors group-hover:bg-neutral-200 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:bg-neutral-800 dark:group-hover:text-neutral-100"
                 >
                   <FontAwesomeIcon
                     icon={faFile}
-                    className="h-4 w-4 text-neutral-400 dark:text-neutral-500"
+                    className="h-4 w-4 text-neutral-400 transition-colors group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
                     aria-hidden="true"
                   />
                   <span className="truncate">{file.name}</span>
@@ -192,7 +194,7 @@ export function DropZone({
                       e.stopPropagation()
                       onRecentFileRemove(file.id)
                     }}
-                    className="ml-1 rounded p-1.5 text-neutral-400 opacity-0 transition-opacity hover:bg-neutral-300 hover:text-neutral-600 group-hover:opacity-100 dark:hover:bg-neutral-600 dark:hover:text-neutral-300"
+                    className="hover:text-black-600 ml-1 rounded p-1.5 text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-pink-500 hover:text-black dark:hover:bg-pink-800 dark:hover:text-white"
                     aria-label={`Remove ${file.name} from recent files`}
                     title="Remove from recent files"
                   >

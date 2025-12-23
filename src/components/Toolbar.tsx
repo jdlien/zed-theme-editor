@@ -124,7 +124,7 @@ export function Toolbar({
           </label>
         )}
         <div
-          className="inline-flex gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
+          className="ml-2 inline-flex gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
           role="radiogroup"
           aria-label="Color scheme"
         >
