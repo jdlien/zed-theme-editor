@@ -160,7 +160,7 @@ export function DropZone({
               </p>
             )}
             <p className="mt-4 text-xs text-neutral-400 dark:text-neutral-600">
-              Your file stays on your device — nothing is uploaded.
+              Your file stays on your device—nothing is uploaded.
             </p>
           </>
         )}
@@ -170,7 +170,7 @@ export function DropZone({
       {onRecentFileClick && (
         <div className="mt-6 min-h-60 w-full max-w-xl">
           {recentFiles.length > 0 && (
-            <h3 className="mb-2 border-b border-neutral-200 px-0.5 pb-1.5 font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
+            <h3 className="mb-2 px-0.5 font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
               Recent Files
             </h3>
           )}
@@ -206,6 +206,20 @@ export function DropZone({
           </ul>
         </div>
       )}
+
+      <div className="mt-6 w-full max-w-xl">
+        <h3 className="mb-2 px-0.5 font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
+          More Themes
+        </h3>
+
+        <p className="px-0.5 font-light text-neutral-700 dark:text-neutral-400">
+          Visit{' '}
+          <a className="link" href="https://zed-themes.com">
+            https://zed-themes.com
+          </a>{' '}
+          to explore themes you can customize here.
+        </p>
+      </div>
     </div>
   )
 }

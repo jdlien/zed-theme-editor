@@ -1,10 +1,16 @@
-@import "tailwindcss";
+@layer base, components, utilities;
+@import 'tailwindcss';
 
 /* Dark mode configuration - use class strategy */
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (
+  &:where(.dark, .dark *):where(:not(.light, .light *)),
+  &:where(:not(.light, .light *)):where(@media (prefers-color-scheme: dark))
+);
 
 /* Theme colors using CSS custom properties */
 :root {
+  color-scheme: dark light;
+
   /* Light theme */
   --color-bg-primary: theme(colors.neutral.100);
   --color-bg-secondary: theme(colors.neutral.50);
@@ -15,7 +21,12 @@
   --color-text-muted: theme(colors.neutral.500);
 }
 
+.light {
+  color-scheme: light;
+}
+
 .dark {
+  color-scheme: dark;
   /* Dark theme */
   --color-bg-primary: theme(colors.neutral.950);
   --color-bg-secondary: theme(colors.neutral.900);
@@ -28,10 +39,34 @@
 
 /* Hue cycling animation for logo */
 @keyframes hue-cycle {
-  from { filter: hue-rotate(0deg); }
-  to { filter: hue-rotate(360deg); }
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
 }
 
 .animate-hue-cycle {
   animation: hue-cycle 60s linear infinite;
+}
+
+@layer base {
+}
+
+@layer components {
+  .link {
+    @apply text-indigo-600 hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300;
+  }
+
+  .btn {
+    @apply flex items-center gap-2 rounded border-indigo-500 bg-indigo-600 bg-linear-to-b from-indigo-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors enabled:hover:bg-indigo-500 enabled:hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .input-group {
+    @apply rounded-md border border-neutral-200/40 p-1 inset-shadow-sm dark:border-neutral-800/50 dark:bg-neutral-950/40;
+  }
+}
+
+@layer utilities {
 }

@@ -180,7 +180,8 @@ Important: When planning big new features or preparing to make large refactors, 
 ### Before Committing
 1. Run `pnpm run build` - must pass
 2. Run `pnpm test -- --run` - all tests must pass
-3. No console.log statements in committed code
+3. Run `pnpm e2e` (or variations, if necessary for you to view end-to-end tests)
+4. No console.log statements in committed code
 
 ## Browser Support
 

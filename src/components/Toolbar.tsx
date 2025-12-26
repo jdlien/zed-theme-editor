@@ -22,6 +22,7 @@ interface ToolbarProps {
   hasUnsavedChanges?: boolean
   onSave?: () => void
   onOpenFile?: () => void
+  onCloseFile?: () => void
   canSave?: boolean
   isDarkMode: boolean
   onToggleDarkMode: () => void
@@ -36,6 +37,7 @@ export function Toolbar({
   hasUnsavedChanges,
   onSave,
   onOpenFile,
+  onCloseFile,
   canSave = true,
   isDarkMode,
   onToggleDarkMode,
@@ -46,13 +48,17 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <header className="flex items-center justify-between border-b border-neutral-300 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onCloseFile}
+          className="flex items-center gap-2 rounded px-1 py-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
+          title="Close file and return to start"
+        >
           <ZedLogo size={28} className="animate-hue-cycle text-[#084CCF]" />
-          <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">
+          <h1 className="mr-1 text-xl font-semibold text-neutral-900 dark:text-white">
             <span className="hidden md:inline">Zed Theme Editor</span>
           </h1>
-        </div>
+        </button>
         {onOpenFile && (
           <button
             onClick={onOpenFile}
@@ -102,7 +108,7 @@ export function Toolbar({
           </label>
         )}
         {onEditorThemeChange && (
-          <label className="ml-2 flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
+          <label className="ml-2 hidden items-center gap-1.5 text-sm text-neutral-600 md:flex dark:text-neutral-400">
             <span className="hidden font-semibold lg:inline">Editor</span>
             <span className="hidden font-semibold sm:inline">Theme</span>
             <select
@@ -156,7 +162,7 @@ export function Toolbar({
           <button
             onClick={onSave}
             disabled={!canSave || !hasUnsavedChanges}
-            className="flex items-center gap-2 rounded border-indigo-500 bg-indigo-600 bg-linear-to-b from-indigo-500 to-indigo-600 px-3 py-1.5 text-sm text-white transition-colors enabled:hover:bg-indigo-500 enabled:hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn"
             title={`Save (${formatShortcut('S')})`}
           >
             Save

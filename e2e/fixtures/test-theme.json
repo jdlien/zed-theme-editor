@@ -1,0 +1,17 @@
+{
+  "$schema": "https://zed.dev/schema/themes/v0.2.0.json",
+  "name": "Test Theme",
+  "author": "Playwright Tests",
+  "themes": [
+    {
+      "name": "Test Dark",
+      "appearance": "dark",
+      "style": {
+        "background": "#1e1e2e",
+        "text": "#cdd6f4",
+        "text.muted": "#a6adc8",
+        "border": "#313244"
+      }
+    }
+  ]
+}

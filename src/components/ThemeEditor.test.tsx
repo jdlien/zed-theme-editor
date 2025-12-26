@@ -46,6 +46,7 @@ const sampleThemeFamily: ThemeFamily = {
 
 describe('ThemeEditor', () => {
   const mockLoadFile = vi.fn()
+  const mockCloseFile = vi.fn()
   const mockSetActiveTheme = vi.fn()
   const mockSelectColor = vi.fn()
   const mockUpdateColorLive = vi.fn()
@@ -85,6 +86,7 @@ describe('ThemeEditor', () => {
   const getBaseThemeEditorReturn = (overrides = {}) => ({
     state: defaultState,
     loadFile: mockLoadFile,
+    closeFile: mockCloseFile,
     setActiveTheme: mockSetActiveTheme,
     selectColor: mockSelectColor,
     updateColorLive: mockUpdateColorLive,
@@ -116,15 +118,17 @@ describe('ThemeEditor', () => {
     })
 
     // Default useLocalStorage mock - returns different values based on key
-    mockUseLocalStorage.mockImplementation((key: string, defaultValue: unknown) => {
-      const values: Record<string, unknown> = {
-        editorThemeDark: 'neutral-dark',
-        editorThemeLight: 'neutral-light',
-        jsonColorFormat: 'hex',
-        'zed-theme-editor-sidebar-width': 256,
+    mockUseLocalStorage.mockImplementation(
+      (key: string, defaultValue: unknown) => {
+        const values: Record<string, unknown> = {
+          editorThemeDark: 'neutral-dark',
+          editorThemeLight: 'neutral-light',
+          jsonColorFormat: 'hex',
+          'zed-theme-editor-sidebar-width': 256,
+        }
+        return [values[key] ?? defaultValue, vi.fn()]
       }
-      return [values[key] ?? defaultValue, vi.fn()]
-    })
+    )
   })
 
   describe('initial state (no file loaded)', () => {
@@ -135,12 +139,16 @@ describe('ThemeEditor', () => {
 
     it('renders drop zone when no file is loaded', () => {
       render(<ThemeEditor />)
-      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
+      expect(
+        screen.getByText('Drop a Zed theme .json file here')
+      ).toBeInTheDocument()
     })
 
     it('renders dark mode toggle', () => {
       render(<ThemeEditor />)
-      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('switch', { name: 'Toggle dark mode' })
+      ).toBeInTheDocument()
     })
 
     it('shows error message when state has error', () => {
@@ -168,7 +176,9 @@ describe('ThemeEditor', () => {
         })
       )
       render(<ThemeEditor />)
-      expect(screen.getByRole('switch', { name: 'Toggle dark mode' })).toHaveAttribute('aria-checked', 'true')
+      expect(
+        screen.getByRole('switch', { name: 'Toggle dark mode' })
+      ).toHaveAttribute('aria-checked', 'true')
     })
   })
 
@@ -206,6 +216,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -240,7 +251,9 @@ describe('ThemeEditor', () => {
 
     it('renders color search input', () => {
       render(<ThemeEditor />)
-      expect(screen.getByPlaceholderText('Filter colors...')).toBeInTheDocument()
+      expect(
+        screen.getByPlaceholderText('Filter colors...')
+      ).toBeInTheDocument()
     })
 
     it('renders theme preview', () => {
@@ -298,6 +311,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -361,6 +375,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -399,6 +414,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -430,6 +446,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -461,6 +478,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -486,6 +504,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -522,6 +541,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -555,6 +575,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -576,7 +597,10 @@ describe('ThemeEditor', () => {
       fireEvent.keyDown(window, { key: 's', metaKey: true })
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Failed to save:', expect.any(Error))
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to save:',
+          expect.any(Error)
+        )
       })
       consoleSpy.mockRestore()
     })
@@ -585,6 +609,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -617,6 +642,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -644,6 +670,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -673,6 +700,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -691,7 +719,9 @@ describe('ThemeEditor', () => {
 
       render(<ThemeEditor />)
       // Color format select is rendered
-      expect(screen.getByTitle('Color format for JSON display')).toBeInTheDocument()
+      expect(
+        screen.getByTitle('Color format for JSON display')
+      ).toBeInTheDocument()
     })
   })
 
@@ -700,6 +730,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, selectedColorPath: 'style/background' },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -744,21 +775,24 @@ describe('ThemeEditor', () => {
 
     beforeEach(() => {
       mockSetSidebarWidth = vi.fn()
-      mockUseLocalStorage.mockImplementation((key: string, defaultValue: unknown) => {
-        if (key === 'zed-theme-editor-sidebar-width') {
-          return [256, mockSetSidebarWidth]
+      mockUseLocalStorage.mockImplementation(
+        (key: string, defaultValue: unknown) => {
+          if (key === 'zed-theme-editor-sidebar-width') {
+            return [256, mockSetSidebarWidth]
+          }
+          const values: Record<string, unknown> = {
+            editorThemeDark: 'neutral-dark',
+            editorThemeLight: 'neutral-light',
+            jsonColorFormat: 'hex',
+          }
+          return [values[key] ?? defaultValue, vi.fn()]
         }
-        const values: Record<string, unknown> = {
-          editorThemeDark: 'neutral-dark',
-          editorThemeLight: 'neutral-light',
-          jsonColorFormat: 'hex',
-        }
-        return [values[key] ?? defaultValue, vi.fn()]
-      })
+      )
 
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -840,6 +874,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -899,6 +934,7 @@ describe('ThemeEditor', () => {
           history: [themeWithMinimalStyle],
         },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -935,6 +971,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, selectedColorPath: 'style/background' },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -954,7 +991,9 @@ describe('ThemeEditor', () => {
       render(<ThemeEditor />)
       // The ColorEditorPanel is rendered with the selected color
       // We just verify the component renders with a color selected
-      expect(screen.queryByText('Select a color to edit')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText('Select a color to edit')
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -965,25 +1004,28 @@ describe('ThemeEditor', () => {
     beforeEach(() => {
       mockSetDarkEditorTheme = vi.fn()
       mockSetLightEditorTheme = vi.fn()
-      mockUseLocalStorage.mockImplementation((key: string, defaultValue: unknown) => {
-        if (key === 'editorThemeDark') {
-          return ['neutral-dark', mockSetDarkEditorTheme]
+      mockUseLocalStorage.mockImplementation(
+        (key: string, defaultValue: unknown) => {
+          if (key === 'editorThemeDark') {
+            return ['neutral-dark', mockSetDarkEditorTheme]
+          }
+          if (key === 'editorThemeLight') {
+            return ['neutral-light', mockSetLightEditorTheme]
+          }
+          const values: Record<string, unknown> = {
+            jsonColorFormat: 'hex',
+            'zed-theme-editor-sidebar-width': 256,
+          }
+          return [values[key] ?? defaultValue, vi.fn()]
         }
-        if (key === 'editorThemeLight') {
-          return ['neutral-light', mockSetLightEditorTheme]
-        }
-        const values: Record<string, unknown> = {
-          jsonColorFormat: 'hex',
-          'zed-theme-editor-sidebar-width': 256,
-        }
-        return [values[key] ?? defaultValue, vi.fn()]
-      })
+      )
     })
 
     it('uses light editor theme in light mode', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, isDarkMode: false },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1011,6 +1053,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, isDarkMode: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1060,6 +1103,7 @@ describe('ThemeEditor', () => {
           themeFamily: multiThemeFamily,
         },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1089,6 +1133,7 @@ describe('ThemeEditor', () => {
           themeFamily: multiThemeFamily,
         },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1116,6 +1161,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: false },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1145,6 +1191,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1171,6 +1218,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1199,6 +1247,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...defaultState, isDarkMode: false },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1226,6 +1275,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, isDarkMode: false },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1252,6 +1302,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, isDarkMode: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1279,21 +1330,24 @@ describe('ThemeEditor', () => {
       let mockSetJsonColorFormat: ReturnType<typeof vi.fn>
       mockSetJsonColorFormat = vi.fn()
 
-      mockUseLocalStorage.mockImplementation((key: string, defaultValue: unknown) => {
-        if (key === 'jsonColorFormat') {
-          return ['rgb', mockSetJsonColorFormat]
+      mockUseLocalStorage.mockImplementation(
+        (key: string, defaultValue: unknown) => {
+          if (key === 'jsonColorFormat') {
+            return ['rgb', mockSetJsonColorFormat]
+          }
+          const values: Record<string, unknown> = {
+            editorThemeDark: 'neutral-dark',
+            editorThemeLight: 'neutral-light',
+            'zed-theme-editor-sidebar-width': 256,
+          }
+          return [values[key] ?? defaultValue, vi.fn()]
         }
-        const values: Record<string, unknown> = {
-          editorThemeDark: 'neutral-dark',
-          editorThemeLight: 'neutral-light',
-          'zed-theme-editor-sidebar-width': 256,
-        }
-        return [values[key] ?? defaultValue, vi.fn()]
-      })
+      )
 
       mockUseThemeEditor.mockReturnValue({
         state: loadedState,
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1332,6 +1386,7 @@ describe('ThemeEditor', () => {
           history: [originalFamily], // Original state in history
         },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,
@@ -1359,6 +1414,7 @@ describe('ThemeEditor', () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
+        closeFile: mockCloseFile,
         setActiveTheme: mockSetActiveTheme,
         selectColor: mockSelectColor,
         updateColorLive: mockUpdateColorLive,

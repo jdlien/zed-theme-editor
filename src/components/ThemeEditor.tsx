@@ -44,6 +44,7 @@ export function ThemeEditor() {
   const {
     state,
     loadFile,
+    closeFile,
     setActiveTheme,
     selectColor,
     updateColorLive,
@@ -66,8 +67,11 @@ export function ThemeEditor() {
     saveFile,
     isSupported: canSaveInPlace,
   } = useFileAccess()
-  const { recentFiles, addFile: addRecentFile, removeFile: removeRecentFile } =
-    useRecentFiles()
+  const {
+    recentFiles,
+    addFile: addRecentFile,
+    removeFile: removeRecentFile,
+  } = useRecentFiles()
 
   // Handle opening a new file
   const handleOpenFile = useCallback(async () => {
@@ -84,6 +88,17 @@ export function ThemeEditor() {
       }
     }
   }, [openFile, loadFile, addRecentFile])
+
+  // Handle closing the current file
+  const handleCloseFile = useCallback(() => {
+    if (state.hasUnsavedChanges) {
+      const confirmed = window.confirm(
+        'You have unsaved changes. Are you sure you want to close this file?'
+      )
+      if (!confirmed) return
+    }
+    closeFile()
+  }, [state.hasUnsavedChanges, closeFile])
 
   // Handle opening a recent file
   const handleRecentFileClick = useCallback(
@@ -411,6 +426,7 @@ export function ThemeEditor() {
           isDarkMode={state.isDarkMode}
           onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
           onOpenFile={handleOpenFile}
+          onCloseFile={handleCloseFile}
           editorTheme={editorTheme}
           onEditorThemeChange={setEditorTheme}
           colorFormat={jsonColorFormat}
@@ -452,6 +468,7 @@ export function ThemeEditor() {
         hasUnsavedChanges={state.hasUnsavedChanges}
         onSave={handleSave}
         onOpenFile={handleOpenFile}
+        onCloseFile={handleCloseFile}
         canSave={canSaveInPlace}
         isDarkMode={state.isDarkMode}
         onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}

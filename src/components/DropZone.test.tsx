@@ -46,10 +46,12 @@ describe('DropZone', () => {
   describe('initial render', () => {
     it('renders drop zone with default message', () => {
       render(<DropZone onFileLoad={mockOnFileLoad} />)
-      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
+      expect(
+        screen.getByText('Drop a Zed theme .json file here')
+      ).toBeInTheDocument()
       expect(screen.getByText('or click to browse')).toBeInTheDocument()
       expect(
-        screen.getByText('Your file stays on your device — nothing is uploaded.')
+        screen.getByText('Your file stays on your device—nothing is uploaded.')
       ).toBeInTheDocument()
     })
 
@@ -298,7 +300,9 @@ describe('DropZone', () => {
       // Leave
       const leaveEvent = createDragEvent('dragleave')
       fireEvent(dropZone, leaveEvent)
-      expect(screen.getByText('Drop a Zed theme .json file here')).toBeInTheDocument()
+      expect(
+        screen.getByText('Drop a Zed theme .json file here')
+      ).toBeInTheDocument()
     })
 
     it('handles drop with valid JSON file', async () => {
