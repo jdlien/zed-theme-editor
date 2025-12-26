@@ -56,4 +56,60 @@ test.describe('File Loading', () => {
       page.getByText('Drop a Zed theme .json file here')
     ).toBeVisible()
   })
+
+  test('should show error when loading invalid JSON file', async ({ page }) => {
+    await page.goto('/')
+
+    // Load a .json file with invalid content (plain text, not JSON)
+    const invalidPath = path.join(__dirname, 'fixtures', 'invalid.json')
+    const fileContent = fs.readFileSync(invalidPath, 'utf-8')
+
+    const dropZone = page.getByRole('button', {
+      name: /drop zone for theme files/i,
+    })
+
+    const dataTransfer = await page.evaluateHandle(
+      ({ content, fileName }) => {
+        const dt = new DataTransfer()
+        const file = new File([content], fileName, {
+          type: 'application/json',
+        })
+        dt.items.add(file)
+        return dt
+      },
+      { content: fileContent, fileName: 'invalid.json' }
+    )
+
+    await dropZone.dispatchEvent('drop', { dataTransfer })
+
+    // Should show an error message
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5000 })
+  })
+
+  test('should show error when loading malformed JSON', async ({ page }) => {
+    await page.goto('/')
+
+    const malformedJson = '{ "name": "broken", themes: }'
+
+    const dropZone = page.getByRole('button', {
+      name: /drop zone for theme files/i,
+    })
+
+    const dataTransfer = await page.evaluateHandle(
+      ({ content, fileName }) => {
+        const dt = new DataTransfer()
+        const file = new File([content], fileName, {
+          type: 'application/json',
+        })
+        dt.items.add(file)
+        return dt
+      },
+      { content: malformedJson, fileName: 'malformed.json' }
+    )
+
+    await dropZone.dispatchEvent('drop', { dataTransfer })
+
+    // Should show an error message
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5000 })
+  })
 })

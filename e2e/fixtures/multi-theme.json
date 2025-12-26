@@ -1,0 +1,31 @@
+{
+  "$schema": "https://zed.dev/schema/themes/v0.2.0.json",
+  "name": "One",
+  "author": "Zed Industries",
+  "themes": [
+    {
+      "name": "One Dark",
+      "appearance": "dark",
+      "style": {
+        "background": "#3b414dff",
+        "text": "#dce0e5ff",
+        "text.muted": "#a9afbcff",
+        "border": "#464b57ff",
+        "editor.background": "#282c33ff",
+        "editor.foreground": "#acb2beff"
+      }
+    },
+    {
+      "name": "One Light",
+      "appearance": "light",
+      "style": {
+        "background": "#dcdcddff",
+        "text": "#242529ff",
+        "text.muted": "#58585aff",
+        "border": "#c9c9caff",
+        "editor.background": "#fafafaff",
+        "editor.foreground": "#242529ff"
+      }
+    }
+  ]
+}

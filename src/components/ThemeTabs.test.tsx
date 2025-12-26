@@ -40,10 +40,10 @@ describe('ThemeTabs', () => {
         />
       )
       expect(
-        screen.getByRole('button', { name: /Dark Theme/i })
+        screen.getByRole('tab', { name: /Dark Theme/i })
       ).toBeInTheDocument()
       expect(
-        screen.getByRole('button', { name: /Light Theme/i })
+        screen.getByRole('tab', { name: /Light Theme/i })
       ).toBeInTheDocument()
     })
 
@@ -56,7 +56,7 @@ describe('ThemeTabs', () => {
       render(
         <ThemeTabs themes={themes} activeIndex={0} onSelect={mockOnSelect} />
       )
-      expect(screen.getAllByRole('button')).toHaveLength(3)
+      expect(screen.getAllByRole('tab')).toHaveLength(3)
     })
   })
 
@@ -70,7 +70,7 @@ describe('ThemeTabs', () => {
         />
       )
       // FontAwesome renders SVG with data-icon attribute
-      const darkButton = screen.getByRole('button', { name: /Dark Theme/i })
+      const darkButton = screen.getByRole('tab', { name: /Dark Theme/i })
       expect(darkButton.querySelector('[data-icon="moon"]')).toBeInTheDocument()
     })
 
@@ -82,7 +82,7 @@ describe('ThemeTabs', () => {
           onSelect={mockOnSelect}
         />
       )
-      const lightButton = screen.getByRole('button', { name: /Light Theme/i })
+      const lightButton = screen.getByRole('tab', { name: /Light Theme/i })
       expect(lightButton.querySelector('[data-icon="sun"]')).toBeInTheDocument()
     })
   })
@@ -96,7 +96,7 @@ describe('ThemeTabs', () => {
           onSelect={mockOnSelect}
         />
       )
-      const activeButton = screen.getByRole('button', { name: /Dark Theme/i })
+      const activeButton = screen.getByRole('tab', { name: /Dark Theme/i })
       expect(activeButton.className).toContain('border-indigo-500')
     })
 
@@ -108,7 +108,7 @@ describe('ThemeTabs', () => {
           onSelect={mockOnSelect}
         />
       )
-      const inactiveButton = screen.getByRole('button', {
+      const inactiveButton = screen.getByRole('tab', {
         name: /Light Theme/i,
       })
       expect(inactiveButton.className).toContain('text-neutral-500')
@@ -126,7 +126,7 @@ describe('ThemeTabs', () => {
 
       // Initially first tab is active
       expect(
-        screen.getByRole('button', { name: /Dark Theme/i }).className
+        screen.getByRole('tab', { name: /Dark Theme/i }).className
       ).toContain('border-indigo-500')
 
       // Rerender with second tab active
@@ -139,10 +139,10 @@ describe('ThemeTabs', () => {
       )
 
       expect(
-        screen.getByRole('button', { name: /Dark Theme/i }).className
+        screen.getByRole('tab', { name: /Dark Theme/i }).className
       ).not.toContain('border-indigo-500')
       expect(
-        screen.getByRole('button', { name: /Light Theme/i }).className
+        screen.getByRole('tab', { name: /Light Theme/i }).className
       ).toContain('border-indigo-500')
     })
   })
@@ -157,7 +157,7 @@ describe('ThemeTabs', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /Light Theme/i }))
+      fireEvent.click(screen.getByRole('tab', { name: /Light Theme/i }))
       expect(mockOnSelect).toHaveBeenCalledWith(1)
     })
 
@@ -170,7 +170,7 @@ describe('ThemeTabs', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /Dark Theme/i }))
+      fireEvent.click(screen.getByRole('tab', { name: /Dark Theme/i }))
       expect(mockOnSelect).toHaveBeenCalledWith(0)
     })
 
@@ -183,8 +183,8 @@ describe('ThemeTabs', () => {
         />
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /Light Theme/i }))
-      fireEvent.click(screen.getByRole('button', { name: /Dark Theme/i }))
+      fireEvent.click(screen.getByRole('tab', { name: /Light Theme/i }))
+      fireEvent.click(screen.getByRole('tab', { name: /Dark Theme/i }))
 
       expect(mockOnSelect).toHaveBeenCalledTimes(2)
     })

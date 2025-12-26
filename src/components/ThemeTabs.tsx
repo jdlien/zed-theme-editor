@@ -23,10 +23,15 @@ export function ThemeTabs({ themes, activeIndex, onSelect }: ThemeTabsProps) {
   }
 
   return (
-    <div className="flex gap-1 border-b border-neutral-300 bg-neutral-50 px-4 dark:border-neutral-700 dark:bg-neutral-900">
+    <div
+      role="tablist"
+      className="flex gap-1 border-b border-neutral-300 bg-neutral-50 px-4 dark:border-neutral-700 dark:bg-neutral-900"
+    >
       {themes.map((theme, index) => (
         <button
           key={index}
+          role="tab"
+          aria-selected={index === activeIndex}
           onClick={() => onSelect(index)}
           className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
             index === activeIndex

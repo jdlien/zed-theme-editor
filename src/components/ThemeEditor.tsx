@@ -450,7 +450,10 @@ export function ThemeEditor() {
           {/* v8 ignore stop */}
         </div>
         {state.error && (
-          <div className="bg-red-300/50 px-4 py-2 text-center text-sm text-red-900 dark:bg-red-900/50 dark:text-red-200">
+          <div
+            role="alert"
+            className="bg-red-300/50 px-4 py-2 text-center text-sm text-red-900 dark:bg-red-900/50 dark:text-red-200"
+          >
             {state.error}
           </div>
         )}

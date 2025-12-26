@@ -1,0 +1,2 @@
+This is not valid JSON.
+It's just a plain text file that should trigger an error when loaded.
