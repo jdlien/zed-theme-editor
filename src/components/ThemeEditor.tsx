@@ -50,7 +50,7 @@ export function ThemeEditor() {
     updateColorLive,
     addColor,
     commitPendingHistory,
-    setDarkMode,
+    toggleDarkMode,
     markSaved,
     undo,
     redo,
@@ -424,7 +424,7 @@ export function ThemeEditor() {
       >
         <Toolbar
           isDarkMode={state.isDarkMode}
-          onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+          onToggleDarkMode={toggleDarkMode}
           onOpenFile={handleOpenFile}
           onCloseFile={handleCloseFile}
           editorTheme={editorTheme}
@@ -474,7 +474,7 @@ export function ThemeEditor() {
         onCloseFile={handleCloseFile}
         canSave={canSaveInPlace}
         isDarkMode={state.isDarkMode}
-        onToggleDarkMode={() => setDarkMode(!state.isDarkMode)}
+        onToggleDarkMode={toggleDarkMode}
         editorTheme={editorTheme}
         onEditorThemeChange={setEditorTheme}
         colorFormat={jsonColorFormat}

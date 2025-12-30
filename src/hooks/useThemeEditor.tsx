@@ -311,6 +311,7 @@ interface ThemeEditorContextValue {
   commitPendingHistory: () => void
   setColorFormat: (format: ColorFormat) => void
   setDarkMode: (isDark: boolean) => void
+  toggleDarkMode: () => void
   markSaved: (handle?: FileSystemFileHandle) => void
   undo: () => void
   redo: () => void
@@ -409,6 +410,15 @@ export function ThemeEditorProvider({
     onDarkModeChange?.(isDark)
   }, [onDarkModeChange])
 
+  const toggleDarkMode = useCallback(() => {
+    document.body.classList.add('theme-transitioning')
+    dispatch({ type: 'SET_DARK_MODE', payload: !state.isDarkMode })
+    onDarkModeChange?.(!state.isDarkMode)
+    setTimeout(() => {
+      document.body.classList.remove('theme-transitioning')
+    }, 200)
+  }, [state.isDarkMode, onDarkModeChange])
+
   const markSaved = useCallback((handle?: FileSystemFileHandle) => {
     dispatch({ type: 'MARK_SAVED', payload: { handle } })
   }, [])
@@ -462,6 +472,7 @@ export function ThemeEditorProvider({
       commitPendingHistory,
       setColorFormat,
       setDarkMode,
+      toggleDarkMode,
       markSaved,
       undo,
       redo,
@@ -484,6 +495,7 @@ export function ThemeEditorProvider({
       commitPendingHistory,
       setColorFormat,
       setDarkMode,
+      toggleDarkMode,
       markSaved,
       undo,
       redo,
