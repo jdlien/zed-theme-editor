@@ -53,6 +53,7 @@ describe('ThemeEditor', () => {
   const mockAddColor = vi.fn()
   const mockCommitPendingHistory = vi.fn()
   const mockSetDarkMode = vi.fn()
+  const mockToggleDarkMode = vi.fn()
   const mockMarkSaved = vi.fn()
   const mockUndo = vi.fn()
   const mockRedo = vi.fn()
@@ -93,6 +94,7 @@ describe('ThemeEditor', () => {
     addColor: mockAddColor,
     commitPendingHistory: mockCommitPendingHistory,
     setDarkMode: mockSetDarkMode,
+    toggleDarkMode: mockToggleDarkMode,
     markSaved: mockMarkSaved,
     undo: mockUndo,
     redo: mockRedo,
@@ -166,7 +168,7 @@ describe('ThemeEditor', () => {
     it('toggles dark mode when clicked', () => {
       render(<ThemeEditor />)
       fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
-      expect(mockSetDarkMode).toHaveBeenCalledWith(true)
+      expect(mockToggleDarkMode).toHaveBeenCalled()
     })
 
     it('marks toggle as checked when in dark mode', () => {
@@ -1254,6 +1256,7 @@ describe('ThemeEditor', () => {
         addColor: mockAddColor,
         commitPendingHistory: mockCommitPendingHistory,
         setDarkMode: mockSetDarkMode,
+        toggleDarkMode: mockToggleDarkMode,
         markSaved: mockMarkSaved,
         undo: mockUndo,
         redo: mockRedo,
@@ -1266,7 +1269,7 @@ describe('ThemeEditor', () => {
 
       render(<ThemeEditor />)
       fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
-      expect(mockSetDarkMode).toHaveBeenCalledWith(true)
+      expect(mockToggleDarkMode).toHaveBeenCalled()
     })
   })
 
@@ -1282,6 +1285,7 @@ describe('ThemeEditor', () => {
         addColor: mockAddColor,
         commitPendingHistory: mockCommitPendingHistory,
         setDarkMode: mockSetDarkMode,
+        toggleDarkMode: mockToggleDarkMode,
         markSaved: mockMarkSaved,
         undo: mockUndo,
         redo: mockRedo,
@@ -1295,7 +1299,7 @@ describe('ThemeEditor', () => {
       render(<ThemeEditor />)
       // In loaded state, dark mode toggle is in toolbar
       fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
-      expect(mockSetDarkMode).toHaveBeenCalledWith(true)
+      expect(mockToggleDarkMode).toHaveBeenCalled()
     })
 
     it('toggles from dark to light mode in editor view', () => {
@@ -1309,6 +1313,7 @@ describe('ThemeEditor', () => {
         addColor: mockAddColor,
         commitPendingHistory: mockCommitPendingHistory,
         setDarkMode: mockSetDarkMode,
+        toggleDarkMode: mockToggleDarkMode,
         markSaved: mockMarkSaved,
         undo: mockUndo,
         redo: mockRedo,
@@ -1321,7 +1326,7 @@ describe('ThemeEditor', () => {
 
       render(<ThemeEditor />)
       fireEvent.click(screen.getByRole('switch', { name: 'Toggle dark mode' }))
-      expect(mockSetDarkMode).toHaveBeenCalledWith(false)
+      expect(mockToggleDarkMode).toHaveBeenCalled()
     })
   })
 
