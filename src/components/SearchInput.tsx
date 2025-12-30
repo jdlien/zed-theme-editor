@@ -31,8 +31,8 @@ export function SearchInput({
   }
 
   return (
-    <div
-      className={`relative flex items-center rounded border border-neutral-300 bg-white dark:border-neutral-600 dark:bg-neutral-800 ${className}`}
+    <label
+      className={`relative flex items-center rounded border border-neutral-300 bg-white focus-within:ring-1 focus-within:ring-indigo-500/50 dark:border-neutral-600 dark:bg-neutral-800 dark:focus-within:border-indigo-400 dark:focus-within:ring-indigo-400/30 ${className}`}
     >
       <FontAwesomeIcon
         icon={faMagnifyingGlass}
@@ -46,7 +46,7 @@ export function SearchInput({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="flex-1 bg-transparent px-2 py-1.5 text-sm text-neutral-900 placeholder-neutral-400 outline-none dark:text-neutral-100 dark:placeholder-neutral-500"
+        className="flex-1 bg-transparent px-2 py-1.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none dark:text-neutral-100 dark:placeholder-neutral-500"
         aria-label={placeholder}
       />
       {value && (
@@ -59,6 +59,6 @@ export function SearchInput({
           <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
         </button>
       )}
-    </div>
+    </label>
   )
 }
