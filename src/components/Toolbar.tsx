@@ -4,11 +4,12 @@
  */
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSun, faMoon, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
+import { faFolderOpen } from '@fortawesome/free-solid-svg-icons'
 import { formatShortcut } from '@/lib/keyboard'
 import { editorThemeMeta, type EditorThemeName } from '@/lib/editorThemeMeta'
 import { ZedLogo } from './ZedLogo'
 import type { ColorFormat } from '@/types/theme'
+import { DarkToggle } from './DarkToggle'
 
 const colorFormatOptions: { value: ColorFormat; label: string }[] = [
   { value: 'hex', label: 'Hex' },
@@ -24,12 +25,12 @@ interface ToolbarProps {
   onOpenFile?: () => void
   onCloseFile?: () => void
   canSave?: boolean
-  isDarkMode: boolean
-  onToggleDarkMode: () => void
   editorTheme?: EditorThemeName
   onEditorThemeChange?: (theme: EditorThemeName) => void
   colorFormat?: ColorFormat
   onColorFormatChange?: (format: ColorFormat) => void
+  isDarkMode: boolean
+  onToggleDarkMode: () => void
 }
 
 export function Toolbar({
@@ -39,19 +40,20 @@ export function Toolbar({
   onOpenFile,
   onCloseFile,
   canSave = true,
-  isDarkMode,
-  onToggleDarkMode,
   editorTheme,
   onEditorThemeChange,
   colorFormat,
   onColorFormatChange,
+  isDarkMode,
+  onToggleDarkMode,
 }: ToolbarProps) {
   return (
     <header className="flex items-center justify-between border-b border-neutral-300 bg-neutral-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
-      <div className="flex items-center gap-3">
+      {/* Left Section */}
+      <div className="flex items-center gap-2">
         <button
           onClick={onCloseFile}
-          className="flex items-center gap-2 rounded px-1 py-1 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
+          className="flex items-center gap-2 rounded px-1 py-1 hover:bg-neutral-200 dark:hover:bg-neutral-700"
           title="Close file and return to start"
         >
           <ZedLogo size={28} className="animate-hue-cycle text-[#084CCF]" />
@@ -59,10 +61,11 @@ export function Toolbar({
             <span className="hidden md:inline">Zed Theme Editor</span>
           </h1>
         </button>
+
         {onOpenFile && (
           <button
             onClick={onOpenFile}
-            className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+            className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
             title="Open file"
           >
             <FontAwesomeIcon icon={faFolderOpen} className="h-4 w-4" />
@@ -86,88 +89,74 @@ export function Toolbar({
           </button>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        {onColorFormatChange && (
-          <label className="flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
-            <span className="hidden font-semibold lg:inline">Color</span>
-            <span className="hidden font-semibold sm:inline">Format</span>
-            <select
-              value={colorFormat}
-              onChange={(e) =>
-                onColorFormatChange(e.target.value as ColorFormat)
-              }
-              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-indigo-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-              title="Color format for JSON display"
-            >
-              {colorFormatOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {onEditorThemeChange && (
-          <label className="ml-2 hidden items-center gap-1.5 text-sm text-neutral-600 md:flex dark:text-neutral-400">
-            <span className="hidden font-semibold lg:inline">Editor</span>
-            <span className="hidden font-semibold sm:inline">Theme</span>
-            <select
-              value={editorTheme}
-              onChange={(e) =>
-                onEditorThemeChange(e.target.value as EditorThemeName)
-              }
-              className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 transition-colors hover:bg-neutral-200 hover:text-neutral-900 focus:border-indigo-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
-              title="Editor theme"
-            >
-              {Object.values(editorThemeMeta)
-                .filter((theme) => theme.isDark === isDarkMode)
-                .map((theme) => (
-                  <option key={theme.name} value={theme.name}>
-                    {theme.label}
+
+      {/* Right Section */}
+      <div className="flex items-center gap-4">
+        {/* Settings group: format and theme selectors */}
+        <div className="flex items-center gap-4">
+          {onColorFormatChange && (
+            <label className="flex items-center gap-1.5 text-sm text-neutral-600 dark:text-neutral-400">
+              <span className="hidden font-semibold xl:inline">Color</span>
+              <span className="hidden font-semibold sm:inline">Format</span>
+              <select
+                value={colorFormat}
+                onChange={(e) =>
+                  onColorFormatChange(e.target.value as ColorFormat)
+                }
+                className="rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                title="Color format for JSON display"
+              >
+                {colorFormatOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
-            </select>
-          </label>
-        )}
-        <button
-          onClick={onToggleDarkMode}
-          className="ml-2 inline-flex cursor-pointer gap-px rounded-full bg-neutral-200 inset-shadow-sm dark:bg-neutral-700"
-          role="switch"
-          aria-checked={isDarkMode}
-          aria-label="Toggle dark mode"
-          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          <span
-            className={`flex size-8 items-center justify-center rounded-full transition-all ${
-              !isDarkMode
-                ? 'bg-white text-neutral-800 shadow-md hover:text-black dark:bg-neutral-600 dark:text-neutral-400'
-                : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
-            }`}
-            aria-hidden="true"
-          >
-            <FontAwesomeIcon icon={faSun} className="h-4 w-4" />
-          </span>
-          <span
-            className={`flex size-8 items-center justify-center rounded-full transition-all ${
-              isDarkMode
-                ? 'bg-white shadow-md dark:bg-neutral-600 dark:text-neutral-200 dark:hover:text-white'
-                : 'text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200'
-            }`}
-            aria-hidden="true"
-          >
-            <FontAwesomeIcon icon={faMoon} className="h-4 w-4" />
-          </span>
-        </button>
-        {onSave && (
-          <button
-            onClick={onSave}
-            disabled={!canSave || !hasUnsavedChanges}
-            className="btn"
-            title={`Save (${formatShortcut('S')})`}
-          >
-            Save
-          </button>
-        )}
+              </select>
+            </label>
+          )}
+
+          {onEditorThemeChange && (
+            <label className="hidden items-center gap-1.5 text-sm text-neutral-600 lg:flex dark:text-neutral-400">
+              <span className="hidden font-semibold xl:inline">Editor</span>
+              <span className="hidden font-semibold sm:inline">Theme</span>
+              <select
+                value={editorTheme}
+                onChange={(e) =>
+                  onEditorThemeChange(e.target.value as EditorThemeName)
+                }
+                className="min-w-[125px] rounded border border-neutral-300 bg-neutral-50 px-2 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200 hover:text-neutral-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                title="Editor theme"
+              >
+                {Object.values(editorThemeMeta)
+                  .filter((theme) => theme.isDark === isDarkMode)
+                  .map((theme) => (
+                    <option key={theme.name} value={theme.name}>
+                      {theme.label}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          )}
+        </div>
+
+        {/* Actions group: mode toggle and save */}
+        <div className="flex items-center gap-4">
+          <DarkToggle
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={onToggleDarkMode}
+          />
+
+          {onSave && (
+            <button
+              onClick={onSave}
+              disabled={!canSave || !hasUnsavedChanges}
+              className="btn"
+              title={`Save (${formatShortcut('S')})`}
+            >
+              Save
+            </button>
+          )}
+        </div>
       </div>
     </header>
   )
