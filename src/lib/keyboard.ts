@@ -44,3 +44,16 @@ export function formatShortcut(key: string, shift = false): string {
   }
   return `${mod}+${key}`
 }
+
+/**
+ * Check if the user is currently typing in an input field
+ * Use this to avoid triggering single-key shortcuts while typing
+ */
+export function isTypingInInput(e: KeyboardEvent): boolean {
+  const target = e.target as HTMLElement
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+  )
+}

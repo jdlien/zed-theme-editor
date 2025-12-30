@@ -25,7 +25,7 @@ import {
   type AllColorsEntry,
 } from '@/lib/jsonParsing'
 import type { ColorFormat } from '@/types/theme'
-import { formatShortcut } from '@/lib/keyboard'
+import { formatShortcut, isTypingInInput } from '@/lib/keyboard'
 import type { EditorThemeName } from '@/lib/editorThemeMeta'
 import { DropZone } from './DropZone'
 import { Toolbar } from './Toolbar'
@@ -409,12 +409,15 @@ export function ThemeEditor() {
         searchInputRef.current?.focus()
       } else if (e.key === 'Escape') {
         handleSelectColor(null)
+      } else if (e.key.toLowerCase() === 'd' && !isMod && !isTypingInInput(e)) {
+        e.preventDefault()
+        toggleDarkMode()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleSave, handleUndo, handleRedo, canUndo, canRedo, handleSelectColor])
+  }, [handleSave, handleUndo, handleRedo, canUndo, canRedo, handleSelectColor, toggleDarkMode])
 
   // Show drop zone if no file loaded
   if (!state.themeFamily) {
