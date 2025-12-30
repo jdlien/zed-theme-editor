@@ -194,7 +194,7 @@ export function DropZone({
                       e.stopPropagation()
                       onRecentFileRemove(file.id)
                     }}
-                    className="hover:text-black-600 ml-1 rounded p-1.5 text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-pink-500 hover:text-black dark:hover:bg-pink-800 dark:hover:text-white"
+                    className="hover:text-black-600 ml-1 rounded p-1.5 text-neutral-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-pink-500 hover:text-black focus:bg-pink-500 focus:text-black dark:hover:bg-pink-800 dark:hover:text-white"
                     aria-label={`Remove ${file.name} from recent files`}
                     title="Remove from recent files"
                   >
