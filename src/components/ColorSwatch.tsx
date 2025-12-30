@@ -178,7 +178,7 @@ export function ColorSwatchRow({
       <button
         type="button"
         onClick={onClick}
-        className={`flex w-full items-center gap-3 rounded px-2 pb-0.5 text-left transition-colors ${isSelected ? 'bg-indigo-500/20 dark:bg-indigo-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}`}
+        className={`flex w-full items-center gap-3 rounded px-2 pb-0.5 text-left ${isSelected ? 'bg-indigo-500/20 dark:bg-indigo-900/30' : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'}`}
       >
         <div className="pt-1">
           <ColorSwatch

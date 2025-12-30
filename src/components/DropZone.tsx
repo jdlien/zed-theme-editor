@@ -179,11 +179,11 @@ export function DropZone({
               <li key={file.id} className="group flex items-center">
                 <button
                   onClick={() => onRecentFileClick(file)}
-                  className="flex flex-1 items-center gap-2 rounded px-3 py-2 text-left text-sm text-neutral-600 transition-colors group-hover:bg-neutral-200 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:bg-neutral-800 dark:group-hover:text-neutral-100"
+                  className="flex flex-1 items-center gap-2 rounded px-3 py-2 text-left text-sm text-neutral-600 group-hover:bg-neutral-200 group-hover:text-neutral-900 dark:text-neutral-400 dark:group-hover:bg-neutral-800 dark:group-hover:text-neutral-100"
                 >
                   <FontAwesomeIcon
                     icon={faFile}
-                    className="h-4 w-4 text-neutral-400 transition-colors group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
+                    className="h-4 w-4 text-neutral-400 group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300"
                     aria-hidden="true"
                   />
                   <span className="truncate">{file.name}</span>

@@ -260,7 +260,7 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
         </h3>
         <button
           onClick={() => setIsFullPreview(!isFullPreview)}
-          className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+          className="flex items-center gap-1 rounded px-1.5 py-0.5 text-xs text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
           title={
             isFullPreview
               ? 'Switch to compact preview'
@@ -319,7 +319,11 @@ export function ThemePreview({ style, className = '' }: ThemePreviewProps) {
                 className="flex items-center gap-2"
                 style={{ color: iconMuted as string }}
               >
-                <FontAwesomeIcon icon={faCircleUser} className="h-3 w-3" aria-hidden="true" />
+                <FontAwesomeIcon
+                  icon={faCircleUser}
+                  className="h-3 w-3"
+                  aria-hidden="true"
+                />
               </div>
             </div>
 

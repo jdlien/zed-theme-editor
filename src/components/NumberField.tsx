@@ -334,9 +334,7 @@ export function NumberField({
     w-full px-2 py-1 text-sm font-mono text-right
     bg-white border border-neutral-300 rounded
     dark:bg-neutral-800 dark:border-neutral-600
-    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
     disabled:opacity-50 disabled:cursor-not-allowed
-    transition-colors duration-150
   `
 
   return (
