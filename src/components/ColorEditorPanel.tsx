@@ -493,7 +493,7 @@ export function ColorEditorPanel({
             <p
               className={`line-clamp-2 text-xs hover:absolute hover:inset-x-0 hover:top-0 hover:z-10 hover:line-clamp-none hover:rounded hover:bg-neutral-50 hover:pb-0.5 hover:shadow-md dark:hover:bg-neutral-900 ${
                 description
-                  ? 'text-neutral-500'
+                  ? 'text-neutral-500 dark:text-neutral-400'
                   : 'text-neutral-300 italic dark:text-neutral-700'
               }`}
             >

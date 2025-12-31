@@ -331,7 +331,7 @@ export function NumberField({
 
   // Base styles
   const baseStyles = `
-    w-full px-2 py-1 text-sm font-mono text-right
+    w-full px-1 py-1 text-sm font-mono text-right
     bg-white border border-neutral-300 rounded
     dark:bg-neutral-800 dark:border-neutral-600
     disabled:opacity-50 disabled:cursor-not-allowed
