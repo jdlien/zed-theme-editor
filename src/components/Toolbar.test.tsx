@@ -136,7 +136,7 @@ describe('Toolbar', () => {
       expect(screen.getByText('Save')).toBeInTheDocument()
     })
 
-    it('is disabled when canSave is false', () => {
+    it('shows Download button when canSave is false', () => {
       render(
         <Toolbar
           {...defaultProps}
@@ -145,7 +145,8 @@ describe('Toolbar', () => {
           hasUnsavedChanges={true}
         />
       )
-      expect(screen.getByText('Save')).toBeDisabled()
+      expect(screen.getByText('Download')).toBeInTheDocument()
+      expect(screen.getByText('Download')).not.toBeDisabled()
     })
 
     it('is disabled when hasUnsavedChanges is false', () => {

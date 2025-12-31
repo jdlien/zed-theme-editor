@@ -65,6 +65,7 @@ export function ThemeEditor() {
     openFile,
     openFileFromHandle,
     saveFile,
+    downloadFile,
     isSupported: canSaveInPlace,
   } = useFileAccess()
   const {
@@ -223,7 +224,7 @@ export function ThemeEditor() {
     return colors.find((c) => c.path === state.selectedColorPath) || null
   }, [colors, state.selectedColorPath])
 
-  // Handle save
+  // Handle save (or download as fallback)
   const handleSave = useCallback(async () => {
     if (!state.themeFamily || !state.hasUnsavedChanges) return
 
@@ -232,20 +233,33 @@ export function ThemeEditor() {
       commitPendingHistory()
     }
 
-    try {
-      const success = await saveFile(serializedTheme, state.fileHandle)
-      if (success) {
-        markSaved(state.fileHandle || undefined)
+    // Try save-in-place if supported and we have a file handle
+    if (canSaveInPlace && state.fileHandle) {
+      try {
+        const success = await saveFile(serializedTheme, state.fileHandle)
+        if (success) {
+          markSaved(state.fileHandle)
+          return
+        }
+      } catch (error) {
+        console.error('Failed to save:', error)
       }
-    } catch (error) {
-      console.error('Failed to save:', error)
     }
+
+    // Fall back to download
+    const fileName = state.fileName || 'theme.json'
+    downloadFile(serializedTheme, fileName)
+    // Mark as saved even though it's a download (content was exported)
+    markSaved()
   }, [
     state.themeFamily,
     state.hasUnsavedChanges,
     state.fileHandle,
+    state.fileName,
     serializedTheme,
+    canSaveInPlace,
     saveFile,
+    downloadFile,
     markSaved,
     hasPendingHistory,
     commitPendingHistory,

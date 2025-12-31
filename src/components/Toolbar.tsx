@@ -149,11 +149,15 @@ export function Toolbar({
           {onSave && (
             <button
               onClick={onSave}
-              disabled={!canSave || !hasUnsavedChanges}
+              disabled={!hasUnsavedChanges}
               className="btn"
-              title={`Save (${formatShortcut('S')})`}
+              title={
+                canSave
+                  ? `Save (${formatShortcut('S')})`
+                  : `Download (${formatShortcut('S')})`
+              }
             >
-              Save
+              {canSave ? 'Save' : 'Download'}
             </button>
           )}
         </div>

@@ -59,6 +59,7 @@ describe('ThemeEditor', () => {
   const mockRedo = vi.fn()
   const mockOpenFile = vi.fn()
   const mockSaveFile = vi.fn()
+  const mockDownloadFile = vi.fn()
 
   // Default mock state (no file loaded)
   const defaultState = {
@@ -80,6 +81,7 @@ describe('ThemeEditor', () => {
     ...defaultState,
     themeFamily: sampleThemeFamily,
     fileName: 'theme.json',
+    fileHandle: {} as FileSystemFileHandle, // Mock file handle for save-in-place
     history: [sampleThemeFamily],
   }
 
@@ -116,6 +118,7 @@ describe('ThemeEditor', () => {
     mockUseFileAccess.mockReturnValue({
       openFile: mockOpenFile,
       saveFile: mockSaveFile,
+      downloadFile: mockDownloadFile,
       isSupported: true,
     })
 
@@ -572,7 +575,7 @@ describe('ThemeEditor', () => {
   })
 
   describe('save failure handling', () => {
-    it('handles save failure gracefully', async () => {
+    it('handles save failure gracefully and falls back to download', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
@@ -603,11 +606,14 @@ describe('ThemeEditor', () => {
           'Failed to save:',
           expect.any(Error)
         )
+        // Should fall back to download after save failure
+        expect(mockDownloadFile).toHaveBeenCalled()
+        expect(mockMarkSaved).toHaveBeenCalled()
       })
       consoleSpy.mockRestore()
     })
 
-    it('does not mark as saved when save returns false', async () => {
+    it('falls back to download when save returns false', async () => {
       mockUseThemeEditor.mockReturnValue({
         state: { ...loadedState, hasUnsavedChanges: true },
         loadFile: mockLoadFile,
@@ -634,8 +640,11 @@ describe('ThemeEditor', () => {
 
       await waitFor(() => {
         expect(mockSaveFile).toHaveBeenCalled()
+        // When save returns false, fall back to download
+        expect(mockDownloadFile).toHaveBeenCalled()
+        // Mark as saved after download
+        expect(mockMarkSaved).toHaveBeenCalled()
       })
-      expect(mockMarkSaved).not.toHaveBeenCalled()
     })
   })
 
